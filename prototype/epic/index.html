@@ -1,0 +1,944 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>그리모어 롤 교과서</title>
+<style>
+:root{
+  --page:#ECE6DA; --page-2:#E3DBCC; --ink:#1F1B17; --ink-2:#4A433B; --rule:#C2B7A5;
+  --slate:#2A2522; --slate-ink:#EFE8DC; --paper-stage:#E5DDCD;
+  --us:#2F66BD; --them:#B83A2F; --gold:#9E6B1C; --gold-bg:#F3E3B5; --warn-bg:#F6E7B0; --ok-bg:#E3EAD2;
+  --accent:#1F1B17; --accent-ink:#ECE6DA;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --page:#221E1B; --page-2:#2D2824; --ink:#EFE8DC; --ink-2:#C9BFB0; --rule:#544B43;
+    --us:#6E9BE8; --them:#E2766A; --gold:#E0B35A; --gold-bg:#4A3B1F; --warn-bg:#4B4020; --ok-bg:#2F3A26;
+    --accent:#EFE8DC; --accent-ink:#221E1B; --paper-stage:#3B3530; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"]{
+  --page:#221E1B; --page-2:#2D2824; --ink:#EFE8DC; --ink-2:#C9BFB0; --rule:#544B43;
+  --us:#6E9BE8; --them:#E2766A; --gold:#E0B35A; --gold-bg:#4A3B1F; --warn-bg:#4B4020; --ok-bg:#2F3A26;
+  --accent:#EFE8DC; --accent-ink:#221E1B; --paper-stage:#3B3530; color-scheme: dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--page);color:var(--ink);font:17px/1.6 "Gothic A1",system-ui,sans-serif;overflow-x:hidden;-webkit-font-smoothing:antialiased;word-break:keep-all;overflow-wrap:break-word}
+h1,h2,h3,.cut-title{text-wrap:balance}
+a{color:inherit}
+.disp{font-family:"Black Han Sans","Gothic A1",sans-serif;font-weight:400;letter-spacing:.01em}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.top{display:flex;align-items:center;gap:16px;padding:12px 24px;max-width:1440px;margin:0 auto}
+.logo{font:400 22px/1 "Black Han Sans",sans-serif;text-decoration:none;letter-spacing:.04em}
+.logo small{font:500 13px/1 "Gothic A1",sans-serif;color:var(--ink-2);margin-left:8px;letter-spacing:0}
+.top nav{margin-left:auto;display:flex;gap:6px;align-items:center}
+.navlink{font-size:15px;text-decoration:none;padding:8px 10px;border-radius:6px}
+.navlink[aria-current="page"]{background:var(--page-2)}
+.motion-sw{font:inherit;font-size:14px;background:none;border:1px solid var(--rule);color:var(--ink);border-radius:6px;padding:7px 10px;cursor:pointer}
+.view{display:none}.view.on{display:block}
+.stage{position:relative;overflow:hidden;background:var(--slate);touch-action:manipulation;cursor:pointer}
+.stage.paper{background:var(--paper-stage)}
+.stage canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;font:700 16px/1 "Gothic A1",sans-serif;padding:14px 20px;border-radius:8px;border:1px solid var(--rule);background:var(--page);color:var(--ink);text-decoration:none;cursor:pointer;min-height:48px}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btn:disabled{opacity:.45;cursor:default}
+.tlink{font-size:15px;color:var(--ink-2);text-underline-offset:3px;background:none;border:0;cursor:pointer;font-family:inherit;padding:8px 0}
+/* 첫 화면 */
+#v-hero{position:relative}
+.hero-stage{height:clamp(560px,calc(100svh - 60px - var(--demo-h,0px)),860px)}
+.hero-ui{position:absolute;top:16px;right:16px;display:flex;gap:8px;z-index:3}
+.chip-btn{font:600 14px/1 "Gothic A1",sans-serif;border:0;border-radius:8px;padding:11px 12px;background:rgba(236,230,218,.92);color:#1F1B17;cursor:pointer}
+.hero-copy{position:absolute;left:6%;width:38%;top:60%;z-index:2;display:flex;flex-direction:column;align-items:flex-start;text-align:left;gap:16px;opacity:0;transition:opacity .25s;pointer-events:none}
+.hero-copy.on{opacity:1;pointer-events:auto}
+.hero-copy p{margin:0;max-width:34em;font-size:18px;color:#EFE8DC}
+.paper ~ .hero-copy p{color:var(--ink)}
+.hero-kicker{position:absolute;left:6%;top:12%;z-index:2;font:400 20px/1.3 "Black Han Sans",sans-serif;color:#EFE8DC;transition:opacity .2s}
+.paper ~ .hero-kicker{color:var(--ink)}
+/* 개념 지도 */
+.wrap{max-width:1200px;margin:0 auto;padding:24px}
+.map-head h1{font-size:40px;line-height:1.15;margin:8px 0 8px}
+.map-head p{margin:0 0 24px;color:var(--ink-2);max-width:40em}
+.resume{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:28px;align-items:center;margin:0 0 48px}
+.resume .stage{aspect-ratio:1/1;border-radius:10px;max-height:460px;width:100%}
+.resume h2{font-size:30px;line-height:1.2;margin:6px 0 10px}
+.resume .kick{font-size:14px;color:var(--ink-2);margin:0}
+.resume p{margin:0 0 18px}
+.chapters{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:36px 28px}
+.ch{border-top:2px solid var(--ink);padding-top:12px}
+.ch-pic{width:100%;aspect-ratio:16/9;border-radius:8px;background:var(--slate);display:block;margin-bottom:12px}
+.ch h3{font-size:22px;line-height:1.25;margin:0 0 4px}
+.ch .q{margin:0 0 10px;color:var(--ink-2);font-size:15px}
+.ch ul{list-style:none;margin:0;padding:0;font-size:15px;line-height:1.75}
+.ch .deep-h{font-size:14px;font-weight:700;color:var(--ink-2);margin:10px 0 0}
+.ch ul.deep{color:var(--ink-2)}
+.ch .go{display:inline-block;margin-top:12px;font-weight:700}
+/* 레슨 */
+.lesson{display:grid;grid-template-columns:minmax(0,620px) minmax(0,1fr);gap:40px;max-width:1240px;margin:0 auto;padding:16px 24px 32px;align-items:start}
+.lesson .stage{aspect-ratio:1/1;width:100%;border-radius:10px}
+.panel{padding-top:8px;min-height:420px;display:flex;flex-direction:column}
+.crumb{font-size:14px;color:var(--ink-2);margin:0 0 6px}
+.crumb a{text-decoration:none}
+.dots{display:flex;gap:6px;margin:0 0 18px}
+.dots i{width:22px;height:4px;border-radius:2px;background:var(--rule)}
+.dots i.on{background:var(--ink)}
+.cut-title{font-size:34px;line-height:1.22;margin:0 0 14px}
+.cut-body{margin:0 0 24px;font-size:18px;max-width:30em}
+.cut-text{transition:opacity .2s}
+.cut-text.wait{opacity:0}
+.u{text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:4px;cursor:pointer;background:none;border:0;font:inherit;color:inherit;padding:0}
+.gloss{display:none;margin:-10px 0 20px;padding:10px 12px;background:var(--page-2);border-radius:6px;font-size:15px;max-width:30em}
+.gloss.on{display:block}
+.actions{display:flex;gap:12px;align-items:center;margin-top:auto;padding-top:12px;flex-wrap:wrap}
+.quiz h3{font-size:26px;line-height:1.3;margin:0 0 16px}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:0 0 16px}
+.opts button{font:600 16px/1.35 "Gothic A1",sans-serif;text-align:left;padding:14px;border-radius:8px;border:1px solid var(--rule);background:var(--page);color:var(--ink);cursor:pointer;min-height:56px}
+.opts button.right{background:var(--ok-bg);border-color:var(--ink)}
+.opts button.wrong{background:var(--warn-bg)}
+.band{padding:14px;border-radius:8px;margin:0 0 14px;font-size:16px}
+.band.ok{background:var(--ok-bg)}.band.no{background:var(--warn-bg)}
+.nexts{display:grid;gap:10px;margin:8px 0 0}
+.nexts a{display:block;padding:14px;border:1px solid var(--rule);border-radius:8px;text-decoration:none}
+.nexts b{display:block;font-size:17px}
+.nexts span{font-size:15px;color:var(--ink-2)}
+footer{max-width:1200px;margin:40px auto 0;padding:16px 24px 32px;font-size:12px;line-height:1.6;color:var(--ink-2);border-top:1px solid var(--rule)}
+#hud{position:fixed;left:8px;bottom:8px;z-index:9;font:12px/1.3 ui-monospace,monospace;background:rgba(0,0,0,.7);color:#fff;padding:4px 6px;border-radius:4px;white-space:pre;display:none}
+@media (max-width:900px){
+  .lesson{grid-template-columns:minmax(0,1fr);gap:16px;padding:0 16px 24px}
+  .lesson .stage{border-radius:8px}
+  .panel{min-height:0}
+  .cut-title{font-size:28px}
+  .resume{grid-template-columns:minmax(0,1fr);gap:16px}
+  .chapters{grid-template-columns:minmax(0,1fr)}
+}
+@media (max-width:600px){
+  body{font-size:16px}
+  .top{padding:10px 16px;gap:8px}
+  .logo small{display:none}
+  .wrap{padding:16px}
+  .map-head h1{font-size:32px}
+  .hero-stage{height:calc(100svh - 56px - var(--demo-h,0px));min-height:560px}
+  .hero-ui{top:12px;right:12px}
+  .seg button{padding:8px 9px;font-size:13px}
+  .hero-copy{left:16px;right:16px;width:auto}
+  .hero-copy p{font-size:16px}
+  .hero-kicker{left:16px;top:16px;font-size:18px}
+  .opts{grid-template-columns:1fr}
+  .cut-body{font-size:17px}
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .stage{box-shadow:0 0 0 1px #6A5F55} }
+:root[data-theme="dark"] .stage{box-shadow:0 0 0 1px #6A5F55}
+/* 움직임 줄이기: 폰·좁은 화면에서는 무대를 1:2로 늘려 전·후를 위아래로 쌓는다(그림마다 무대 폭의 약 90%) */
+@media (max-width:900px){ .lesson .stage.pair{aspect-ratio:1/2} }
+@media (orientation:portrait){ html.rm .hero-stage{height:auto;min-height:0;aspect-ratio:1/2;max-height:calc(100svh - 56px)} }
+@media (orientation:portrait) and (max-width:600px){ html.rm .hero-stage{max-height:none} }
+html.rm .hero-ui{display:none}
+/* 첫 화면 [다시 보기]: 넓은 화면에서는 아래 오른쪽. 재생 중 넥서스 조각이 나는 위 오른쪽을 가리지 않는다 */
+@media (orientation:landscape){ .hero-ui{top:auto;bottom:16px} }
+
+</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Gothic+A1:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+<header class="top">
+  <a class="logo" href="#home">GRIMOIRE<small>움직이는 롤 교과서</small></a>
+  <nav>
+    <a class="navlink" href="#map" data-nav="map">개념 지도</a>
+    <button class="motion-sw" id="motion-sw" aria-pressed="false">움직임 줄이기</button>
+  </nav>
+</header>
+
+<main>
+  <section class="view" id="v-hero" aria-label="첫 화면">
+    <div class="stage hero-stage" id="st-hero" tabindex="0" role="button" aria-label="첫 장면. 누르면 끝 장면으로 넘어가요"></div>
+    <div class="hero-ui"><button class="chip-btn" id="hero-replay">다시 보기</button></div>
+    <div class="hero-kicker" id="hero-kicker">움직이는 롤 교과서</div>
+    <div class="hero-copy" id="hero-copy">
+      <h1 class="sr">상대 넥서스를 부수면 이겨요</h1>
+      <p>넥서스는 각 팀 기지 가장 안쪽의 큰 수정이에요.</p>
+      <a class="btn primary" href="#map">개념 지도 보기</a>
+    </div>
+  </section>
+
+  <section class="view" id="v-map" aria-label="개념 지도">
+    <div class="wrap">
+      <div class="map-head">
+        <h1 class="disp">개념 지도</h1>
+        <p>모든 개념은 상대 넥서스를 부수는 길 위에 있어요. 위에서 아래로 읽으면 처음 하는 사람도 따라올 수 있어요.</p>
+      </div>
+      <div class="resume">
+        <div class="stage" id="st-resume" tabindex="0" role="button" aria-label="레슨 ① 이어 보기"></div>
+        <div>
+          <p class="kick">레슨 ① 이어 보기</p>
+          <h2 class="disp">롤은 어떤 게임인가</h2>
+          <p>상대 넥서스를 먼저 부수려면 무엇을 어떤 순서로 해야 하는지 봐요.</p>
+          <a class="btn primary" href="#lesson-1">이어 보기</a>
+        </div>
+      </div>
+      <div class="chapters" id="chapters"></div>
+    </div>
+  </section>
+
+  <section class="view" id="v-lesson" aria-label="레슨">
+    <div class="lesson">
+      <div class="stage" id="st-lesson" tabindex="0" role="button" aria-label="장면. 누르면 건너뛰거나 다시 봐요"></div>
+      <div class="panel" id="panel"></div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  챔피언·스킬 이미지: Riot Games Data Dragon. 미니언, 몬스터, 구조물, 아이템 그림은 직접 그렸어요.<br>
+  GRIMOIRE isn't endorsed by Riot Games and doesn't reflect the views or opinions of Riot Games or anyone officially involved in producing or managing Riot Games properties. Riot Games, and all associated properties are trademarks or registered trademarks of Riot Games, Inc.
+</footer>
+<div id="hud"></div>
+
+<script type="module">
+// =====================================================================
+// GRIMOIRE 움직이는 교과서 — C 결(점 하나 = 진짜 하나). p10-rework, 비평 ai-tell-c.md 반영 p10-fix
+// 무대는 2D 캔버스 하나. 장면은 시간 t의 함수로 그린다. 판 그림은 이전 판과 같은 코드다.
+// =====================================================================
+const TEAM = { us: '#3F7BD8', them: '#D2473A' };
+const GOLD = ['#F2D58A', '#D9A63B', '#9E6B1C'];
+
+// ---------------- 그림 재료 ----------------
+const IMG = {};
+const ASSETS = ['splash-Jinx.jpg', 'map11.png', 'champ-Ahri.png', 'champ-Syndra.png', 'champ-Jinx.png', 'champ-Caitlyn.png', 'champ-Thresh.png', 'champ-LeeSin.png', 'spell-SyndraQ.png', 'spell-SyndraE.png', 'spell-LeeSinQ.png'];
+const load = n => new Promise((res, rej) => { const i = new Image(); i.decoding = 'async'; i.onload = () => res(i); i.onerror = () => rej(new Error(n)); i.src = 'assets/' + n });
+let MAPK = null; // 검은 정글을 투명하게 뺀 지도
+function keyMap() {
+  const im = IMG['map11.png'], c = document.createElement('canvas'); c.width = im.width; c.height = im.height;
+  const x = c.getContext('2d', { willReadFrequently: true }); x.drawImage(im, 0, 0); const d = x.getImageData(0, 0, c.width, c.height), a = d.data;
+  for (let i = 0; i < a.length; i += 4) { const s = a[i] + a[i + 1] + a[i + 2]; if (s < 70) a[i + 3] = 0; else if (s < 120) a[i + 3] = (s - 70) * 5 }
+  x.putImageData(d, 0, 0); MAPK = c;
+}
+const CH = { ari: 'champ-Ahri.png', syn: 'champ-Syndra.png', jinx: 'champ-Jinx.png', cait: 'champ-Caitlyn.png', thresh: 'champ-Thresh.png', lee: 'champ-LeeSin.png' };
+const hex = h => [parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), parseInt(h.slice(5, 7), 16)];
+const clamp8 = v => v < 0 ? 0 : v > 255 ? 255 : v;
+// ---------------- 그리기 도구 (모두 우리가 그린 모양 + Data Dragon 그림) ----------------
+// 판 좌표: 무대 가운데 정사각형 [0,1]². (ctx, w, h) 어느 해상도에서도 같은 자리에 그려진다
+function bd(w, h) { const s = Math.min(w, h) * .96; return { s, ox: (w - s) / 2, oy: (h - s) / 2 } }
+const X = (b, x) => b.ox + x * b.s, Yy = (b, y) => b.oy + y * b.s;
+function mapImg(x, b, crop = [0, 0, 1], alpha = 1) {
+  const k = b.s / crop[2]; x.save(); x.beginPath(); x.rect(b.ox, b.oy, b.s, b.s); x.clip();
+  x.translate(b.ox - crop[0] * k, b.oy - crop[1] * k); x.scale(k, k); x.lineCap = 'round'; x.lineJoin = 'round';
+  x.save(); x.globalAlpha = alpha * .14; x.filter = 'grayscale(1)'; x.imageSmoothingQuality = 'high'; x.drawImage(MAPK, 0, 0, 1, 1); x.restore(); // 협곡 지도는 흐린 밑그림으로만
+  for (const [cx, cy, col] of [[0, 1, TEAM.us], [1, 0, TEAM.them]]) { x.globalAlpha = alpha * .2; x.fillStyle = col; x.beginPath(); x.arc(cx, cy, .3, 0, 7); x.fill() }
+  x.globalAlpha = alpha; x.strokeStyle = '#4C6870'; x.lineWidth = .075; x.beginPath(); x.moveTo(.15, .16); x.bezierCurveTo(.3, .24, .4, .36, .5, .5); x.bezierCurveTo(.6, .64, .7, .76, .85, .84); x.stroke();
+  x.fillStyle = '#3B4F55'; for (const [px, py] of [[.32, .29], [.67, .69]]) { x.beginPath(); x.arc(px, py, .055, 0, 7); x.fill() }
+  const lanes = () => { x.beginPath(); x.moveTo(.09, .86); x.lineTo(.09, .17); x.quadraticCurveTo(.09, .09, .17, .09); x.lineTo(.86, .09); x.moveTo(.14, .91); x.lineTo(.83, .91); x.quadraticCurveTo(.91, .91, .91, .83); x.lineTo(.91, .14); x.moveTo(.19, .81); x.lineTo(.81, .19) };
+  x.strokeStyle = '#4F483F'; x.lineWidth = .064; lanes(); x.stroke(); x.strokeStyle = '#A99A7D'; x.lineWidth = .046; lanes(); x.stroke();
+  x.restore();
+}
+function tok(x, b, px, py, r, img, team, o = {}) { // 초상화 말: 진영색 고리
+  const cx = X(b, px), cy = Yy(b, py), R = r * b.s;
+  x.save(); if (o.grey) x.filter = 'grayscale(1) brightness(.85)';
+  x.fillStyle = TEAM[team] || team || '#888'; x.beginPath(); x.arc(cx, cy, R * (1 + (o.ring || .16)), 0, 7); x.fill();
+  if (o.lv) { x.strokeStyle = '#FFF2CF'; x.lineWidth = R * .16; x.beginPath(); x.arc(cx, cy, R * 1.45, -Math.PI / 2, -Math.PI / 2 + o.lv * 6.2832); x.stroke() }
+  if (o.power) { x.strokeStyle = o.power; x.lineWidth = R * .14; x.beginPath(); x.arc(cx, cy, R * 1.42, 0, 7); x.stroke() }
+  x.beginPath(); x.arc(cx, cy, R, 0, 7); x.clip(); x.drawImage(IMG[img], cx - R, cy - R, R * 2, R * 2); x.restore();
+  if (o.hp != null) hp(x, b, px, py - r * 1.55, r * 2.1, o.hp, team);
+}
+function hp(x, b, px, py, w, f, team) {
+  const W = w * b.s, H = Math.max(3, b.s * .012), L = X(b, px) - W / 2, T = Yy(b, py) - H / 2;
+  x.fillStyle = 'rgba(20,16,14,.85)'; x.fillRect(L - 1.5, T - 1.5, W + 3, H + 3); x.fillStyle = team === 'them' ? '#D2473A' : '#6FB34A'; x.fillRect(L, T, W * f, H);
+}
+function label(x, b, px, py, t, size = .034, col = '#EFE8DC', w = 600) { x.font = `${w} ${Math.max(size * b.s, 13 * (x.dpr || 1))}px "Gothic A1",sans-serif`; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillStyle = col; x.fillText(t, X(b, px), Yy(b, py)) }
+function nex(x, b, px, py, s, team, o = {}) { // 받침대 위의 수정 (일반형)
+  const cx = X(b, px), cy = Yy(b, py), u = s * b.s, c = hex(TEAM[team]);
+  const rgb = (k, a = 1) => `rgba(${clamp8(c[0] * k)},${clamp8(c[1] * k)},${clamp8(c[2] * k)},${a})`;
+  x.save(); if (o.grey) x.filter = 'grayscale(1) brightness(.55)';
+  x.fillStyle = '#6F6860'; x.beginPath(); x.moveTo(cx - u * .48, cy + u * .5); x.lineTo(cx - u * .3, cy + u * .32); x.lineTo(cx + u * .3, cy + u * .32); x.lineTo(cx + u * .48, cy + u * .5); x.fill();
+  x.fillStyle = '#958D80'; x.beginPath(); x.moveTo(cx - u * .3, cy + u * .34); x.lineTo(cx - u * .18, cy + u * .22); x.lineTo(cx + u * .18, cy + u * .22); x.lineTo(cx + u * .3, cy + u * .34); x.fill();
+  const t = cy - u * .5, m = cy - u * .08, bt = cy + u * .2, hw = u * .2;
+  const f = (p, col) => { x.fillStyle = col; x.beginPath(); x.moveTo(...p[0]); p.slice(1).forEach(q => x.lineTo(...q)); x.fill() };
+  if (!o.broken) {
+    f([[cx, t], [cx - hw, m], [cx - hw * .2, m + u * .03]], rgb(1.35)); f([[cx, t], [cx - hw * .2, m + u * .03], [cx + hw, m]], rgb(1.1));
+    f([[cx - hw, m], [cx, bt], [cx - hw * .2, m + u * .03]], rgb(.85)); f([[cx - hw * .2, m + u * .03], [cx, bt], [cx + hw, m]], rgb(.62));
+  } else { f([[cx - hw * .8, cy + u * .2], [cx - hw * .3, cy + u * .02], [cx, cy + u * .2]], rgb(.6)); f([[cx + hw * .1, cy + u * .2], [cx + hw * .5, cy + u * .06], [cx + hw * .8, cy + u * .2]], rgb(.5)) }
+  x.restore();
+}
+function tur(x, b, px, py, s, team, o = {}) { // 포탑: 좁아지는 탑 + 진영색 머리
+  const cx = X(b, px), cy = Yy(b, py), u = s * b.s; x.save(); x.globalAlpha = o.dim ? .45 : 1;
+  x.fillStyle = '#7C756B'; x.beginPath(); x.moveTo(cx - u * .28, cy + u * .5); x.lineTo(cx - u * .16, cy - u * .2); x.lineTo(cx + u * .16, cy - u * .2); x.lineTo(cx + u * .28, cy + u * .5); x.fill();
+  x.fillStyle = '#A39B8E'; x.fillRect(cx - u * .24, cy - u * .3, u * .48, u * .12);
+  x.fillStyle = TEAM[team]; x.beginPath(); x.arc(cx, cy - u * .44, u * .14, 0, 7); x.fill(); x.restore();
+}
+function mini(x, b, px, py, s, team, o = {}) { // 미니언: 둥근 몸 + 투구 (일반형)
+  const cx = X(b, px), cy = Yy(b, py), u = s * b.s, c = hex(TEAM[team]);
+  x.fillStyle = `rgb(${c[0] * .7 | 0},${c[1] * .7 | 0},${c[2] * .7 | 0})`; x.beginPath(); x.ellipse(cx, cy + u * .1, u * .42, u * .4, 0, 0, 7); x.fill();
+  x.fillStyle = TEAM[team]; x.beginPath(); x.ellipse(cx, cy + u * .02, u * .36, u * .34, 0, 0, 7); x.fill();
+  x.fillStyle = '#B9B2A6'; x.beginPath(); x.ellipse(cx, cy - u * .22, u * .3, u * .24, 0, Math.PI, 0); x.fill();
+  x.fillStyle = '#2B2320'; x.fillRect(cx - u * .2, cy - u * .2, u * .4, u * .07);
+  if (o.power) { x.strokeStyle = o.power; x.lineWidth = u * .12; x.beginPath(); x.ellipse(cx, cy + u * .02, u * .52, u * .5, 0, 0, 7); x.stroke() }
+  if (o.hp != null) hp(x, b, px, py - s * .75, s * 1.1, o.hp, team);
+}
+function coin(x, cx, cy, r) {
+  x.fillStyle = GOLD[2]; x.beginPath(); x.ellipse(cx, cy + r * .18, r, r * .62, 0, 0, 7); x.fill();
+  const g = x.createRadialGradient(cx - r * .35, cy - r * .3, r * .1, cx, cy, r * 1.05); g.addColorStop(0, GOLD[0]); g.addColorStop(.55, GOLD[1]); g.addColorStop(1, '#A8731F');
+  x.fillStyle = g; x.beginPath(); x.ellipse(cx, cy, r, r * .62, 0, 0, 7); x.fill(); x.strokeStyle = '#B98428'; x.lineWidth = r * .1; x.beginPath(); x.ellipse(cx, cy, r * .68, r * .42, 0, 0, 7); x.stroke();
+}
+function coins(x, b, px, py, s) { const u = s * b.s, cx = X(b, px), cy = Yy(b, py); for (const [dx, dy, r] of [[0, .28, .3], [-.3, .3, .25], [.3, .3, .25], [-.15, .08, .25], [.15, .08, .25], [0, -.12, .24]]) coin(x, cx + dx * u, cy + dy * u, r * u) }
+function sword(x, cx, cy, u) {
+  x.save(); x.translate(cx, cy); x.rotate(-Math.PI / 4);
+  const g = x.createLinearGradient(-u * .06, 0, u * .06, 0); g.addColorStop(0, '#E7EAEE'); g.addColorStop(.5, '#A9AFB7'); g.addColorStop(1, '#6E747C');
+  x.fillStyle = g; x.beginPath(); x.moveTo(0, -u * .46); x.lineTo(u * .06, -u * .37); x.lineTo(u * .06, u * .12); x.lineTo(-u * .06, u * .12); x.lineTo(-u * .06, -u * .37); x.fill();
+  x.fillStyle = '#C79A3A'; x.fillRect(-u * .2, u * .12, u * .4, u * .06); x.fillStyle = '#6B4628'; x.fillRect(-u * .04, u * .18, u * .08, u * .2); x.fillStyle = '#C79A3A'; x.beginPath(); x.arc(0, u * .42, u * .06, 0, 7); x.fill(); x.restore();
+}
+function item(x, b, px, py, s) { // 아이템 칸: 둥근 네모 + 장검 (직접 그린 아이템)
+  const u = s * b.s, cx = X(b, px), cy = Yy(b, py); x.fillStyle = '#3B342F'; rr(x, cx - u / 2, cy - u / 2, u, u, u * .14); x.fill();
+  x.strokeStyle = '#C79A3A'; x.lineWidth = u * .05; rr(x, cx - u * .45, cy - u * .45, u * .9, u * .9, u * .12); x.stroke(); sword(x, cx, cy, u * .86);
+}
+function rr(x, l, t, w, h, r) { x.beginPath(); x.moveTo(l + r, t); x.arcTo(l + w, t, l + w, t + h, r); x.arcTo(l + w, t + h, l, t + h, r); x.arcTo(l, t + h, l, t, r); x.arcTo(l, t, l + w, t, r); x.closePath() }
+function skill(x, b, px, py, s, img, grey) {
+  const u = s * b.s, cx = X(b, px), cy = Yy(b, py); x.save(); x.fillStyle = '#14110F'; x.fillRect(cx - u / 2 - 3, cy - u / 2 - 3, u + 6, u + 6);
+  if (grey) x.filter = 'grayscale(1) brightness(.8) contrast(.7)'; x.drawImage(IMG[img], cx - u / 2, cy - u / 2, u, u); x.restore();
+}
+function ring(x, b, px, py, r, col, o = {}) { x.save(); x.strokeStyle = col; x.globalAlpha = o.a ?? .8; x.lineWidth = (o.w || .006) * b.s; if (o.dash) x.setLineDash([b.s * .018, b.s * .014]); x.beginPath(); x.arc(X(b, px), Yy(b, py), r * b.s, 0, 7); x.stroke(); if (o.fill) { x.globalAlpha = o.fill; x.fillStyle = col; x.fill() } x.restore() }
+// 에픽 몬스터 실루엣 (lessons-v3/04 5절: 특징 하나로 알아보게, 우리 그림 방식)
+function dragon(x, b, px, py, s, col = '#E2703A', emb) {
+  const u = s * b.s, cx = X(b, px), cy = Yy(b, py), dk = '#7A3618';
+  x.fillStyle = dk; // 날개 편 용: 날개 둘 + 몸 + 목 + 꼬리
+  for (const sg of [-1, 1]) { x.beginPath(); x.moveTo(cx + sg * u * .08, cy - u * .08); x.lineTo(cx + sg * u * .62, cy - u * .42); x.lineTo(cx + sg * u * .58, cy - u * .12); x.quadraticCurveTo(cx + sg * u * .44, cy + u * .02, cx + sg * u * .36, cy - u * .02); x.quadraticCurveTo(cx + sg * u * .26, cy + u * .1, cx + sg * u * .16, cy + u * .06); x.fill() }
+  x.fillStyle = col; x.beginPath(); x.ellipse(cx, cy + u * .06, u * .17, u * .22, 0, 0, 7); x.fill();
+  x.beginPath(); x.moveTo(cx - u * .06, cy - u * .1); x.quadraticCurveTo(cx, cy - u * .34, cx + u * .02, cy - u * .36); x.lineTo(cx + u * .1, cy - u * .34); x.quadraticCurveTo(cx + u * .06, cy - u * .2, cx + u * .07, cy - u * .08); x.fill();
+  x.beginPath(); x.ellipse(cx + u * .06, cy - u * .38, u * .08, u * .05, -.3, 0, 7); x.fill();
+  x.strokeStyle = col; x.lineWidth = u * .07; x.lineCap = 'round'; x.beginPath(); x.moveTo(cx, cy + u * .26); x.quadraticCurveTo(cx - u * .05, cy + u * .44, cx + u * .16, cy + u * .48); x.stroke();
+  if (emb) emblem(x, cx, cy + u * .06, u * .13, emb, '#FFF2DC');
+}
+function elder(x, b, px, py, s) { dragon(x, b, px, py, s, '#C9B7A0'); const u = s * b.s, cx = X(b, px) + u * .06, cy = Yy(b, py) - u * .43; x.fillStyle = '#E8DCC8'; for (const [dx, h] of [[-.07, .12], [0, .17], [.07, .12]]) { x.beginPath(); x.moveTo(cx + dx * u - u * .025, cy); x.lineTo(cx + dx * u, cy - h * u); x.lineTo(cx + dx * u + u * .025, cy); x.fill() } }
+function baron(x, b, px, py, s) { // 가장 큰 몸, 긴 뿔, 긴 꼬리
+  const u = s * b.s, cx = X(b, px), cy = Yy(b, py); x.fillStyle = '#6B4A78'; x.strokeStyle = '#6B4A78'; x.lineCap = 'round';
+  x.lineWidth = u * .09; x.beginPath(); x.moveTo(cx + u * .18, cy + u * .2); x.bezierCurveTo(cx + u * .55, cy + u * .32, cx + u * .5, cy - u * .1, cx + u * .62, cy - u * .2); x.stroke();
+  x.beginPath(); x.ellipse(cx, cy + u * .08, u * .3, u * .24, 0, 0, 7); x.fill(); x.beginPath(); x.ellipse(cx - u * .18, cy - u * .14, u * .15, u * .12, 0, 0, 7); x.fill();
+  x.fillStyle = '#D7C9B4'; for (const sg of [-1, 1]) { x.beginPath(); x.moveTo(cx - u * .2 + sg * u * .05, cy - u * .22); x.quadraticCurveTo(cx - u * .2 + sg * u * .2, cy - u * .44, cx - u * .2 + sg * u * .1, cy - u * .56); x.lineTo(cx - u * .2 + sg * u * .03, cy - u * .24); x.fill() }
+  x.fillStyle = '#EFD27A'; x.beginPath(); x.arc(cx - u * .22, cy - u * .14, u * .025, 0, 7); x.fill();
+}
+function larva(x, b, px, py, s) { const u = s * b.s, cx = X(b, px), cy = Yy(b, py); for (let k = 0; k < 4; k++) { x.fillStyle = k % 2 ? '#7E5C8E' : '#956FA6'; x.beginPath(); x.ellipse(cx - u * .3 + k * u * .2, cy - Math.sin(k * .9) * u * .06, u * .14, u * .12, 0, 0, 7); x.fill() } x.fillStyle = '#F0E2B6'; x.beginPath(); x.arc(cx + u * .34, cy - u * .08, u * .03, 0, 7); x.fill() }
+function emblem(x, cx, cy, r, type, col) { // 속성 문양 (글 없이 모양으로)
+  x.save(); x.fillStyle = col || '#fff'; x.strokeStyle = col || '#fff'; x.lineWidth = r * .18; x.lineJoin = 'round';
+  if (type === 'fire') { x.beginPath(); x.moveTo(cx, cy - r); x.quadraticCurveTo(cx + r * .9, cy - r * .1, cx + r * .5, cy + r * .7); x.quadraticCurveTo(cx, cy + r, cx - r * .5, cy + r * .7); x.quadraticCurveTo(cx - r * .9, cy - r * .1, cx - r * .15, cy - r * .3); x.quadraticCurveTo(cx - r * .1, cy - r * .7, cx, cy - r); x.fill() }
+  else if (type === 'earth') { x.beginPath(); x.moveTo(cx - r * .9, cy + r * .6); x.lineTo(cx - r * .5, cy - r * .5); x.lineTo(cx + r * .1, cy - r * .8); x.lineTo(cx + r * .8, cy - r * .2); x.lineTo(cx + r * .9, cy + r * .6); x.closePath(); x.fill() }
+  else if (type === 'ocean') { x.beginPath(); x.moveTo(cx, cy - r); x.bezierCurveTo(cx + r * .3, cy - r * .4, cx + r * .8, cy, cx + r * .8, cy + r * .35); x.arc(cx, cy + r * .35, r * .8, 0, Math.PI); x.bezierCurveTo(cx - r * .8, cy, cx - r * .3, cy - r * .4, cx, cy - r); x.fill() }
+  else if (type === 'soul') { x.restore(); emblem(x, cx, cy, r, 'ocean', '#2F7F98'); emblem(x, cx, cy + r * .12, r * .62, 'ocean', col); return }
+  x.restore();
+}
+const EMB_COL = { fire: '#E2703A', earth: '#A0784A', ocean: '#3E9BB8' };
+function slots(x, b, px, py, list, s = .07) { list.forEach((t, i) => { const cx = X(b, px + i * s * 1.25), cy = Yy(b, py), u = s * b.s; x.fillStyle = t ? EMB_COL[t] : 'rgba(239,232,220,.14)'; rr(x, cx - u / 2, cy - u / 2, u, u, u * .2); x.fill(); if (t) emblem(x, cx, cy, u * .3, t, '#FFF2DC') }) }
+function balance(x, b, px, py, s, tilt, loadL = 0, loadR = 0) { // 저울: 기울기만 (숫자 없음)
+  const u = s * b.s, cx = X(b, px), cy = Yy(b, py), a = tilt * .22; x.strokeStyle = '#C9BFB0'; x.fillStyle = '#C9BFB0'; x.lineWidth = u * .03;
+  x.beginPath(); x.moveTo(cx, cy); x.lineTo(cx, cy + u * .4); x.stroke(); x.fillRect(cx - u * .18, cy + u * .4, u * .36, u * .04);
+  const lx = cx - Math.cos(a) * u * .5, ly = cy - Math.sin(a) * u * .5, rx = cx + Math.cos(a) * u * .5, ry = cy + Math.sin(a) * u * .5;
+  x.beginPath(); x.moveTo(lx, ly); x.lineTo(rx, ry); x.stroke();
+  for (const [qx, qy, ld] of [[lx, ly, loadL], [rx, ry, loadR]]) { x.beginPath(); x.moveTo(qx - u * .16, qy + u * .12); x.lineTo(qx + u * .16, qy + u * .12); x.lineTo(qx + u * .1, qy + u * .18); x.lineTo(qx - u * .1, qy + u * .18); x.fill(); if (ld) { x.fillStyle = '#D2473A'; x.beginPath(); x.ellipse(qx, qy + u * .1, u * .03 + ld * u * .1, u * .025 + ld * u * .04, 0, 0, 7); x.fill(); x.fillStyle = '#C9BFB0' } x.beginPath(); x.moveTo(qx, qy); x.lineTo(qx, qy + u * .12); x.stroke() }
+}
+// 판 위 그리기 함수 묶기: draw(x,w,h) 형태로
+const on = fn => (x, w, h) => fn(x, bd(w, h), w, h);
+const layer = (...fs) => (x, w, h) => { for (const f of fs) if (f) { x.save(); f(x, w, h); x.restore() } };
+// ---------- 바탕 ----------
+const Q = new URLSearchParams(location.search);
+const PHONE = () => innerWidth < 700, PH = PHONE;
+const RM = matchMedia('(prefers-reduced-motion: reduce)');
+const ST = { userRM: null };
+const reduced = () => ST.userRM ?? RM.matches;
+let DPR = 1;
+// 작전판 바닥은 크기마다 한 번만 그려 두고 붙인다 (매 프레임 다시 그리지 않는다)
+const MAPC = new Map(), mapImgRaw = mapImg;
+mapImg = function (x, b, crop = [0, 0, 1], alpha = 1) { const k = crop.join() + '|' + Math.round(b.s); let m = MAPC.get(k);
+  if (!m) { m = document.createElement('canvas'); m.width = m.height = Math.max(1, Math.round(b.s)); mapImgRaw(m.getContext('2d'), { s: m.width, ox: 0, oy: 0 }, crop, 1); MAPC.set(k, m); if (MAPC.size > 40) MAPC.delete(MAPC.keys().next().value) }
+  x.save(); x.globalAlpha *= alpha; x.drawImage(m, b.ox, b.oy, b.s, b.s); x.restore() };
+const mapC = (c, b, crop = [0, 0, 1]) => mapImg(c, b, crop);
+const cl = (v, a = 0, b = 1) => v < a ? a : v > b ? b : v;
+const eio = t => t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2, eo = t => 1 - Math.pow(1 - t, 3), ei = t => t * t * t;
+const lerp = (a, b, t) => a + (b - a) * t, seg = (t, a, b) => cl((t - a) / (b - a));
+function rng(seed) { let s = seed >>> 0; return () => { s = (s * 1664525 + 1013904223) >>> 0; return s / 4294967296 } }
+// 시간 비틀기: 맞기 전 그대로 → 맞는 순간 0.1초 멈춤 → 0.4초 느리게(0.35배) → 빠르게(1.3배)
+function warp(t, h) { if (h == null || t < h) return t; const a = t - h; if (a < .1) return h; const b = a - .1; return b < .4 ? h + b * .35 : h + .14 + (b - .4) * 1.3 }
+function realOf(s, h) { if (h == null || s <= h) return s; const d = s - h; return d <= .14 ? h + .1 + d / .35 : h + .5 + (d - .14) / 1.3 }
+function flash(c, px, py, r, p) { if (p < 0 || p > 1) return; c.globalAlpha = (1 - p) * .9; c.fillStyle = '#FFF6E2'; c.beginPath(); c.arc(px, py, r * (.5 + p * .9), 0, 7); c.fill(); c.globalAlpha = 1 }
+function headline(c, w, h, mode, p) { // 큰 글자: slam 쾅 떨어져 꽂힘 · slide 미끄러져 들어와 멈춤 · pop 제자리에 톡
+  if (p <= 0) return; const { t, fs } = heroFs(w, h), cx = t.x + t.w * .45, cy = t.y + fs * 1.2; c.save();
+  if (mode === 'slam') { const e = ei(cl(p)), s = lerp(1.55, 1, e); c.globalAlpha = cl(p * 3); c.translate(cx, cy); c.scale(s, s); c.translate(-cx, -cy) }
+  else if (mode === 'slide') { const e = eo(cl(p)); c.translate(-(t.x + t.w) * (1 - e), 0) }
+  else { const e = eo(cl(p)); c.globalAlpha = e; const s = lerp(.93, 1, e); c.translate(cx, cy); c.scale(s, s); c.translate(-cx, -cy) }
+  HERO.text('B').draw(c, w, h); c.restore();
+}
+// ---------- 공통: 이미 깨진 미드 구조물 (레슨 ① 컷 2: 포탑 셋 → 억제기 → 넥서스 앞 포탑 둘이 먼저 깨진다) ----------
+const RUBBLE = [[.6, .4, 't'], [.665, .335, 't'], [.72, .28, 't'], [.76, .24, 'i'], [.72, .12, 't'], [.88, .28, 't']];
+function rubble(c, b) { for (const [px, py, k] of RUBBLE) { const cx = X(b, px), cy = Yy(b, py), u = .06 * b.s; c.save(); c.globalAlpha = .5;
+  if (k === 'i') { c.strokeStyle = '#7C756B'; c.lineWidth = u * .16; c.beginPath(); c.arc(cx, cy, u * .32, .5, 5.5); c.stroke(); c.fillStyle = 'rgba(210,71,58,.4)'; c.beginPath(); c.arc(cx, cy, u * .13, 0, 7); c.fill() }
+  else { c.fillStyle = '#7C756B'; c.beginPath(); c.moveTo(cx - u * .28, cy + u * .5); c.lineTo(cx - u * .2, cy + u * .16); c.lineTo(cx - u * .02, cy + u * .26); c.lineTo(cx + u * .12, cy + u * .1); c.lineTo(cx + u * .22, cy + u * .2); c.lineTo(cx + u * .28, cy + u * .5); c.fill(); c.fillStyle = '#A39B8E'; c.fillRect(cx - u * .38, cy + u * .42, u * .2, u * .1); c.fillRect(cx + u * .22, cy + u * .36, u * .16, u * .12) }
+  c.restore() } }
+function s1base(c, w, h, o = {}) { const b = HR(w, h); mapC(c, b, [0, 0, 1], o.Z || 1); rubble(c, b); nex(c, b, .16, .84, .15, 'us'); if (o.nex) nex(c, b, ...NEXT, .15, 'them', { broken: o.broken }); tok(c, b, .3, .7, .045, CH.jinx, 'us'); return b }
+function s1card(c, w, h, t) { const p = seg(t, 1, 1.65); if (p < 1) HERO.card(p)(c, w, h) }
+const LP = (k, d = 0) => [k + d, 1 - k + d];
+function s2base(c, w, h, Z = 1) { const b = bd(w, h); mapC(c, b, MID, Z); tur(c, b, .27, .73, .1, 'us'); tur(c, b, .73, .27, .1, 'them'); return b }
+function border(c, b, k, a = .75) { const p = LP(k, -.06), q = LP(k, .06); c.save(); c.globalAlpha = a; c.strokeStyle = '#EFE8DC'; c.lineCap = 'round'; c.lineWidth = b.s * .007; c.beginPath(); c.moveTo(X(b, p[0]), Yy(b, p[1])); c.lineTo(X(b, q[0]), Yy(b, q[1])); c.stroke(); c.restore() }
+function penRing(c, cx, cy, r, p, z = 1, al = 1) { if (p <= 0 || al <= 0) return; c.save(); c.globalAlpha = al; c.lineCap = 'round'; for (const [col, lw] of [['#1F1B17', 8], ['#F4ECDA', 4]]) { c.strokeStyle = col; c.lineWidth = lw * DPR / z; c.beginPath(); c.arc(cx, cy, r, -2, -2 + cl(p) * 6.2832); c.stroke() } c.restore() }
+
+// ---------- 조각 도구 (A와 C가 함께 쓴다) ----------
+function cutPoly(P, px, py, nx, ny) { const A = [], B = []; for (let i = 0; i < P.length; i++) { const p = P[i], q = P[(i + 1) % P.length], dp = (p[0] - px) * nx + (p[1] - py) * ny, dq = (q[0] - px) * nx + (q[1] - py) * ny; (dp >= 0 ? A : B).push(p); if ((dp >= 0) !== (dq >= 0)) { const t = dp / (dp - dq), m = [p[0] + (q[0] - p[0]) * t, p[1] + (q[1] - p[1]) * t]; A.push(m); B.push(m) } } return [A, B] }
+const cen = P => { let a = 0, b = 0; for (const p of P) { a += p[0]; b += p[1] } return [a / P.length, b / P.length] };
+function chunk(polys) { // 면을 따라 굵게: 가장 긴 변과 나란히, 무게중심을 지나 두 쪽으로. 가로세로 비가 2를 넘는 납작한 면(받침대)은 긴 변에 수직으로 자른다
+  const out = []; for (const p of polys) { const P = p.pts; let bi = 0, L = 0; for (let i = 0; i < P.length; i++) { const q = P[(i + 1) % P.length], l = Math.hypot(q[0] - P[i][0], q[1] - P[i][1]); if (l > L) { L = l; bi = i } }
+    const a = P[bi], q = P[(bi + 1) % P.length], ln = Math.hypot(q[0] - a[0], q[1] - a[1]) || 1, ux = (q[0] - a[0]) / ln, uy = (q[1] - a[1]) / ln, c0 = cen(P);
+    let l0 = 1e9, l1 = -1e9, w0 = 1e9, w1 = -1e9; for (const v of P) { const u = v[0] * ux + v[1] * uy, n = -v[0] * uy + v[1] * ux; l0 = Math.min(l0, u); l1 = Math.max(l1, u); w0 = Math.min(w0, n); w1 = Math.max(w1, n) }
+    const [A, B] = l1 - l0 > 2 * (w1 - w0) ? cutPoly(P, c0[0], c0[1], ux, uy) : cutPoly(P, c0[0], c0[1], -uy, ux);
+    if (A.length > 2 && B.length > 2) out.push({ ...p, pts: A }, { ...p, pts: B }); else out.push(p) } return out }
+function nexModel(b, px, py, s, team) { // index.html nex()와 같은 면 + 받침대
+  const cx = X(b, px), cy = Yy(b, py), u = s * b.s, k3 = hex(TEAM[team]), rgb = k => `rgb(${clamp8(k3[0] * k)},${clamp8(k3[1] * k)},${clamp8(k3[2] * k)})`;
+  const t = cy - u * .5, m = cy - u * .08, bt = cy + u * .2, hw = u * .2, md = [cx - hw * .2, m + u * .03];
+  return { cx, cy, u, bt, faces: [{ pts: [[cx, t], [cx - hw, m], md], col: rgb(1.35) }, { pts: [[cx, t], md, [cx + hw, m]], col: rgb(1.1) }, { pts: [[cx - hw, m], [cx, bt], md], col: rgb(.85) }, { pts: [md, [cx, bt], [cx + hw, m]], col: rgb(.62) }],
+    base: [{ pts: [[cx - u * .48, cy + u * .5], [cx - u * .3, cy + u * .32], [cx + u * .3, cy + u * .32], [cx + u * .48, cy + u * .5]], col: '#6F6860', heavy: 1 }, { pts: [[cx - u * .3, cy + u * .34], [cx - u * .18, cy + u * .22], [cx + u * .18, cy + u * .22], [cx + u * .3, cy + u * .34]], col: '#958D80', heavy: 1 }] };
+}
+function miniModel(b, px, py, s, team) { const cx = X(b, px), cy = Yy(b, py), u = s * b.s, P = [], Hh = []; for (let i = 0; i < 8; i++) { const a = i / 8 * 6.2832; P.push([cx + Math.cos(a) * u * .36, cy + u * .02 + Math.sin(a) * u * .34]) } for (let i = 0; i <= 4; i++) { const a = Math.PI + i / 4 * Math.PI; Hh.push([cx + Math.cos(a) * u * .3, cy - u * .22 + Math.sin(a) * u * .24]) } return [{ pts: P, col: TEAM[team] }, { pts: Hh, col: '#B9B2A6' }] }
+const LW = S => Math.max(1.5 * DPR, S * .004);
+function polyPath(c, P) { c.beginPath(); P.forEach((p, i) => i ? c.lineTo(...p) : c.moveTo(...p)); c.closePath() }
+function drawModel(c, polys, S) { c.lineJoin = 'round'; for (const p of polys) { polyPath(c, p.pts); c.fillStyle = p.col; c.fill(); c.lineWidth = LW(S); c.strokeStyle = '#1F1B17'; c.stroke() } } // 성한 모양도 조각과 같은 선
+function shatter(pieces, hx, hy, S, seed, o = {}) { // 위에서 본 판: z = 높이. 튀어 올랐다 떨어져 튕기고 미끄러지다 멈춘다
+  const r = rng(seed), g = S * 6, dt = 1 / 120, sp0 = o.sp || [.12, .3], vz0 = o.vz || [1, .6], B = o.box;
+  const out = pieces.map(p => { const c = cen(p.pts), dx = c[0] - hx, dy = c[1] - hy, L = Math.hypot(dx, dy) || 1, hv = p.heavy ? .45 : 1, sp = S * (sp0[0] + r() * sp0[1]) * hv; return { col: p.col, loc: p.pts.map(q => [q[0] - c[0], q[1] - c[1]]), x: c[0], y: c[1], z: 0, vx: dx / L * sp + (r() - .5) * S * .15, vy: dy / L * sp + (r() - .5) * S * .15, vz: S * (vz0[0] + r() * vz0[1]) * hv, a: 0, w: (r() - .5) * 10 * hv, rest: false, fr: [] } });
+  for (let k = 0; k < 480; k++) for (const f of out) {
+    if (!f.rest) { f.vz -= g * dt; f.z += f.vz * dt; f.x += f.vx * dt; f.y += f.vy * dt; f.a += f.w * dt;
+      if (B) { if (f.x < B[0] || f.x > B[2]) { f.x = cl(f.x, B[0], B[2]); f.vx *= -.4 } if (f.y < B[1] || f.y > B[3]) { f.y = cl(f.y, B[1], B[3]); f.vy *= -.4 } }
+      if (f.z <= 0) { f.z = 0; if (f.vz < -S * .25) { f.vz = -f.vz * .3; f.vx *= .5; f.vy *= .5; f.w *= .45 } else { f.vz = 0; f.vx *= .88; f.vy *= .88; f.w *= .82; if (Math.hypot(f.vx, f.vy) < S * .01) f.rest = true } } }
+    if (k % 2 === 0) f.fr.push([f.x, f.y, f.z, f.a]);
+  }
+  return out;
+}
+function drawFrags(c, frs, t, S, fadeAt, hl = 0) { // hl: 맞은 순간 테두리가 밝아지는 정도(0~1)
+  const i = Math.min(239, Math.max(0, Math.floor(t * 60))), al = fadeAt == null ? 1 : 1 - seg(t, fadeAt, fadeAt + .4); if (al <= 0) return; c.lineJoin = 'round';
+  for (const f of frs) { const [fx, fy, fz, fa] = f.fr[i], sc = 1 + fz / S * 1.6, cs = Math.cos(fa), sn = Math.sin(fa);
+    const path = (ox, oy, k) => { c.beginPath(); f.loc.forEach((q, j) => { const px = ox + (q[0] * cs - q[1] * sn) * k, py = oy + (q[0] * sn + q[1] * cs) * k; j ? c.lineTo(px, py) : c.moveTo(px, py) }); c.closePath() };
+    c.globalAlpha = .3 * al; c.fillStyle = '#000'; path(fx, fy, 1); c.fill(); c.globalAlpha = al;
+    path(fx, fy - fz, sc); c.fillStyle = f.col; c.fill(); c.lineWidth = LW(S); c.strokeStyle = '#1F1B17'; c.stroke();
+    if (hl > 0) { c.globalAlpha = al * hl; c.strokeStyle = '#FFF6E2'; c.lineWidth = LW(S) * 1.5; c.stroke(); c.globalAlpha = al } }
+  c.globalAlpha = 1;
+}
+function boxOf(b) { return [b.ox + b.s * .1, b.oy + b.s * .07, b.ox + b.s * .93, b.oy + b.s * .92] }
+
+function polyLen(P) { let L = 0; for (let i = 1; i < P.length; i++) L += Math.hypot(P[i][0] - P[i - 1][0], P[i][1] - P[i - 1][1]); return L }
+function polyAt(P, f) { const L = polyLen(P) * cl(f); let a = 0; for (let i = 1; i < P.length; i++) { const l = Math.hypot(P[i][0] - P[i - 1][0], P[i][1] - P[i - 1][1]); if (a + l >= L) { const k = (L - a) / (l || 1); return [lerp(P[i - 1][0], P[i][0], k), lerp(P[i - 1][1], P[i][1], k), Math.atan2(P[i][1] - P[i - 1][1], P[i][0] - P[i - 1][0])] } a += l } const n = P.length - 1; return [P[n][0], P[n][1], Math.atan2(P[n][1] - P[n - 1][1], P[n][0] - P[n - 1][0])] }
+function pen(c, P, f, z, arrow = true) {
+  if (f <= 0) return; const L = polyLen(P) * cl(f); let a = 0; const pts = [P[0]]; for (let i = 1; i < P.length; i++) { const l = Math.hypot(P[i][0] - P[i - 1][0], P[i][1] - P[i - 1][1]); if (a + l >= L) { const k = (L - a) / (l || 1); pts.push([lerp(P[i - 1][0], P[i][0], k), lerp(P[i - 1][1], P[i][1], k)]); break } pts.push(P[i]); a += l }
+  c.lineCap = 'round'; c.lineJoin = 'round'; for (const [col, lw] of [['#1F1B17', 10], ['#F4ECDA', 5.5]]) { c.strokeStyle = col; c.lineWidth = lw * DPR / z; c.beginPath(); pts.forEach((p, i) => i ? c.lineTo(...p) : c.moveTo(...p)); c.stroke() }
+  if (arrow && pts.length > 1) { const p = pts[pts.length - 1], q = pts[pts.length - 2], an = Math.atan2(p[1] - q[1], p[0] - q[0]), s = 14 * DPR / z; c.fillStyle = '#F4ECDA'; c.strokeStyle = '#1F1B17'; c.lineWidth = 2.5 * DPR / z; c.beginPath(); c.moveTo(p[0] + Math.cos(an) * s, p[1] + Math.sin(an) * s); c.lineTo(p[0] + Math.cos(an + 2.4) * s, p[1] + Math.sin(an + 2.4) * s); c.lineTo(p[0] + Math.cos(an - 2.4) * s, p[1] + Math.sin(an - 2.4) * s); c.closePath(); c.stroke(); c.fill() }
+}
+function camera(c, z, fx, fy, ax, ay) { c.translate(ax, ay); c.scale(z, z); c.translate(-fx, -fy) }
+// ---------- C 알갱이(C+): 점 하나 = 미니언 하나, 무리의 움직임으로. 큰 순간만 펜 동그라미 + 살짝 다가가기 + A 조각 ----------
+const UR = .018; // 점 반지름(판 짧은 변 기준). 폰에서 지름 10px 넘게
+function unit(c, b, px, py, col, o = {}) { // o.pop: 사라지는 진행(톡), o.born: 미니언 그림 → 점(0→1), o.k: 크기 배율, o.power: 힘 고리
+  const cx = X(b, px), cy = Yy(b, py), r = b.s * UR * (o.k || 1), lw = Math.max(1.3 * DPR, b.s * .003), p = o.pop ?? -1, bn = o.born ?? 1;
+  if (p >= 1) return;
+  if (bn < 1) { c.globalAlpha = 1 - bn; mini(c, b, px, py, .045, col === TEAM.us ? 'us' : 'them'); c.globalAlpha = bn } // 레슨에서 미니언이 처음 나올 때 한 번: 미니언 그림이 점으로 줄어든다
+  if (p >= 0) { c.globalAlpha = .85 * (1 - p); c.strokeStyle = '#F4ECDA'; c.lineWidth = lw; c.beginPath(); c.arc(cx, cy, r * (1 + p * 1.6), 0, 7); c.stroke(); c.globalAlpha = 1 - p }
+  if (o.power) { c.strokeStyle = o.power; c.lineWidth = r * .4; c.beginPath(); c.arc(cx, cy, r * 1.5, 0, 7); c.stroke() }
+  c.fillStyle = col; c.strokeStyle = '#1F1B17'; c.lineWidth = lw; c.beginPath(); c.arc(cx, cy, r * (p >= 0 ? 1 + p * .4 : lerp(1.6, 1, bn)), 0, 7); c.fill(); c.stroke(); c.globalAlpha = 1;
+}
+const C1P = [[[.16, .84], [.09, .72], [.09, .17], [.17, .09], [.66, .09]], [[.16, .84], [.3, .7], [.68, .32]], [[.16, .84], [.28, .91], [.83, .91], [.91, .83], [.91, .36]]];
+const C1 = { hit: 0, end: 0, text: 0, NS: .2,
+  prep(w, h) { const b = HR(w, h), r = rng(4), N = NEXT; this.u = [];
+    for (let p = 0; p < 3; p++) for (let j = 0; j < 6; j++) { // 라인마다 한 웨이브 6
+      const i = p * 6 + j, an = (p === 0 ? 165 : p === 1 ? 128 : 92) * Math.PI / 180 + ((j % 3) - 1) * .2, rad = .13 + (j > 2 ? .05 : 0), stand = [N[0] + Math.cos(an) * rad, N[1] + Math.sin(an) * rad];
+      const path = [...C1P[p], stand]; this.u.push({ p, j, path, stand, d: j * .07 + r() * .02, ta: 0, ang: an }) }
+    for (const u of this.u) u.ta = 2.05 + u.d + 1.5;
+    const last = Math.max(...this.u.map(u => u.ta)); this.hit = last + .95; this.text = this.hit + .55; this.end = this.hit + 1.3; // 다 모여 톡톡 친 뒤, 0.3초 정적, 그다음 깨진다
+    const m = nexModel(b, ...N, this.NS, 'them'); this.model = [...m.base, ...m.faces]; this.frs = shatter(chunk(this.model), X(b, N[0] - .02), Yy(b, N[1] + .03), b.s, 13, { sp: [.07, .12], vz: [.6, .3], box: boxOf(b) }); // 낮게 튀어 무대 안에서 멈춘다
+  },
+  frame(c, w, h, t, rt) {
+    const b = HR(w, h), N = [X(b, NEXT[0]), Yy(b, NEXT[1])]; c.save(); const z = bigCam(c, this, t, N, [X(b, .64), Yy(b, .02), X(b, .98), Yy(b, .36)]); // 무대만 살짝 다가간다. 넥서스 둘레는 무대 안에 남는다
+    s1base(c, w, h); s1card(c, w, h, t);
+    if (t < this.hit) drawModel(c, this.model, b.s); else drawFrags(c, this.frs, t - this.hit, b.s, null, glowAt(rt, this.hit));
+    for (const u of this.u) {
+      const st = 2.05 + u.d; if (t < st) continue; const k = cl((t - st) / 1.5), e = eio(k), pt = polyAt(u.path, e), mg = 1 - cl((e - .75) / .25), nx = -Math.sin(pt[2]), ny = Math.cos(pt[2]), off = ((u.j % 3) - 1) * .02 * mg;
+      let px = pt[0] + nx * off, py = pt[1] + ny * off;
+      if (t >= u.ta && t < this.hit - .3) { const tp = ((t - u.ta - .1) % .26) / .26; if (t > u.ta + .1 && tp < .45) { const l = Math.sin(tp / .45 * Math.PI) * .018; px -= Math.cos(u.ang) * l; py -= Math.sin(u.ang) * l } } // 멈춰 서서 톡톡 친다
+      unit(c, b, px, py, TEAM.us, { born: cl((t - st) / .3) });
+    }
+    bigMark(c, this, t, rt, N, b.s * .12, z); // 깨지기 직전 0.3초: 멈춘 채 펜 동그라미만. 깨진 뒤 사라짐
+    c.restore();
+    headline(c, w, h, 'pop', seg(t, this.text, this.text + .2));
+  } };
+const C2B = [[.46, 0], [.43, .03], [.43, -.03], [.4, 0], [.37, .03], [.37, -.03], [.34, 0]], C2R = [[.55, .02], [.58, -.02], [.61, .01]];
+const C2 = { hit: 1.4, end: 3.4, pops: { r0: 1.4, b0: 1.6, r1: 1.75, r2: 1.95 },
+  frame(c, w, h, t, rt) {
+    const b = bd(w, h), C0 = [X(b, .5), Yy(b, .5)], zi = eio(seg(t, this.hit - .5, this.hit)), zo = eio(seg(t, this.hit + .14, this.hit + .9)), z = 1 + .2 * zi * (1 - zo);
+    c.save(); camera(c, z, C0[0], C0[1], C0[0], C0[1]);
+    const ap = eio(seg(t, .5, 1.1)), adv = eio(seg(t, 2.2, 3.1)) * .13; s2base(c, w, h); border(c, b, .5 + adv);
+    C2B.forEach(([k, d], i) => { const pt = this.pops['b' + i]; unit(c, b, ...LP(k + ap * .05 + adv, d), TEAM.us, { pop: pt != null && t >= pt ? (t - pt) / .12 : -1, born: cl(t / .3) }) });
+    C2R.forEach(([k, d], i) => { const pt = this.pops['r' + i]; unit(c, b, ...LP(k - ap * .04, d), TEAM.them, { pop: pt != null && t >= pt ? (t - pt) / .12 : -1, born: cl(t / .3) }) });
+    penRing(c, C0[0], C0[1], b.s * .1, seg(t, this.hit - .3, this.hit - .05), z, 1 - seg(t, this.hit + .3, this.hit + .7));
+    c.restore(); flash(c, C0[0], C0[1], b.s * .05, (rt - this.hit) / .2);
+  } };
+const P = (x, y) => [x, y];
+const atB = (p) => { const b = bd(E.W, E.H); return [b.ox + p[0] * b.s, b.oy + p[1] * b.s] };
+const def = (id, fn, o = {}) => Object.assign({ id, draw: on(fn) }, o);
+const MID = [.28, .28, .44], BASE = [0, .56, .44], BOT = [.56, .56, .44], TOPL = [0, 0, .56];
+const mapL = (crop, a = 1) => (x, b) => mapImg(x, b, crop, a);
+
+// ---- 첫 화면 ----
+const HR = (w, h) => { if (w > h * 1.15) { const s = Math.min(h * .9, w * .52); return { s, ox: w - s - w * .05, oy: (h - s) / 2 } } const s = Math.min(w * .94, h * .5); return { s, ox: (w - s) / 2, oy: h - s - h * .03 } };
+const HT = (w, h) => w > h * 1.15 ? { x: w * .06, y: h * .3, w: w * .38 } : { x: w * .05, y: h * .09, w: w * .9 };
+const HCARD = (w, h) => { const t = HT(w, h), cw = w > h * 1.15 ? w * .36 : w * .9; return { x: t.x, y: w > h * 1.15 ? h * .2 : h * .06, w: cw, h: cw / 1.695 } };
+const onH = fn => (x, w, h) => fn(x, HR(w, h), w, h);
+const NEXT = [.84, .16];
+const HERO = {
+  board: (enemy, broken) => onH((x, b) => { mapImg(x, b); nex(x, b, .16, .84, .15, 'us'); if (enemy) nex(x, b, ...NEXT, .15, 'them', { broken }); tok(x, b, .3, .7, .045, CH.jinx, 'us') }),
+  nexus: { id: 'h-nexus', draw: onH((x, b) => nex(x, b, ...NEXT, .15, 'them')) },
+  card(p) { // 원화 카드 → 징크스 말 (가루 없이 그림만 옮긴다)
+    return (x, w, h) => {
+      const c = HCARD(w, h), b = HR(w, h), r = .045 * b.s, tx = b.ox + .3 * b.s, ty = b.oy + .7 * b.s, e = p < .5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2, d = x.dpr || 1;
+      const L = c.x + (tx - r - c.x) * e, T = c.y + (ty - r - c.y) * e, W2 = c.w + (2 * r - c.w) * e, H2 = c.h + (2 * r - c.h) * e, R = 10 * d + (r - 10 * d) * e;
+      x.save(); rr(x, L, T, W2, H2, Math.min(R, W2 / 2, H2 / 2)); x.clip(); const im = IMG['splash-Jinx.jpg'], s2 = Math.max(W2 / im.width, H2 / im.height); x.drawImage(im, L + (W2 - im.width * s2) * .62, T + (H2 - im.height * s2) * .2, im.width * s2, im.height * s2); x.restore();
+    };
+  },
+  text: st => ({ id: 'h-text-' + st, draw(x, w, h) {
+    const t = HT(w, h), fs = Math.min(t.w / 6.3, h * .13), dk = st === 'A' && isDark(), ink = st === 'A' && !dk ? '#1F1B17' : '#EFE8DC', red = st === 'A' && !dk ? '#B83A2F' : '#E0675A';
+    x.font = `${fs}px "Black Han Sans"`; x.textBaseline = 'middle'; x.textAlign = 'left';
+    [['상대 ', '넥서스', '를'], ['부수면 이겨요']].forEach((ln, i) => { let cx = t.x; const cy = t.y + fs * (.6 + i * 1.15); ln.forEach((s2, j) => { x.fillStyle = i === 0 && j === 1 ? red : ink; x.fillText(s2, cx, cy); cx += x.measureText(s2).width }) });
+  } }),
+};
+const isDark = () => document.documentElement.dataset.theme === 'dark' || (document.documentElement.dataset.theme !== 'light' && matchMedia('(prefers-color-scheme: dark)').matches);
+const heroFs = (w, h) => { const t = HT(w, h); return { t, fs: Math.min(t.w / 6.3, h * .13) } };
+
+// ---- 레슨 ① 롤은 어떤 게임인가 ----
+const L1bgMap = (x, b, skipBot) => { mapImg(x, b); nex(x, b, .16, .84, .15, 'us'); for (const [p, t] of [[[.4, .6], 'us'], [[.3, .7], 'us'], [[.6, .4], 'them'], [[.7, .3], 'them'], [[.09, .38], 'us'], [[.62, .91], 'us'], [[.38, .09], 'them'], [[.91, .62], 'them']]) if (!(skipBot && p[0] === .91)) tur(x, b, p[0], p[1], .06, t) };
+const L1midBg = (withM2, coinBadge) => (x, b) => {
+  mapImg(x, b, MID); tur(x, b, .27, .73, .1, 'us'); tur(x, b, .73, .27, .1, 'them');
+  tok(x, b, .36, .64, .055, CH.ari, 'us', { hp: .85 }); tok(x, b, .68, .32, .055, CH.syn, 'them', { hp: .85 });
+  dotM(x, b, .45, .55, 'us', { hp: .7 }); dotM(x, b, .42, .5, 'us', { hp: .9 }); dotM(x, b, .6, .45, 'them', { hp: .8 });
+  if (withM2) dotM(x, b, .54, .56, 'them', { hp: .08 });
+  if (coinBadge) coins(x, b, .44, .72, .06);
+};
+const ringPts = (p, r, col, w = 1) => ({ ring: 1, x: p[0], y: p[1], r, th: .35, color: col, w });
+const LOOP = [-150, -90, -30, 30, 90, 150].map(a => [.5 + .3 * Math.cos(a * Math.PI / 180), .5 + .3 * Math.sin(a * Math.PI / 180)]);
+const LOOPN = ['미니언', '금', '아이템', '처치', '포탑', '넥서스'];
+// 라인전이 끝나면: 세 라인의 줄기가 강과 정글 쪽으로 (탑 → 바론 쪽 강, 미드 → 정글, 바텀 → 용 쪽 강)
+const STREAMS = (x, b) => { x.lineCap = 'round'; x.strokeStyle = '#E9DFC9'; x.fillStyle = '#E9DFC9'; x.lineWidth = b.s * .02; for (const p of [[[.09, .52], [.16, .34], [.3, .29]], [[.52, .48], [.5, .64], [.38, .66]], [[.52, .91], [.64, .84], [.66, .71]]]) { x.beginPath(); x.moveTo(X(b, p[0][0]), Yy(b, p[0][1])); x.quadraticCurveTo(X(b, p[1][0]), Yy(b, p[1][1]), X(b, p[2][0]), Yy(b, p[2][1])); x.stroke(); x.beginPath(); x.arc(X(b, p[2][0]), Yy(b, p[2][1]), b.s * .02, 0, 7); x.fill() } };
+const L1loopBg = (x, b) => { mapImg(x, b, [0, 0, 1], .28); ring(x, b, .5, .5, .3, '#C9BFB0', { dash: 1, a: .5, w: .004 }); LOOP.forEach((p, i) => { const a = Math.atan2(p[1] - .5, p[0] - .5); if (i === 5) return label(x, b, .1, .78, LOOPN[i], .036); label(x, b, .5 + .43 * Math.cos(a), .5 + .43 * Math.sin(a), LOOPN[i], .036) }) }; // '넥서스' 이름표는 받침대 왼쪽 아래(조각·점에 덮이지 않게)
+
+const ROLES = [[.19, .5, ['ari', 'lee']], [.5, .5, ['lee']], [.81, .5, ['ari', 'syn']], [.19, .8, ['jinx', 'cait']], [.5, .8, ['thresh']], [.81, .8, ['thresh']]];
+const ROLEN = ['암살자', '전사', '마법사', '원거리 딜러', '서포터', '탱커'];
+const FIVE = [[.55, .6], [.6, .82], [.78, .57], [.82, .78], [.5, .74]];
+const LARVAT = [[.42, .66], [.66, .72], [.76, .46]];
+const ALIVE = [[.47, .5], [.22, .42], [.42, .18], [.52, .28]], MLINE = [[.498, .429], [.541, .472], [.53, .398], [.573, .44]]; // 아리는 미드 라인 위, 미니언 넷은 아리 바로 옆(facts-v3: 강화 계기는 600 안)
+// ---- 장면별 바탕 그리기 (위에서 이름으로 씀) ----
+function L2tradeBg(ax, ay, q, synHp) { // q: 0 없음(가루가 대신), 1 밝음, 2 회색
+  return (x, b) => { mapImg(x, b, MID); ring(x, b, ax, ay, .3, TEAM.us, { dash: 1, a: .7, w: .004 }); tok(x, b, ax, ay, .055, CH.ari, 'us', { hp: .9 }); tok(x, b, .6, .4, .055, CH.syn, 'them', { hp: synHp });
+    if (q) skill(x, b, .86, .1, .11, 'spell-SyndraQ.png', q === 2) };
+}
+function wave(x, b, cx, cy) { for (const [dx, dy] of [[0, 0], [-.05, .05], [.05, -.05], [-.03, -.03], [.03, .03], [-.08, .02]]) dotM(x, b, cx + dx, cy + dy, 'us', { k: 1.2 }) }
+function L2pushBg(line, enemy) {
+  return (x, b) => { mapImg(x, b, MID); tur(x, b, .27, .73, .1, 'us'); tur(x, b, .73, .27, .1, 'them');
+    if (enemy) { dotM(x, b, .57, .43, 'them'); dotM(x, b, .6, .46, 'them') }
+    x.strokeStyle = '#EFE8DC'; x.lineWidth = b.s * .006; x.globalAlpha = .7; x.beginPath(); x.moveTo(X(b, line - .06), Yy(b, 1 - line - .06)); x.lineTo(X(b, line + .06), Yy(b, 1 - line + .06)); x.stroke(); x.globalAlpha = 1 };
+}
+function ROLEBG(x, b) { ROLES.forEach(([bx, by], i) => { x.strokeStyle = 'rgba(239,232,220,.35)'; x.lineWidth = b.s * .004; rr(x, X(b, bx - .145), Yy(b, by - .11), .29 * b.s, .25 * b.s, b.s * .02); x.stroke(); label(x, b, bx, by - .07, ROLEN[i], .032) }) }
+function L3rangeBg(jhp, jx = .25) { // jx: 징크스 자리
+  return (x, b) => { mapImg(x, b, BOT); ring(x, b, .62, .78, .42, TEAM.them, { dash: 1, a: .75, w: .004, fill: .06 }); ring(x, b, jx, .78, .339, TEAM.us, { dash: 1, a: .75, w: .004 });
+    tok(x, b, jx, .78, .058, CH.jinx, 'us', { hp: jhp }); tok(x, b, .62, .78, .058, CH.cait, 'them', { hp: .9 }) };
+}
+function L3toolBg(e, leeHere, leeAt) { // e: 0 없음 · 1 밝음 · 2 회색
+  return (x, b) => { mapImg(x, b, MID); if (e) skill(x, b, .12, .1, .11, 'spell-SyndraE.png', e === 2); skill(x, b, .88, .1, .11, 'spell-LeeSinQ.png');
+    tok(x, b, .36, .62, .058, CH.syn, 'us', { hp: leeAt ? .5 : .9 }); if (leeHere) tok(x, b, .66, .36, .055, CH.lee, 'them'); if (leeAt) tok(x, b, leeAt, 1.08 - leeAt - .1, .055, CH.lee, 'them') };
+}
+function TEAMBG(formed, leeGone, hit) {
+  return (x, b) => { label(x, b, .5, .05, '상대', .032, '#E0675A'); tok(x, b, .3, .16, .045, CH.thresh, 'them'); if (!leeGone) tok(x, b, .5, .16, .05, CH.lee, 'them'); for (const px of [.7, .86, .14]) { x.fillStyle = TEAM.them; x.strokeStyle = '#1F1B17'; x.lineWidth = Math.max(1.3 * DPR, b.s * .003); x.beginPath(); x.arc(X(b, px), Yy(b, .16), b.s * .03, 0, 7); x.fill(); x.stroke() } // 나머지 상대 셋: 글자 없는 진영색 원
+    if (formed) { label(x, b, .5, .55, '막는 앞줄', .03, '#C9BFB0'); ring(x, b, .5, .64, .05, '#C9BFB0', { dash: 1, a: .7 }); label(x, b, .5, .94, '치는 뒷줄', .03, '#C9BFB0'); ['ari', 'jinx', 'cait', 'syn'].forEach((c, i) => tok(x, b, .2 + i * .2, .84, .05, CH[c], 'us', hit ? { hp: i === 1 || i === 2 ? .3 : .7 } : {})) }
+    if (hit) tok(x, b, .5, .78, .05, CH.lee, 'them') };
+}
+function GROWTH(x, b) { // 강해지는 때: 기둥 두 개 (높이는 순서만)
+  x.strokeStyle = '#C9BFB0'; x.lineWidth = b.s * .005; x.beginPath(); x.moveTo(X(b, .1), Yy(b, .82)); x.lineTo(X(b, .92), Yy(b, .82)); x.stroke();
+  label(x, b, .14, .88, '초반', .03, '#C9BFB0'); label(x, b, .88, .88, '후반', .03, '#C9BFB0');
+  const col = (i, hs, c) => hs.forEach((hh, k) => { x.fillStyle = c; x.fillRect(X(b, .18 + k * .14 + i * .05), Yy(b, .82 - hh), b.s * .04, hh * b.s) });
+  col(0, [.12, .18, .26, .4, .56], '#5C93E6'); col(1, [.24, .34, .4, .44, .46], '#E0675A');
+  tok(x, b, .2, .12, .05, CH.jinx, 'us'); label(x, b, .34, .12, '나', .034); tok(x, b, .55, .12, .05, CH.cait, 'them'); label(x, b, .69, .12, '상대', .034);
+}
+function L4teamBg(power) { return (x, b) => { mapImg(x, b); [CH.ari, CH.jinx, CH.lee, CH.thresh, CH.cait].forEach((c, i) => tok(x, b, ...FIVE[i], .04, c, 'us', power ? { power } : {})) } }
+function L4soulBg(list) { return (x, b) => { mapImg(x, b, [0, 0, 1], .3); [CH.ari, CH.jinx, CH.lee, CH.thresh, CH.cait].forEach((c, i) => tok(x, b, ...FIVE[i], .035, c, 'us')); if (list) slots(x, b, .08, .09, list, .08) } }
+function L4larvaBg(st) { return (x, b) => { mapImg(x, b, TOPL); [CH.ari, CH.lee, CH.jinx].forEach((c, i) => tok(x, b, ...LARVAT[i], .045, c, 'us', st ? { power: '#956FA6' } : {})); [0, 1, 2].forEach(i => { const u = .06 * b.s; x.fillStyle = i < st ? '#956FA6' : 'rgba(239,232,220,.14)'; rr(x, X(b, .08 + i * .09) - u / 2, Yy(b, .09) - u / 2, u, u, u * .2); x.fill() }) } }
+function L4baronBg(power, withMinions) { return (x, b) => { mapImg(x, b); [CH.ari, CH.lee, CH.jinx, CH.thresh].forEach((c, i) => tok(x, b, ...ALIVE[i], .04, c, 'us', power ? { power: '#9C7AB0' } : {})); tok(x, b, .08, .92, .04, CH.cait, 'us', { grey: 1 }); if (withMinions) MLINE.forEach(p => dotM(x, b, p[0], p[1], 'us')) } }
+
+// ---- 개념 지도 (curriculum-v3.md 3절, 장 질문은 plan-v3.md 2.1) ----
+const CHAPTERS = [
+  ['롤은 어떤 게임인가', '상대 넥서스를 부수려면 무엇이 필요하나?', '승리 조건은 넥서스|넥서스를 지키는 벽|5대5와 다섯 자리|미니언|포탑은 미니언부터 쏜다|킬은 수단|전략의 큰 고리|*역할 퀘스트', 1],
+  ['자원', '넥서스로 가는 힘은 어디서 생기나?', '골드는 어디서|막타|경험치와 레벨|아이템|귀환과 상점|*현상금|*체력과 마나도 자원|*소환사 주문'],
+  ['맵', '넥서스까지 가는 길은 어떻게 생겼나?', '세 라인, 강, 정글|기지: 우물과 상점|포탑과 방패|억제기와 슈퍼 미니언|전장의 안개|수풀|와드|*이동 시간|*결정질 과성장'],
+  ['라인전', '초반에 자원을 누가 더 가져가나?', '라인전이란|웨이브와 충돌 지점|딜교|미니언 어그로|포탑 어그로|밀기와 당기기|*귀환 타이밍|갱과 미아|*자리별 라인전|*라인전의 끝|조작 기본', 2],
+  ['챔피언과 상성', '왜 어떤 챔피언끼리는 한쪽이 유리하나?', '역할군|사거리|상성이란|사거리 상성|*성장 시점 상성|*기술 상성|*자원 상성|*상성을 쓰는 법|*조합', 3],
+  ['정글과 에픽 몬스터', '큰 몬스터는 넥서스로 가는 길을 어떻게 줄여 주나?', '정글러의 일|정글 캠프와 강타|*정글 펫과 정글 퀘스트|*동선|갱|에픽 몬스터란|원소 드래곤과 영혼|*장로 드래곤|공허 유충|협곡의 전령|내셔 남작|바위게|*강타 싸움과 스틸|*카정|*상대 정글 위치 읽기', 4],
+  ['운영', '라인전이 끝나면 무엇을 먼저 가져가나?', '라인전 뒤|사이드 웨이브 받기|오브젝트 교환|오브젝트 준비|시야 싸움|*스플릿 푸시|*로밍|*포탑 철거 순서'],
+  ['한타', '다섯이 부딪칠 때 누가 이기나?', '한타란|앞라인과 뒷라인|*교전 개시|*노릴 대상|*지키기|숫자 세기|*자리 잡기'],
+  ['심화: 웨이브와 타이밍', '미니언 줄과 시간을 내 편으로 만들려면?', '*웨이브 상태|*슬로우 푸시|*프리징|*크래시, 바운스, 리셋|*미니언 시간표|*귀환 맞추기와 템포|*크로스맵|*슈퍼 미니언과 억제기 재생'],
+];
+const CHPIC = [
+  (x, b) => { mapImg(x, b); nex(x, b, .16, .84, .15, 'us'); nex(x, b, .84, .16, .15, 'them') },
+  (x, b) => { coins(x, b, .36, .5, .3); item(x, b, .7, .45, .24) },
+  (x, b) => { mapImg(x, b); for (const p of [[.4, .6], [.6, .4], [.09, .38], [.38, .09], [.62, .91], [.91, .62]]) tur(x, b, p[0], p[1], .07, p[0] + p[1] > 1 ? 'them' : 'us') },
+  (x, b) => { mapImg(x, b, MID); tok(x, b, .36, .64, .07, CH.ari, 'us'); tok(x, b, .66, .34, .07, CH.syn, 'them'); dotM(x, b, .5, .5, 'them', { k: 1.4 }) },
+  (x, b) => { ring(x, b, .3, .5, .26, TEAM.us, { dash: 1 }); ring(x, b, .7, .5, .32, TEAM.them, { dash: 1 }); tok(x, b, .3, .5, .08, CH.jinx, 'us'); tok(x, b, .7, .5, .08, CH.cait, 'them') },
+  (x, b) => dragon(x, b, .5, .52, .62),
+  (x, b) => { mapImg(x, b); baron(x, b, .32, .29, .16); dragon(x, b, .67, .69, .14) },
+  (x, b) => { [CH.ari, CH.jinx, CH.lee, CH.thresh, CH.cait].forEach((c, i) => tok(x, b, .14 + i * .18, .62, .07, c, 'us')); [CH.syn].forEach(c => tok(x, b, .5, .26, .07, c, 'them')) },
+  (x, b) => { wave(x, b, .4, .6); for (const p of [[.62, .38], [.66, .34]]) dotM(x, b, p[0], p[1], 'them', { k: 1.2 }) },
+];
+
+const NUM = ['①', '②', '③', '④'];
+const QALT = [['협곡 작전판 위 양 팀 포탑과 넥서스', '상대 포탑 앞, 우리 미니언 없이 아리 혼자', '신드라 부활 고리가 차는 중, 아리는 미드'],
+  ['체력 거의 빈 상대 미니언, 우리 미니언이 막 치려 함', '아리가 신드라를 때리는 순간, 신드라 곁에 상대 미니언 여럿', '아리가 상대 포탑 가까이, 상대 정글 안 보임'],
+  ['케이틀린 원이 징크스에 닿고, 징크스 원은 안 닿음', '신드라 E 아이콘 회색, 리 신이 가까움', '시간 축에서 내 기둥이 늦게 올라감'],
+  ['우리 팀 문양 칸 셋이 참, 상대는 하나', '바론 버프가 붙은 우리 챔피언과 미니언', '장로 버프가 붙은 우리 팀, 상대 체력바가 조금씩 남음']];
+
+// ===================== C 결: 점 하나 = 진짜 하나 (p10-rework) =====================
+// 옮겨 가는 것은 처음부터 알갱이(미니언 점, 금 한 닢, 경험치 한 덩이, 힘 한 몫, 공격 한 번)로 있고, 출발점에서 나와 도착점으로 간다.
+// 도착하면 도착점이 바뀐다. 부서지는 것은 굵은 조각으로 깨지고 다시 붙지 않는다. 큰 순간은 레슨마다 한 컷.
+const arcPt = (A, B, f, lift = 0) => [lerp(A[0], B[0], f), lerp(A[1], B[1], f) - Math.sin(Math.PI * cl(f)) * lift]; // 던져진 물건: 살짝 떠서 내려앉는다
+const at = (t, t0, d) => eio(seg(t, t0, t0 + d));
+const LWs = b => Math.max(1.3 * DPR, b.s * .003);
+function coinT(c, b, px, py, a = 1) { const cx = X(b, px), cy = Yy(b, py), r = b.s * UR, lw = LWs(b); c.globalAlpha = a; c.fillStyle = '#D9A63B'; c.strokeStyle = '#1F1B17'; c.lineWidth = lw; c.beginPath(); c.arc(cx, cy, r, 0, 7); c.fill(); c.stroke(); c.strokeStyle = '#9E6B1C'; c.beginPath(); c.arc(cx, cy, r * .6, 0, 7); c.stroke(); c.globalAlpha = 1 } // 납작한 동전
+function xpT(c, b, px, py, a = 1) { const cx = X(b, px), cy = Yy(b, py), r = b.s * UR * 1.15; c.globalAlpha = a; c.fillStyle = '#FFF2CF'; c.strokeStyle = '#1F1B17'; c.lineWidth = LWs(b); c.beginPath(); c.moveTo(cx, cy - r); c.lineTo(cx + r, cy); c.lineTo(cx, cy + r); c.lineTo(cx - r, cy); c.closePath(); c.fill(); c.stroke(); c.globalAlpha = 1 } // 경험치 한 덩이: 마름모
+function powT(c, b, px, py, col, a = 1) { const cx = X(b, px), cy = Yy(b, py), r = b.s * UR; c.globalAlpha = a; c.fillStyle = col; c.strokeStyle = '#1F1B17'; c.lineWidth = LWs(b); c.beginPath(); c.arc(cx, cy, r, 0, 7); c.fill(); c.stroke(); c.fillStyle = '#FFF2DC'; c.beginPath(); c.arc(cx, cy, r * .32, 0, 7); c.fill(); c.globalAlpha = 1 } // 힘 한 몫
+function projT(c, b, A, B, f, team, a = 1) { if (f <= 0 || f >= 1) return; const p = [lerp(A[0], B[0], f), lerp(A[1], B[1], f)], cx = X(b, p[0]), cy = Yy(b, p[1]), an = Math.atan2(B[1] - A[1], B[0] - A[0]), r = b.s * UR; c.save(); c.globalAlpha = a; c.translate(cx, cy); c.rotate(an); c.fillStyle = TEAM[team]; c.strokeStyle = '#1F1B17'; c.lineWidth = LWs(b); c.beginPath(); c.moveTo(r * 1.3, 0); c.lineTo(0, r * .55); c.lineTo(-r * .9, 0); c.lineTo(0, -r * .55); c.closePath(); c.fill(); c.stroke(); c.restore() } // 공격 한 번
+function cdIcon(c, b, px, py, s, img, t0, t) { // 스킬을 쓰면 아이콘이 회색이 되고, 어두운 부채꼴이 시계 방향으로 천천히 걷힌다
+  if (t < t0) return skill(c, b, px, py, s, img); skill(c, b, px, py, s, img, true); const p = 1 - seg(t, t0, t0 + 6) * .5, cx = X(b, px), cy = Yy(b, py), u = s * b.s;
+  c.save(); c.beginPath(); c.rect(cx - u / 2, cy - u / 2, u, u); c.clip(); c.fillStyle = 'rgba(0,0,0,.5)'; c.beginPath(); c.moveTo(cx, cy); c.arc(cx, cy, u, -Math.PI / 2, -Math.PI / 2 + p * 6.2832); c.closePath(); c.fill(); c.restore() }
+function turModel(b, px, py, s, team) { const cx = X(b, px), cy = Yy(b, py), u = s * b.s, o = []; for (let i = 0; i < 8; i++) { const a = i / 8 * 6.2832; o.push([cx + Math.cos(a) * u * .14, cy - u * .44 + Math.sin(a) * u * .14]) }
+  return [{ pts: [[cx - u * .28, cy + u * .5], [cx - u * .16, cy - u * .2], [cx + u * .16, cy - u * .2], [cx + u * .28, cy + u * .5]], col: '#7C756B', heavy: 1 }, { pts: [[cx - u * .24, cy - u * .3], [cx + u * .24, cy - u * .3], [cx + u * .24, cy - u * .18], [cx - u * .24, cy - u * .18]], col: '#A39B8E' }, { pts: o, col: TEAM[team] }] }
+function hpCut(b, px, py, r, f0, f1, team) { const W = r * 2.1 * b.s, Hh = Math.max(3, b.s * .012), L = X(b, px) - W / 2, T = Yy(b, py - r * 1.55) - Hh / 2, a = L + W * f1, e = L + W * f0, m = (a + e) / 2, col = team === 'them' ? '#D2473A' : '#6FB34A'; // 체력 칸 한 토막 (두 조각)
+  return [{ pts: [[a, T], [m, T], [m, T + Hh], [a, T + Hh]], col }, { pts: [[m, T], [e, T], [e, T + Hh], [m, T + Hh]], col }] }
+const hpFall = (b, pieces, seed) => shatter(pieces, cen(pieces[0].pts)[0], cen(pieces[0].pts)[1] - b.s * .02, b.s * .35, seed, { sp: [.05, .1], vz: [.5, .3] });
+function greyed(c, fn) { c.save(); c.filter = 'grayscale(1) brightness(.75)'; c.globalAlpha = .7; fn(); c.restore() } // 쓰러진 몬스터·챔피언
+function shop(c, b, px, py) { const cx = X(b, px), cy = Yy(b, py), u = .07 * b.s; c.fillStyle = '#8C7F68'; c.fillRect(cx - u * .5, cy - u * .1, u, u * .6); c.fillStyle = '#B9A98A'; c.beginPath(); c.moveTo(cx - u * .65, cy - u * .1); c.lineTo(cx, cy - u * .55); c.lineTo(cx + u * .65, cy - u * .1); c.closePath(); c.fill(); c.strokeStyle = '#1F1B17'; c.lineWidth = LWs(b); c.stroke() }
+let STILLMODE = false; // 움직임 줄이기 '전' 그림: 다가가기 없이(z=1), 펜 동그라미는 다 그린 채로
+function bigCam(c, fx, t, P, K) { // 큰 순간만: 맞기 0.8초 전~0.3초 전에 다가가고(1.2배 아래, 흔들림 없음), 마지막 0.3초는 멈춘다. 맞은 뒤 0.14~0.9초에 돌아온다
+  if (STILLMODE) return 1; const W = c.canvas.width, H = c.canvas.height, k = K || [P[0], P[1], P[0], P[1]];
+  const zm = Math.min(1.2, W / Math.max(1, k[2] - k[0]), H / Math.max(1, k[3] - k[1])), zi = eio(seg(t, fx.hit - .8, fx.hit - .3)), zo = eio(seg(t, fx.hit + .14, fx.hit + .9)), z = 1 + (zm - 1) * zi * (1 - zo);
+  if (zm < 1.005 || z <= 1) return 1; const q = 1 - 1 / zm, cx = cl(P[0], (k[2] - W / zm) / q, k[0] / q), cy = cl(P[1], (k[3] - H / zm) / q, k[1] / q); // 지킬 칸(K)이 무대 안에 남도록 다가가는 중심을 안쪽으로 당긴다
+  camera(c, z, cx, cy, cx, cy); return z }
+function bigMark(c, fx, t, rt, P, r, z) { if (STILLMODE) return penRing(c, P[0], P[1], r, 1, 1, 1); penRing(c, P[0], P[1], r, seg(t, fx.hit - .3, fx.hit - .05), z, 1 - seg(t, fx.hit + .3, fx.hit + .7)) }
+const glowAt = (rt, h) => { const p = (rt - h) / .26; return p < 0 || p > 1 ? 0 : 1 - p }; // 맞는 순간 한 번: 맞은 물체의 테두리가 밝아졌다 돌아온다 (원판 번쩍임 대신)
+function tokGlow(c, b, px, py, r, g) { c.save(); c.globalAlpha = g; c.strokeStyle = '#FFF6E2'; c.lineWidth = Math.max(2.5 * DPR, b.s * .006); c.beginPath(); c.arc(X(b, px), Yy(b, py), r * b.s * 1.16, 0, 7); c.stroke(); c.restore() }
+function slotGlow(c, b, px, py, s, g) { const u = s * b.s, cx = X(b, px), cy = Yy(b, py); c.save(); c.globalAlpha = g; c.strokeStyle = '#FFF6E2'; c.lineWidth = Math.max(2.5 * DPR, b.s * .006); rr(c, cx - u / 2, cy - u / 2, u, u, u * .2); c.stroke(); c.restore() }
+function emptyCoin(c, b, px, py, a = 1) { const cx = X(b, px), cy = Yy(b, py), r = b.s * UR; c.save(); c.globalAlpha = a; c.strokeStyle = '#D9A63B'; c.lineWidth = Math.max(1.5 * DPR, b.s * .004); c.setLineDash([r * .5, r * .38]); c.beginPath(); c.arc(cx, cy, r, 0, 7); c.stroke(); c.restore() } // 못 받은 한 닢: 빈 동전 테두리(점선)
+function dotM(c, b, px, py, team, o = {}) { unit(c, b, px, py, TEAM[team], o); if (o.hp != null && !(o.pop >= 0)) hp(c, b, px, py - UR * (o.k || 1) * 2.3, .05, o.hp, team) } // 미니언 하나 = 점 하나(정지 그림에서도). 체력이 필요하면 점 위에 체력 칸
+const mixHex = (a, b2, k) => { const A = hex(a), B = hex(b2); return `rgb(${A.map((v, i) => Math.round(lerp(v, B[i], k))).join(',')})` };
+function soulTile(c, b, px, py, s, p) { const cx = X(b, px), cy = Yy(b, py), u = s * b.s * lerp(1.25, 1.1, p); c.save(); c.globalAlpha = p; c.fillStyle = '#1E5566'; rr(c, cx - u / 2, cy - u / 2, u, u, u * .22); c.fill(); c.strokeStyle = '#1F1B17'; c.lineWidth = LWs(b); c.stroke(); c.strokeStyle = '#7CC7DE'; c.lineWidth = Math.max(1.5 * DPR, u * .06); rr(c, cx - u * .37, cy - u * .37, u * .74, u * .74, u * .15); c.stroke(); emblem(c, cx, cy + u * .02, u * .27, 'ocean', '#BFE6F0'); c.restore() } // 다섯째 자리에 새로 놓는 영혼 문양: 칸보다 조금 크고, 짙은 바다색 판 + 밝은 안쪽 테
+function walkers(c, b, t, n, path, t0, dur, gap, o = {}) { // 미니언 무리가 길을 따라 걸어와 감속해 멈춘다. o.tap: 멈춘 뒤 앞뒤로 톡톡 치기
+  const P = path.map(p => [p[0], p[1]]); for (let i = 0; i < n; i++) { const st = t0 + i * gap; if (t < st) continue; const k = at(t, st, dur), back = i * (o.space || .045) / Math.max(.001, polyLen(P)), pt = polyAt(P, cl(k * (1 - back) )), nx = -Math.sin(pt[2]), ny = Math.cos(pt[2]), off = ((i % 3) - 1) * (o.wide || .02);
+    let px = pt[0] + nx * off, py = pt[1] + ny * off;
+    if (o.tap && t > st + dur && t < o.tapEnd) { const tp = ((t - st - dur) % .26) / .26; if (tp < .45) { const l = Math.sin(tp / .45 * Math.PI) * .014; px += Math.cos(pt[2]) * l; py += Math.sin(pt[2]) * l } }
+    unit(c, b, px, py, TEAM[o.team || 'us'], { born: o.born === false ? 1 : cl((t - st) / .3) }) } }
+
+const LA = [-150, -90, -30, 30, 90, 150].map(a => a * Math.PI / 180), arcN = (i, f, dr = 0) => { const a = lerp(LA[i], LA[i + 1], f); return [.5 + (.3 + dr) * Math.cos(a), .5 + (.3 + dr) * Math.sin(a)] };
+const BACKX = [.12, .35, .65, .88]; // 뒷줄 넷: 징크스·케이틀린 사이에 리 신이 겹치지 않고 내려앉을 틈
+const ROLES2 = [[.19, .5, '마법사'], [.5, .5, '암살자'], [.81, .5, '전사'], [.19, .8, '원거리 딜러'], [.5, .8, '서포터'], [.81, .8, '탱커']];
+const ROLEPOS = { ari: [.345, .53], syn: [.19, .53], lee: [.655, .53], jinx: [.13, .83], cait: [.25, .83], thresh: [.655, .83] }; // 둘을 가진 챔피언은 두 칸 사이 벽 위에
+function ROLEBG2(x, b) { ROLES2.forEach(([bx, by, nm]) => { x.strokeStyle = 'rgba(239,232,220,.35)'; x.lineWidth = b.s * .004; rr(x, X(b, bx - .145), Yy(b, by - .11), .29 * b.s, .25 * b.s, b.s * .02); x.stroke(); label(x, b, bx, by - .07, nm, .032) }) }
+
+const FX = {
+// ---------- 레슨 ① ----------
+'C0.01': { ev: .4, end: 3.0, // 우리 웨이브가 기지에서 나와 멈추고, 넥서스까지 갈 길이 그려진다 (되감기 없음)
+  frame(c, w, h, t) { const b = bd(w, h); L1bgMap(c, b); nex(c, b, .84, .16, .16, 'them');
+    walkers(c, b, t, 6, [[.16, .84], [.37, .63]], .4, 1.2, .12);
+    const lp = at(t, 1.9, .8); if (lp > 0) { const A = [X(b, .4), Yy(b, .6)], B = [X(b, .78), Yy(b, .22)]; c.save(); c.strokeStyle = '#EFE8DC'; c.globalAlpha = .85; c.lineCap = 'round'; c.lineWidth = Math.max(2.5 * DPR, b.s * .007); c.setLineDash([b.s * .022, b.s * .018]); c.beginPath(); c.moveTo(...A); c.lineTo(lerp(A[0], B[0], lp), lerp(A[1], B[1], lp)); c.stroke(); c.restore() } } },
+'C1.02': { ev: .6, end: 3.2, // 아리의 막타 → 금 한 닢이 아리 곁에 내려앉아 그대로 남는다 / 우리 미니언의 막타 → 금은 생기지 않고, 아리 금화 옆에 빈 동전 테두리(점선)가 남는다
+  frame(c, w, h, t) { const b = bd(w, h); L1midBg(false, false)(c, b);
+    dotM(c, b, .52, .45, 'them', { hp: .06, pop: t >= .9 ? (t - .9) / .12 : -1 }); projT(c, b, [.36, .64], [.52, .45], seg(t, .6, .9), 'us');
+    if (t >= .95) coinT(c, b, ...(t < 1.6 ? arcPt([.52, .45], [.44, .72], at(t, .95, .65), .06) : [.44, .72]));
+    dotM(c, b, .54, .56, 'them', { hp: .08, pop: t >= 2.2 ? (t - 2.2) / .12 : -1 }); projT(c, b, [.45, .55], [.54, .56], seg(t, 1.95, 2.2), 'us');
+    const ea = seg(t, 2.3, 2.5); if (ea > 0) emptyCoin(c, b, .49, .72, ea) } },
+'C1.04': { ev: 1.65, end: 3.5, // 귀환 고리가 닫히며 아리가 기지에 서 있다 → 상점 앞으로 걸어간다 → 금화 다섯 닢이 상점으로, 아이템 하나가 아리 곁 칸으로. 아리 고리가 굵어진다 (사라졌다 나타나기 없음)
+  frame(c, w, h, t) { const b = bd(w, h), R = .065, wk = at(t, .6, .9), A = [lerp(.14, .3, wk), lerp(.58, .82, wk)]; mapImg(c, b, BASE); nex(c, b, .36, .64, .2, 'us'); shop(c, b, .17, .84); label(c, b, .17, .93, '상점', .034);
+    const ra = 1 - seg(t, .45, .7); if (ra > 0) { c.save(); c.globalAlpha = ra; c.strokeStyle = '#9DBDF0'; c.lineCap = 'round'; c.lineWidth = Math.max(3 * DPR, b.s * .007); c.beginPath(); c.arc(X(b, A[0]), Yy(b, A[1]), R * b.s * 1.5, -Math.PI / 2, -Math.PI / 2 + eio(seg(t, 0, .45)) * 6.2832); c.stroke(); c.restore() } // 귀환 고리가 닫힌다: 방금 기지로 돌아왔다
+    tok(c, b, ...A, R, CH.ari, 'us', { ring: .16 + .18 * eo(seg(t, 3.1, 3.35)) });
+    for (let i = 0; i < 5; i++) { const home = [A[0] + .1 + (i % 3) * .035, A[1] - .02 + Math.floor(i / 3) * .035], f = at(t, 1.65 + i * .1, .5); if (f <= 0) coinT(c, b, ...home); else if (f < 1) coinT(c, b, ...arcPt(home, [.18, .82], f, .1)) } // 아리가 가진 금화: 아리와 함께 걷다가 상점으로
+    const slot = [A[0] + .07, A[1] - .12], fi = at(t, 2.6, .5); if (fi > 0) item(c, b, ...(fi < 1 ? arcPt([.18, .82], slot, fi, .07) : slot), .06) } },
+'C0.07': { big: 1, hit: 5.4, end: 6.7, // 큰 고리: 미니언 → 금 → 아이템 → 처치 → 포탑 → 넥서스. 실제로 옮겨 가는 것이 차례로 다음 칸으로
+  prep(w, h) { const b = bd(w, h);
+    this.ft = shatter(chunk(turModel(b, ...LOOP[4], .13, 'them')), X(b, LOOP[4][0]) - b.s * .04, Yy(b, LOOP[4][1]) - b.s * .02, b.s * .8, 5, { sp: [.06, .14], vz: [.9, .4], box: boxOf(b) });
+    const m = nexModel(b, ...LOOP[5], .16, 'them'); this.nm = [...m.base, ...m.faces]; this.fn = shatter(chunk(this.nm), X(b, LOOP[5][0] + .025), Yy(b, LOOP[5][1] + .07), b.s, 9, { sp: [.1, .16], vz: [1, .4], box: boxOf(b) }) }, // 치는 쪽(오른쪽 아래)에서 밀려 왼쪽 위로
+  frame(c, w, h, t, rt) { const b = bd(w, h), N = [X(b, LOOP[5][0]), Yy(b, LOOP[5][1])]; c.save(); const z = bigCam(c, this, t, N, [X(b, .03), Yy(b, .04), X(b, .95), Yy(b, .96)]); L1loopBg(c, b); // 이름표 여섯이 모두 무대 안에 남는 만큼만 다가간다
+    const A0 = arcN(0, .3, -.07); unit(c, b, ...A0, TEAM.us); // 우리 미니언이 마지막 한 대를 친다
+    dotM(c, b, ...LOOP[0], 'them', { hp: .1, pop: t >= .6 ? (t - .6) / .12 : -1 }); projT(c, b, A0, LOOP[0], seg(t, .35, .6), 'us');
+    const Hp = i => [LOOP[1][0] + (i - 1) * .035, LOOP[1][1] + .05]; // 금 자리의 더미: 이미 있던 두 닢 + 방금 온 한 닢
+    if (t >= .65 && t < 1.25) { const f = at(t, .65, .6), p = arcN(0, f), k = seg(f, .75, 1), q = Hp(1); coinT(c, b, lerp(p[0], q[0], k), lerp(p[1], q[1], k)) }
+    for (let i = 0; i < 3; i++) { const f = at(t, 1.4 + i * .1, .6); if (f <= 0) { if (i !== 1 || t >= 1.25) coinT(c, b, ...Hp(i)) } else if (f < 1) { const p = arcN(1, f, .02 * (i - 1)), k = eio(seg(f, 0, .25)), q = Hp(i); coinT(c, b, lerp(q[0], p[0], k), lerp(q[1], p[1], k)) } }
+    if (t >= 2.05 && t < 2.25) item(c, b, ...LOOP[2], .09); const fi = at(t, 2.25, .6); if (fi > 0 && fi < 1) item(c, b, ...arcN(2, fi), .06);
+    if (t < 2.85) tok(c, b, ...LOOP[3], .055, CH.syn, 'them'); else greyed(c, () => tok(c, b, ...LOOP[3], .055, CH.syn, 'them'));
+    for (let i = 0; i < 3; i++) { const st = 3.0 + i * .1; if (t < st) continue; const a3 = lerp(LA[3], LA[4], .82), a = t < 4.1 + i * .1 ? lerp(LA[3], a3, at(t, st, .6)) : lerp(a3, lerp(LA[4], LA[5], .86), at(t, 4.1 + i * .1, .7)), dr = (i - 1) * .03, p = [.5 + (.3 + dr) * Math.cos(a), .5 + (.3 + dr) * Math.sin(a)], leg = t < 4.1 ? 3 : 4; let tap = 0; // 처치 자리에서 포탑으로, 포탑을 깬 뒤 넥서스로 (끊김 없이 이어 걷는다)
+      if (t > st + .6 && t < (leg === 3 ? 3.9 : this.hit - .3)) { const tp = ((t - st) % .26) / .26; if (tp < .45) tap = Math.sin(tp / .45 * Math.PI) * .012 } unit(c, b, p[0] + tap, p[1] - tap, TEAM.us) }
+    if (t < 3.9) tur(c, b, ...LOOP[4], .13, 'them'); else drawFrags(c, this.ft, t - 3.9, b.s * .8);
+    if (t < this.hit) drawModel(c, this.nm, b.s); else drawFrags(c, this.fn, t - this.hit, b.s, null, glowAt(rt, this.hit));
+    bigMark(c, this, t, rt, N, b.s * .115, z); c.restore() } },
+// ---------- 레슨 ② ----------
+'C1.03': { ev: .6, end: 2.4, // 미니언이 쓰러지면 경험치 한 덩이가 원 안의 아리에게만. 아리의 레벨 고리가 찬다 (레슨 ②에서 미니언이 처음 나오는 컷: 그림 → 점)
+  frame(c, w, h, t) { const b = bd(w, h), bn = cl(t / .3); mapImg(c, b, MID); const ra = seg(t, .85, 1.05) * (1 - seg(t, 1.9, 2.3)); if (ra > 0) ring(c, b, .54, .46, .24, '#FFF2CF', { dash: 1, a: .45 * ra, w: .004 });
+    tok(c, b, .38, .62, .055, CH.ari, 'us', { lv: .5 + .3 * eo(seg(t, 1.6, 1.95)) }); tok(c, b, .16, .3, .05, CH.lee, 'us'); dotM(c, b, .47, .53, 'us', { born: bn });
+    dotM(c, b, .54, .46, 'them', { hp: .05, born: bn, pop: t >= .85 ? (t - .85) / .12 : -1 }); projT(c, b, [.47, .53], [.54, .46], seg(t, .6, .85), 'us');
+    if (t >= 1.0 && t < 1.6) xpT(c, b, ...arcPt([.54, .46], [.38, .62], at(t, 1.0, .6), .03)) } },
+'C3.03': { ev: .5, end: 2.6, // 신드라가 Q를 쓰면 Q가 회색이 된다 → 아리가 한 걸음 앞으로 평타 + Q → 신드라 체력 칸이 떨어진다
+  prep(w, h) { const b = bd(w, h); this.h1 = hpFall(b, hpCut(b, .6, .4, .055, .9, .72, 'them'), 3); this.h2 = hpFall(b, hpCut(b, .6, .4, .055, .72, .55, 'them'), 5) },
+  frame(c, w, h, t) { const b = bd(w, h); mapImg(c, b, MID); cdIcon(c, b, .86, .1, .11, 'spell-SyndraQ.png', .75, t);
+    const mv = at(t, 1.0, .4), A = [lerp(.4, .44, mv), lerp(.6, .56, mv)]; ring(c, b, ...A, .3, TEAM.us, { dash: 1, a: .7, w: .004 }); tok(c, b, ...A, .055, CH.ari, 'us', { hp: .9 });
+    tok(c, b, .6, .4, .055, CH.syn, 'them', { hp: t < 1.7 ? .9 : t < 1.95 ? .72 : .55 }); if (t >= 1.7) drawFrags(c, this.h1, t - 1.7, b.s * .35, .5); if (t >= 1.95) drawFrags(c, this.h2, t - 1.95, b.s * .35, .5);
+    dotM(c, b, .67, .47, 'us', { hp: .1, pop: t >= .75 ? (t - .75) / .12 : -1 }); projT(c, b, [.6, .4], [.67, .47], seg(t, .5, .75), 'them');
+    projT(c, b, [.44, .56], [.6, .4], seg(t, 1.45, 1.7), 'us'); projT(c, b, [.44, .56], [.6, .4], seg(t, 1.72, 1.95), 'us') } },
+'C3.06': { ev: .5, end: 3.2, pops: { r0: 1.2, b0: 1.38, r1: 1.52, r2: 1.7 }, // 맞닿은 곳에서 점이 하나씩 톡 사라지고, 많은 쪽(파랑)이 앞으로 민다
+  frame(c, w, h, t) { const b = bd(w, h), ap = eio(seg(t, .5, 1.1)), adv = eio(seg(t, 1.95, 2.9)) * .13; s2base(c, w, h); border(c, b, .5 + adv);
+    C2B.forEach(([k, d], i) => { const pt = this.pops['b' + i]; unit(c, b, ...LP(k + ap * .05 + adv, d), TEAM.us, { pop: pt != null && t >= pt ? (t - pt) / .12 : -1 }) });
+    C2R.forEach(([k, d], i) => { const pt = this.pops['r' + i]; unit(c, b, ...LP(k - ap * .04, d), TEAM.them, { pop: pt != null && t >= pt ? (t - pt) / .12 : -1 }) }) } },
+'C3.10': { big: 1, hit: 1.9, end: 3.5, // 우리 웨이브가 상대 바텀 바깥 포탑을 쳐서 무너뜨리면, 세 라인의 챔피언이 강과 정글로 간다
+  prep(w, h) { const b = bd(w, h); this.ft = shatter(chunk(turModel(b, .91, .62, .1, 'them')), X(b, .89), Yy(b, .67), b.s * .8, 8, { sp: [.06, .12], vz: [.8, .35], box: boxOf(b) }) },
+  frame(c, w, h, t, rt) { const b = bd(w, h), T = [X(b, .9), Yy(b, .6)]; c.save(); const z = bigCam(c, this, t, T, [X(b, .78), Yy(b, .48), X(b, 1), Yy(b, .74)]); L1bgMap(c, b, 1); nex(c, b, .84, .16, .15, 'them'); // 오른쪽 끝 포탑: 펜 동그라미가 잘리지 않게 다가가는 중심을 안쪽으로
+    if (t < this.hit) tur(c, b, .91, .62, .1, 'them'); else drawFrags(c, this.ft, t - this.hit, b.s * .8, null, glowAt(rt, this.hit));
+    walkers(c, b, t, 6, [[.7, .91], [.86, .91], [.91, .86], [.91, .71]], .1, 1.0, .1, { tap: 1, tapEnd: this.hit - .3, space: .035, born: false });
+    const mv = at(t, this.hit + .45, .8); for (const [img, A, B] of [[CH.ari, [.45, .55], [.38, .66]], [CH.jinx, [.8, .88], [.66, .74]], [CH.lee, [.12, .42], [.28, .3]]]) tok(c, b, lerp(A[0], B[0], mv), lerp(A[1], B[1], mv), .04, img, 'us');
+    bigMark(c, this, t, rt, T, b.s * .085, z); c.restore() } },
+// ---------- 레슨 ③ ----------
+'C4.01': { ev: .5, end: 2.2, // 초상화 여섯이 맞는 칸으로 걸어 들어간다. 둘을 가진 챔피언은 두 칸 사이에 선다
+  frame(c, w, h, t) { const b = bd(w, h); ROLEBG2(c, b); ['ari', 'syn', 'jinx', 'cait', 'thresh', 'lee'].forEach((k, i) => { const f = at(t, .5 + i * .12, .8), A = [.1 + i * .16, .16], B = ROLEPOS[k]; tok(c, b, lerp(A[0], B[0], f), lerp(A[1], B[1], f), .045, CH[k], '#C9BFB0') }) } },
+'C4.04': { ev: .5, end: 2.4, // 케이틀린의 평타는 징크스에 닿아 체력 칸이 떨어진다. 징크스는 쏘지 않고, 케이틀린 원 끝까지 걸어 나가 멈춘다 (징크스 원은 케이틀린에게 닿지 않는다)
+  prep(w, h) { const b = bd(w, h); this.h1 = hpFall(b, hpCut(b, .25, .78, .058, .85, .65, 'us'), 2); this.h2 = hpFall(b, hpCut(b, .25, .78, .058, .65, .5, 'us'), 4) },
+  frame(c, w, h, t) { const b = bd(w, h), jx = lerp(.25, .14, at(t, 1.5, .7)); L3rangeBg(t < .8 ? .85 : t < 1.3 ? .65 : .5, jx)(c, b); if (t >= .8) drawFrags(c, this.h1, t - .8, b.s * .35, .5); if (t >= 1.3) drawFrags(c, this.h2, t - 1.3, b.s * .35, .5);
+    projT(c, b, [.62, .78], [.25, .78], seg(t, .5, .8), 'them'); projT(c, b, [.62, .78], [.25, .78], seg(t, 1.0, 1.3), 'them') } },
+'C4.06': { ev: .5, end: 2.1, // 신드라 E가 회색이 되자 리 신이 막힘없이 돌진해 들어오고, 신드라 체력 칸이 떨어진다
+  prep(w, h) { const b = bd(w, h); this.h = hpFall(b, hpCut(b, .36, .62, .058, .9, .55, 'us'), 6) },
+  frame(c, w, h, t) { const b = bd(w, h); mapImg(c, b, MID); cdIcon(c, b, .12, .1, .11, 'spell-SyndraE.png', .5, t); skill(c, b, .88, .1, .11, 'spell-LeeSinQ.png');
+    tok(c, b, .36, .62, .058, CH.syn, 'us', { hp: t < 1.35 ? .9 : .55 }); if (t >= 1.35) drawFrags(c, this.h, t - 1.35, b.s * .35, .5);
+    const f = at(t, 1.0, .32); tok(c, b, lerp(.66, .45, f), lerp(.36, .53, f), .055, CH.lee, 'them') } },
+'C4.09': { big: 1, hit: 1.8, end: 3.2, // 앞줄이 비어 있으면, 상대 리 신이 그 빈자리를 지나 뒷줄의 징크스·케이틀린 사이로 곧장 들어온다
+  prep(w, h) { const b = bd(w, h); this.h = [hpFall(b, hpCut(b, BACKX[1], .86, .05, 1, .35, 'us'), 3), hpFall(b, hpCut(b, BACKX[2], .86, .05, 1, .35, 'us'), 7)] },
+  frame(c, w, h, t, rt) { const b = bd(w, h), S = [X(b, .5), Yy(b, .64)]; c.save(); const z = bigCam(c, this, t, S, [X(b, .28), Yy(b, .03), X(b, .72), Yy(b, .97)]); TEAMBG(false, true)(c, b);
+    const fa = seg(t, 1.2, 1.4); if (fa > 0) { c.globalAlpha = fa; label(c, b, .5, .55, '막는 앞줄', .03, '#C9BFB0'); ring(c, b, .5, .64, .05, '#C9BFB0', { dash: 1, a: .7 }); label(c, b, .5, .955, '치는 뒷줄', .03, '#C9BFB0'); c.globalAlpha = 1 }
+    const hit2 = this.hit + .35, g = glowAt(rt, realOf(hit2, this.hit)); // 징크스·케이틀린이 맞는 순간: 두 말의 테두리가 한 번 밝아진다
+    ['ari', 'jinx', 'cait', 'syn'].forEach((k, i) => { const f = at(t, .4 + i * .08, .8), px = lerp(.2 + i * .2, BACKX[i], f), py = lerp(.46, .86, f); tok(c, b, px, py, .05, CH[k], 'us', f >= 1 ? { hp: (i === 1 || i === 2) && t >= hit2 ? .35 : 1 } : {}); if ((i === 1 || i === 2) && g > 0) tokGlow(c, b, px, py, .05, g) });
+    if (t >= hit2) this.h.forEach(f => drawFrags(c, f, t - hit2, b.s * .35, .6));
+    const lf = at(t, this.hit, .35); tok(c, b, .5, lerp(.16, .86, lf), .05, CH.lee, 'them'); // 두 말 사이 빈 곳에 내려앉는다
+    bigMark(c, this, t, rt, S, b.s * .08, z); c.restore() } },
+// ---------- 레슨 ④ ----------
+'C5.06': { ev: .6, end: 2.1, // 용이 쓰러지면 힘 다섯 몫이 우리 다섯에게 하나씩 간다
+  frame(c, w, h, t) { const b = bd(w, h); mapImg(c, b); if (t < .6) dragon(c, b, .67, .69, .17); else greyed(c, () => dragon(c, b, .67, .69, .17));
+    [CH.ari, CH.jinx, CH.lee, CH.thresh, CH.cait].forEach((im, i) => { const st = .7 + i * .1, f = at(t, st, .6); tok(c, b, ...FIVE[i], .04, im, 'us', f >= 1 ? { power: '#E2703A' } : {}); if (f > 0 && f < 1) powT(c, b, ...arcPt([.67, .69], FIVE[i], f, .04), '#E2703A') }) } },
+'C5.07': { big: 1, hit: 1.9, end: 3.2, // 네 번째 용의 힘 한 몫이 네 번째 칸에 닿고, 칸이 차는 순간 다섯째 자리에 영혼 문양이 새로 놓인다. 칸 넷은 제자리, 다섯 명의 고리 색만 바뀐다
+  frame(c, w, h, t, rt) { const b = bd(w, h), S4 = [.38, .09], P4 = [X(b, S4[0]), Yy(b, S4[1])]; c.save(); const z = bigCam(c, this, t, P4, [X(b, .02), Yy(b, .02), X(b, .54), Yy(b, .17)]); mapImg(c, b, [0, 0, 1], .3); // 다가가기 중심은 속성 칸 줄
+    [CH.ari, CH.jinx, CH.lee, CH.thresh, CH.cait].forEach((im, i) => { const k = eio(seg(t, this.hit + .45 + i * .05, this.hit + .7 + i * .05)); tok(c, b, ...FIVE[i], .035, im, k > 0 ? mixHex(TEAM.us, '#3E9BB8', k) : 'us') });
+    if (t < .5) dragon(c, b, .67, .69, .2, '#3E9BB8', 'ocean'); else greyed(c, () => dragon(c, b, .67, .69, .2, '#3E9BB8', 'ocean'));
+    const f4 = at(t, .6, .7); if (f4 > 0 && f4 < 1) powT(c, b, ...arcPt([.67, .69], S4, f4, .05), '#3E9BB8');
+    ['fire', 'earth', 'ocean'].forEach((ty, i) => slots(c, b, .08 + i * .1, .09, [ty], .08));
+    if (t < this.hit) { slots(c, b, ...S4, [null], .08); if (f4 >= 1) powT(c, b, ...S4, '#3E9BB8') } else slots(c, b, ...S4, ['ocean'], .08); // 닿은 한 몫이 빈 칸 위에 있다가, 맞는 순간 칸이 찬다
+    const g = glowAt(rt, this.hit); if (g > 0) slotGlow(c, b, ...S4, .08, g);
+    const sp = eo(seg(t, this.hit + .15, this.hit + .4)); if (sp > 0) soulTile(c, b, .48, .09, .08, sp);
+    bigMark(c, this, t, rt, P4, b.s * .065, z); c.restore() } },
+'C5.09': { ev: .5, end: 2.5, // 유충 셋이 차례로 쓰러지고, 힘 한 몫씩이 스택 칸으로 가서 칸이 하나씩 찬다
+  frame(c, w, h, t) { const b = bd(w, h), L = [[.5, .46], [.63, .52], [.54, .6]], st = L.filter((_, i) => t >= .5 + i * .45 + .6).length; L4larvaBg(st)(c, b);
+    L.forEach((p, i) => { const k = .5 + i * .45; if (t < k) larva(c, b, ...p, .1); else greyed(c, () => larva(c, b, ...p, .1)); const f = at(t, k + .05, .55); if (f > 0 && f < 1) powT(c, b, ...arcPt(p, [.08 + i * .09, .09], f, .04), '#956FA6') }) } },
+'C5.11': { ev: .5, end: 2.7, // 바론이 쓰러지면 힘이 살아 있는 넷에게만 가고, 아리 바로 옆 미니언 넷에게 다시 한 몫씩 간다 (레슨 ④에서 미니언이 처음 나오는 컷: 그림 → 점)
+  frame(c, w, h, t) { const b = bd(w, h); mapImg(c, b); if (t < .5) baron(c, b, .32, .29, .2); else greyed(c, () => baron(c, b, .32, .29, .2));
+    [CH.ari, CH.lee, CH.jinx, CH.thresh].forEach((im, i) => { const f = at(t, .6 + i * .1, .6); tok(c, b, ...ALIVE[i], .04, im, 'us', f >= 1 ? { power: '#9C7AB0' } : {}); if (f > 0 && f < 1) powT(c, b, ...arcPt([.32, .29], ALIVE[i], f, .04), '#9C7AB0') });
+    tok(c, b, .08, .92, .04, CH.cait, 'us', { grey: 1 });
+    MLINE.forEach((p, j) => { const f = at(t, 1.7 + j * .12, .4); dotM(c, b, ...p, 'us', f >= 1 ? { power: '#9C7AB0', k: 1.2 } : { born: cl(t / .3) }); if (f > 0 && f < 1) powT(c, b, ...arcPt(ALIVE[0], p, f, .02), '#9C7AB0') }) } },
+};
+const HERO_FX = Object.assign(Object.create(null), C1, { big: 1 }); // 첫 화면: motion-options.html C+ 장면 1에서 박자·다가가기·테두리 밝아짐을 고쳤다(p10-fix)
+
+const LESSONS = [
+{ n: 1, ch: 0, title: '롤은 어떤 게임인가', sum: '상대 넥서스를 먼저 부수려면 무엇을 어떤 순서로 해야 하는지 봐요.',
+  cuts: [
+    { id: 'C0.01', title: '상대 넥서스를 먼저 부수면 이겨요', body: '오늘은 저기까지 가는 길을 따라가 봐요.', gloss: ['넥서스', '각 팀 기지 가장 안쪽의 큰 수정. 부서지면 그 팀이 진다'] },
+    { id: 'C1.02', title: '마지막 한 대를 친 사람만 골드를 받아요', body: '이걸 막타라고 해요.', gloss: ['막타', '미니언에게 마지막 한 대를 쳐서 그 미니언의 골드를 받는 것'] },
+    { id: 'C1.04', title: '골드는 쓸 때 힘이 돼요', body: '귀환해서 기지 상점에서 아이템을 사야 챔피언이 강해져요.', gloss: ['귀환', '기지로 순간 돌아가는 기능'] },
+    { id: 'C0.07', title: '모으고, 강해지고, 많을 때 부숴요', body: '이 고리를 넥서스까지 되풀이하는 게 롤의 전략이에요.' }
+  ],
+  quiz: [
+    { q: '넥서스를 치려면 먼저 무엇을?', o: ['바로 넥서스', '정글 몬스터', '바깥 포탑부터 차례로', '상대 챔피언 다섯'], a: 2, why: '바깥 구조물부터 차례로 부숴야 넥서스가 맞아요.', cut: 0,
+      pic: (x, b) => { L1bgMap(x, b); nex(x, b, .84, .16, .16, 'them') }, spot: [.6, .4, .07] },
+    { q: '지금 포탑을 치면?', o: ['포탑이 나를 쏜다', '안전하다', '포탑이 미니언을 쏜다', '아무 일 없다'], a: 0, why: '맞아 줄 미니언이 없으면 포탑은 나를 쏴요.', cut: 0,
+      pic: (x, b) => { mapImg(x, b, MID); tur(x, b, .73, .27, .12, 'them'); tok(x, b, .62, .4, .055, CH.ari, 'us', { hp: .8 }) }, spot: [.62, .4, .09] },
+    { q: '가장 좋은 다음 행동은?', o: ['정글로 쉬러 가기', '기지에서 기다리기', '탑으로 걷기', '미드 포탑 치기'], a: 3, why: '한 명 많은 동안 포탑으로 바꿔요.', cut: 3,
+      pic: (x, b) => { mapImg(x, b, MID); tur(x, b, .73, .27, .12, 'them'); tok(x, b, .5, .5, .055, CH.ari, 'us', { hp: .7 }); tok(x, b, .86, .14, .05, CH.syn, 'them', { grey: 1, lv: .6 }); dotM(x, b, .6, .43, 'us') }, spot: [.73, .27, .1] },
+  ],
+  next: [['라인전', '초반에 자원을 누가 더 가져가나', '#lesson-2'], ['에픽 몬스터', '고리를 빨리 돌게 하는 큰 몬스터', '#lesson-4']] },
+{ n: 2, ch: 3, title: '라인전', sum: '라인전은 싸움이 아니라 자원 다툼이에요.',
+  cuts: [
+    { id: 'C1.03', title: '경험치는 근처에만 있어도 받아요', body: '막타를 못 쳐도 가까이 있으면 레벨이 올라요.' },
+    { id: 'C3.03', title: '상대 스킬이 회색이면 한 걸음 앞으로', body: '상대가 주력 스킬 없이 맞서야 하는 이때가 딜교 타이밍이에요.', gloss: ['딜교 타이밍', '상대가 바로 반격하지 못하는 틈'] },
+    { id: 'C3.06', title: '미니언이 많은 쪽이 라인을 밀어요', body: '밀어 넣으면 시간이 생기고, 당겨 두면 내가 안전해요.' },
+    { id: 'C3.10', title: '첫 포탑이 무너지면 라인전이 끝나요', body: '이제부터는 포탑과 큰 몬스터를 두고 맵 전체에서 다퉈요.' }
+  ],
+  quiz: [
+    { q: '골드를 받으려면?', o: ['그냥 둔다', '마지막 한 대를 친다', '멀리 떨어진다', '미니언 대신 상대를 친다'], a: 1, why: '골드는 막타로만 받아요.', cut: 0,
+      pic: (x, b) => { mapImg(x, b, MID); tok(x, b, .38, .62, .055, CH.ari, 'us'); dotM(x, b, .54, .46, 'them', { hp: .06 }); dotM(x, b, .47, .53, 'us') }, spot: [.54, .46, .08] },
+    { q: '이 순간 무슨 일이?', o: ['아무 일 없다', '포탑이 신드라를 쏜다', '미니언이 신드라를 친다', '근처 미니언이 나를 친다'], a: 3, why: '상대 챔피언을 때리면 근처 상대 미니언이 나를 노려요.', cut: 1,
+      pic: (x, b) => { mapImg(x, b, MID); tok(x, b, .45, .55, .055, CH.ari, 'us', { hp: .8 }); tok(x, b, .6, .4, .055, CH.syn, 'them', { hp: .7 }); for (const p of [[.66, .46], [.7, .38], [.62, .5], [.68, .32]]) dotM(x, b, p[0], p[1], 'them') }, spot: [.67, .42, .1] },
+    { q: '가장 위험한 것은?', o: ['긴 도망길', '막타를 놓침', '레벨이 늦음', '마나가 많음'], a: 0, why: '많이 밀려 있으면 갱에 도망길이 길어요.', cut: 2,
+      pic: (x, b) => { mapImg(x, b, MID); tur(x, b, .27, .73, .1, 'us'); tur(x, b, .73, .27, .1, 'them'); x.fillStyle = 'rgba(110,103,94,.62)'; for (const p of [[.2, .25], [.8, .75], [.25, .2], [.75, .8]]) { x.beginPath(); x.arc(X(b, p[0]), Yy(b, p[1]), b.s * .2, 0, 7); x.fill() } tok(x, b, .64, .36, .055, CH.ari, 'us', { hp: .7 }) }, spot: [.46, .54, .18] },
+  ],
+  next: [['챔피언과 상성', '왜 어떤 라인은 처음부터 불리한가', '#lesson-3'], ['갱과 미아', '개념 지도 3장', '#map']] },
+{ n: 3, ch: 4, title: '챔피언과 상성', sum: '상성은 두 챔피언이 가진 도구의 차이예요.',
+  cuts: [
+    { id: 'C4.01', title: '챔피언은 여섯 무리로 나뉘어요', body: '이 무리를 역할군이라고 하고, 둘을 함께 가진 챔피언도 많아요.', gloss: ['역할군', '챔피언이 잘하는 일에 따라 나눈 무리'] },
+    { id: 'C4.04', title: '사거리가 긴 쪽은 닿지 않는 곳에서 때려요', body: '그냥 서 있으면 케이틀린만 때릴 수 있어요.' },
+    { id: 'C4.06', title: '상대 도구가 빠진 순간이 내 차례예요', body: '상대가 들어오는 기술이 회색이면 내가 압박하고, 내 막는 기술이 회색이면 물러나요.' },
+    { id: 'C4.09', title: '다섯이 모이면 팀의 상성이 돼요', body: '앞에서 막아 줄 챔피언이 없으면 뒷줄이 위험해요.' }
+  ],
+  quiz: [
+    { q: '징크스는 지금 어떻게?', o: ['그냥 서서 때린다', '원 안으로 걸어간다', '원 바로 밖에서 기다린다', '멀리 물러난다'], a: 2, why: '상대 원 안에 오래 서 있으면 공짜로 맞아요.', cut: 1, pic: (x, b) => L3rangeBg(.85)(x, b), spot: [.25, .78, .08] },
+    { q: '신드라는?', o: ['앞으로 나간다', '물러나 거리를 둔다', 'E를 누른다', '제자리 막타'], a: 1, why: '밀어낼 도구가 지금 없어요.', cut: 2, pic: (x, b) => L3toolBg(2, true)(x, b), spot: [.12, .1, .09] },
+    { q: '초반 라인전에서는?', o: ['계속 싸운다', '라인을 떠난다', '바로 귀환', '막타를 지키며 버틴다'], a: 3, why: '내가 강해지는 때까지 자원을 지켜요.', cut: 0, pic: GROWTH, spot: [.3, .66, .12] },
+  ],
+  next: [['한타: 앞라인과 뒷라인', '조합이 큰 싸움에서 어떻게 보이나', '#map'], ['에픽 몬스터', '유리할 때 무엇을 가져가나', '#lesson-4']] },
+{ n: 4, ch: 5, title: '에픽 몬스터를 먹는 이유', sum: '에픽 몬스터는 넥서스로 가는 길을 줄여 줘요.',
+  cuts: [
+    { id: 'C5.06', title: '에픽 몬스터는 팀 전체에 큰 보상을 줘요', body: '그래서 정글러 혼자가 아니라 팀이 함께 챙겨요.', gloss: ['에픽 몬스터', '잡으면 팀에게 큰 보상을 주는 큰 몬스터'] },
+    { id: 'C5.07', title: '네 번째 용을 잡으면 드래곤 영혼을 얻어요', body: '드래곤 영혼은 그 속성의 큰 힘을 팀 전체가 게임 끝까지 갖게 해 줘요.' },
+    { id: 'C5.09', title: '유충을 잡을수록 포탑이 빨리 부서져요', body: '셋을 다 모으면 공허 진드기가 나와 포탑을 함께 쳐요.' },
+    { id: 'C5.11', title: '내셔 남작을 잡으면 곁의 미니언도 강해져요', body: '강해진 미니언이 억제기와 넥서스까지 밀고 가요.' }
+  ],
+  quiz: [
+    { q: '다음 용을 우리가 잡으면?', o: ['드래곤 영혼', '아무 일 없음', '바론이 나옴', '유충이 다시 나옴'], a: 0, why: '네 겹을 먼저 모은 팀이 영혼을 얻어요.', cut: 1,
+      pic: (x, b) => { mapImg(x, b, [0, 0, 1], .28); label(x, b, .2, .34, '우리', .04); slots(x, b, .34, .34, ['fire', 'earth', 'ocean', null], .09); label(x, b, .2, .58, '상대', .04); slots(x, b, .34, .58, ['fire', null, null, null], .09) }, spot: [.34 + 3 * .1125, .34, .07] },
+    { q: '지금 하기 좋은 일은?', o: ['정글 캠프 돌기', '기지에서 쉬기', '미니언과 라인 밀기', '바론 둥지 지키기'], a: 2, why: '강해진 미니언과 함께 밀어야 버프가 포탑이 돼요.', cut: 3,
+      pic: (x, b) => { L4baronBg(true, false)(x, b); MLINE.forEach(p => dotM(x, b, p[0], p[1], 'us', { power: '#9C7AB0', k: 1.2 })) }, spot: [.5, .5, .12] },
+    { q: '지금 할 일은?', o: ['기지로 귀환', '바로 싸움을 건다', '정글 캠프', '와드만 놓기'], a: 1, why: '체력이 낮은 적을 바로 처치하는 버프가 있을 때 싸워요.', cut: 0,
+      pic: (x, b) => { mapImg(x, b, MID); [[.3, .62], [.38, .72], [.24, .74]].forEach((p, i) => tok(x, b, p[0], p[1], .05, [CH.ari, CH.jinx, CH.thresh][i], 'us', { power: '#E8DCC8', hp: .8 })); [[.64, .36], [.72, .44]].forEach((p, i) => tok(x, b, p[0], p[1], .05, [CH.syn, CH.cait][i], 'them', { hp: .18 })); elder(x, b, .84, .84, .14) }, spot: [.68, .4, .12] },
+  ],
+  next: [['오브젝트 교환', '못 지킬 땐 반대편을 가져와요', '#map'], ['롤은 어떤 게임인가', '큰 고리를 다시 보기', '#lesson-1']] },
+];
+
+for (const L of LESSONS) for (const c of L.cuts) { c.fx = FX[c.id]; c.fx.id = c.id }
+// ---------- 무대: 2D 캔버스 하나 ----------
+const E = { cv: document.createElement('canvas'), W: 0, H: 0, dpr: 1, x: null, fps: [], prep: [], first: 0,
+  mount(st) { if (this.cv.parentNode !== st) st.append(this.cv); this.stage = st; this.resize() },
+  resize() { const r = this.stage.getBoundingClientRect(); this.W = Math.round(r.width); this.H = Math.round(r.height); this.dpr = DPR = Math.min(devicePixelRatio || 1, 2); this.cv.width = Math.max(1, Math.round(this.W * this.dpr)); this.cv.height = Math.max(1, Math.round(this.H * this.dpr)); this.x = this.cv.getContext('2d'); this.x.dpr = this.dpr },
+  still(...fns) { const x = this.x; x.setTransform(1, 0, 0, 1, 0, 0); x.clearRect(0, 0, this.cv.width, this.cv.height); for (const f of fns) if (f) { x.save(); f(x, this.cv.width, this.cv.height); x.restore() } } };
+E.cv.setAttribute('aria-hidden', 'true');
+// ---------- 재생기: 장면은 시간 t의 함수다 (같은 t면 같은 그림) ----------
+let raf = 0, token = 0, busy = false;
+const endRT = fx => fx.big ? realOf(fx.end, fx.hit) : fx.end;
+const frameAt = (fx, rt) => (x, w, h) => fx.frame(x, w, h, Math.min(fx.big ? warp(rt, fx.hit) : rt, fx.end), rt);
+function prepFx(fx) { const k = E.cv.width + 'x' + E.cv.height; if (fx.prep && fx._k !== k) { const t = performance.now(); fx.prep(E.cv.width, E.cv.height); fx._k = k; E.prep.push({ id: fx.id, ms: Math.round(performance.now() - t) }) } }
+const prepAt = (fx, W, H) => { const k = W + 'x' + H; if (fx.prep && fx._k !== k) { fx.prep(W, H); fx._k = k } };
+function pairStill(fx) { // 움직임 줄이기: 사건 직전 그림 → 화살표 → 끝 그림. '전'은 다가가기 없이 펜 동그라미를 다 그린 채로. 폰은 무대 1:2에 위아래로, 그림마다 무대 폭의 약 90%
+  return (x, w, h) => {
+    const hero = fx === HERO_FX, side = w >= h * .9, d = DPR, rts = [Math.max(0, (fx.big ? fx.hit : fx.ev) - .2), endRT(fx)];
+    const S = Math.floor(side ? Math.min(w * .46, h * (hero ? .7 : .9)) : Math.min(w * .93, (h - w * (hero ? .27 : .12)) / 2)), gap = side ? w * .96 - 2 * S : w * (hero ? .1 : .08);
+    const pos = i => side ? [w * .02 + i * (S + gap), hero ? h * .06 : (h - S) / 2] : [(w - S) / 2, (hero ? w * .03 : (h - 2 * S - gap) / 2) + i * (S + gap)];
+    rts.forEach((rt, i) => { const [L, T] = pos(i); let o, cr;
+      if (hero) { o = new OffscreenCanvas(w, h); prepAt(fx, w, h); const b = HR(w, h), m = b.s * .015; cr = [Math.max(0, b.ox - m), Math.max(0, b.oy - m), b.s + 2 * m, b.s + 2 * m] } // 첫 화면: 판만 잘라 온다(전·후 띠가 판에 붙는다)
+      else { o = new OffscreenCanvas(S, S); prepAt(fx, S, S); cr = [0, 0, S, S] } // 레슨: 그 크기로 바로 그린다(줄이지 않는다)
+      const ox = o.getContext('2d'); ox.dpr = d; STILLMODE = i === 0; try { frameAt(fx, rt)(ox, o.width, o.height) } finally { STILLMODE = false }
+      x.drawImage(o, ...cr, L, T, S, S);
+      const fz = Math.max(14 * d, S * .034); x.font = `700 ${fz}px "Gothic A1"`; x.textAlign = 'left'; const tw = x.measureText('전').width; x.fillStyle = 'rgba(31,27,23,.85)'; x.fillRect(L + 6 * d, T + S - fz * 1.7, tw + 14 * d, fz * 1.45); x.fillStyle = '#EFE8DC'; x.textBaseline = 'middle'; x.fillText(i ? '후' : '전', L + 13 * d, T + S - fz * .98) });
+    const [L0, T0] = pos(0), [L1, T1] = pos(1), s = 12 * d; x.fillStyle = '#EFE8DC'; x.beginPath();
+    if (side) { const ax = (L0 + S + L1) / 2, ay = T0 + S / 2; x.moveTo(ax - s, ay - s); x.lineTo(ax + s, ay); x.lineTo(ax - s, ay + s) } else { const ax = w / 2, ay = (T0 + S + T1) / 2; x.moveTo(ax - s, ay - s); x.lineTo(ax + s, ay - s); x.lineTo(ax, ay + s) } x.fill();
+    if (hero) { const yb = T1 + S, fs = Math.min(side ? w * .03 : w * .062, (h - yb) * .55), parts = [['상대 ', 0], ['넥서스', 1], ['를 부수면 이겨요', 0]]; // 끝 글자: 두 장 아래 한 줄
+      x.font = `${fs}px "Black Han Sans"`; x.textBaseline = 'middle'; x.textAlign = 'left'; let cx = w / 2 - parts.reduce((a, [p]) => a + x.measureText(p).width, 0) / 2; const cy = yb + (h - yb) / 2;
+      for (const [p, r] of parts) { x.fillStyle = r ? '#E0675A' : '#EFE8DC'; x.fillText(p, cx, cy); cx += x.measureText(p).width } }
+  } }
+function play(fx, done) { cancelAnimationFrame(raf); const my = ++token; busy = true; prepFx(fx);
+  if (reduced()) { E.still(pairStill(fx)); busy = false; done && done(); return }
+  const end = endRT(fx), ft = []; let t0 = 0, last = 0;
+  const step = now => { if (my !== token) return; if (!t0) t0 = now; const rt = (now - t0) / 1000; if (last) ft.push(now - last); last = now; E.still(frameAt(fx, Math.min(rt, end)));
+    if (rt < end) raf = requestAnimationFrame(step); else { busy = false; const f = ft.slice(2).sort((a, b) => a - b); if (f.length > 5) E.fps.push({ id: fx.id, fps: +(1000 / (f.reduce((s, v) => s + v, 0) / f.length)).toFixed(1), p95: +f[Math.floor(f.length * .95)].toFixed(1) }); hud(); done && done() } };
+  raf = requestAnimationFrame(step) }
+function finish(fx) { token++; cancelAnimationFrame(raf); busy = false; prepFx(fx); E.still(reduced() ? pairStill(fx) : frameAt(fx, endRT(fx))) }
+function hud() { if (!Q.has('hud')) return; const h = document.getElementById('hud'); h.style.display = 'block'; h.textContent = E.fps.slice(-4).map(f => `${f.id} ${f.fps}fps p95 ${f.p95}ms`).join('\n') }
+
+// ---------- 첫 화면 ----------
+HERO_FX.id = 'hero';
+function placeHeroCopy() { const r = E.stage.getBoundingClientRect(), { t, fs } = heroFs(r.width, r.height); document.getElementById('hero-copy').style.top = Math.round(t.y + fs * 2.45) + 'px'; document.getElementById('hero-kicker').style.top = Math.max(8, Math.round(HCARD(r.width, r.height).y - 34)) + 'px' }
+function playHero() { const copy = document.getElementById('hero-copy'), kick = document.getElementById('hero-kicker'), my = token + 1; copy.classList.remove('on'); placeHeroCopy();
+  if (!E.first) E.first = Math.round(performance.now());
+  if (reduced()) { kick.style.opacity = 0; play(HERO_FX); return } // 전·후 두 장 위에 글을 겹치지 않는다 (글자는 '후' 그림 안에 있다)
+  kick.style.opacity = 1; setTimeout(() => { if (token === my) kick.style.opacity = 0 }, 1000);
+  play(HERO_FX, () => { if (token === my) copy.classList.add('on') }) }
+
+// ---------- 레슨 ----------
+const LS = { L: null, ci: 0, mode: 'cut', qi: 0, right: 0 }, panel = document.getElementById('panel');
+function esc(s) { return s.replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c])) }
+function bodyHtml(cut) { let t = esc(cut.body); if (cut.gloss && t.includes(cut.gloss[0])) t = t.replace(cut.gloss[0], `<button class="u" data-g>${cut.gloss[0]}</button>`); return t }
+function titleHtml(cut) { let t = esc(cut.title); if (cut.gloss && t.includes(cut.gloss[0]) && !cut.body.includes(cut.gloss[0])) t = t.replace(cut.gloss[0], `<button class="u" data-g>${cut.gloss[0]}</button>`); return t }
+function stageLabel(kind, text) { const st = document.getElementById('st-lesson'); if (kind === 'img') { st.setAttribute('role', 'img'); st.removeAttribute('tabindex') } else { st.setAttribute('role', 'button'); st.setAttribute('tabindex', '0') } st.setAttribute('aria-label', text) }
+const crumb = L => `<p class="crumb"><a href="#map">개념 지도</a> <span aria-hidden="true">›</span> 레슨 ${NUM[L.n - 1]} ${esc(L.title)}</p>`;
+function setPair(on) { const st = document.getElementById('st-lesson'), v = !!on && reduced(); if (st.classList.contains('pair') !== v) { st.classList.toggle('pair', v); if (E.stage === st) E.resize() } } // 움직임 줄이기 폰: 컷 무대를 1:2로
+function renderCut(doPlay = true) {
+  setPair(true); const L = LS.L, cut = L.cuts[LS.ci]; stageLabel('button', `장면: ${cut.title}. 누르면 건너뛰거나 다시 봐요`);
+  panel.innerHTML = `${crumb(L)}<div class="dots">${L.cuts.map((_, i) => `<i class="${i <= LS.ci ? 'on' : ''}"></i>`).join('')}<i></i></div>
+    <div class="cut-text wait" id="ct"><h2 class="cut-title disp">${titleHtml(cut)}</h2><p class="cut-body">${bodyHtml(cut)}</p>${cut.gloss ? `<div class="gloss" id="gl"><b>${cut.gloss[0]}</b><br>${esc(cut.gloss[1])}</div>` : ''}</div>
+    <div class="actions"><button class="btn" id="b-re">다시 보기</button><button class="btn primary" id="b-next">${LS.ci < L.cuts.length - 1 ? '다음' : '확인 문제'}</button></div>`;
+  const show = () => { const c = panel.querySelector('#ct'); if (c) c.classList.remove('wait') };
+  const go = () => { panel.querySelector('#ct').classList.add('wait'); const my = token + 1; play(cut.fx, () => { if (token === my) show() }) };
+  panel.querySelector('#b-re').onclick = go;
+  panel.querySelector('#b-next').onclick = () => { if (LS.ci < L.cuts.length - 1) { LS.ci++; renderCut() } else { LS.mode = 'quiz'; LS.qi = 0; LS.right = 0; renderQuiz() } };
+  panel.querySelectorAll('[data-g]').forEach(b => b.onclick = () => panel.querySelector('#gl').classList.toggle('on'));
+  if (doPlay) go(); else { finish(cut.fx); show() }
+}
+function renderQuiz() {
+  setPair(false); const L = LS.L, q = L.quiz[LS.qi]; token++; cancelAnimationFrame(raf); busy = false; E.still(on(q.pic)); stageLabel('img', `확인 문제 ${LS.qi + 1} 그림: ${QALT[L.n - 1][LS.qi]}`);
+  panel.innerHTML = `${crumb(L)}<div class="dots">${L.cuts.map(() => '<i class="on"></i>').join('')}<i class="on"></i></div>
+    <div class="quiz"><p class="crumb">확인 문제 ${LS.qi + 1} / ${L.quiz.length}</p><h3>${esc(q.q)}</h3>
+    <div class="opts">${q.o.map((o, i) => `<button data-i="${i}">${'ABCD'[i]}. ${esc(o)}</button>`).join('')}</div><div id="fb"></div></div>`;
+  panel.querySelectorAll('.opts button').forEach(btn => btn.onclick = () => {
+    const i = +btn.dataset.i, ok = i === q.a; panel.querySelectorAll('.opts button').forEach(b => b.disabled = true);
+    btn.classList.add(ok ? 'right' : 'wrong'); if (!ok) panel.querySelector(`.opts button[data-i="${q.a}"]`).classList.add('right'); if (ok) LS.right++;
+    const last = LS.qi >= L.quiz.length - 1;
+    panel.querySelector('#fb').innerHTML = `<div class="band ${ok ? 'ok' : 'no'}">${ok ? '맞아요. ' : '정답은 ' + 'ABCD'[q.a] + '예요. '}${esc(q.why)}</div><div class="actions">${ok ? '' : '<button class="btn" id="b-see">장면 다시 보기</button>'}<button class="btn primary" id="b-q">${last ? '마치기' : '다음 문제'}</button></div>`;
+    panel.querySelector('#b-q').onclick = () => { if (last) renderDone(); else { LS.qi++; renderQuiz() } };
+    const see = panel.querySelector('#b-see'); if (see) see.onclick = () => { LS.mode = 'cut'; LS.ci = q.cut; renderCut() };
+    if (ok) mark(q);
+  });
+}
+function mark(q) { // 맞히면: 짚을 곳에 펜 동그라미가 한 번 그려진다 (반짝임·튀어 오름 없음)
+  const s = q.spot, draw = p => E.still(on(q.pic), on((x, b) => penRing(x, X(b, s[0]), Yy(b, s[1]), s[2] * b.s, p)));
+  if (reduced()) return draw(1); const my = ++token, t0 = performance.now(); const st = now => { if (my !== token) return; const p = cl((now - t0) / 350); draw(eio(p)); if (p < 1) raf = requestAnimationFrame(st) }; raf = requestAnimationFrame(st) }
+function renderDone() {
+  setPair(true); const L = LS.L, last = L.cuts[L.cuts.length - 1]; finish(last.fx); stageLabel('img', `레슨 ${NUM[L.n - 1]} 마지막 장면: ${last.title}`);
+  panel.innerHTML = `${crumb(L)}<h2 class="cut-title disp">레슨 ${NUM[L.n - 1]}을 다 봤어요</h2><p class="cut-body">${esc(L.sum)} 확인 문제 ${L.quiz.length}개 중 ${LS.right}개를 맞혔어요.</p>
+    <p class="crumb">이걸 알면 다음은</p><div class="nexts">${L.next.map(([t, w, h]) => `<a href="${h}"><b>${esc(t)}</b><span>${esc(w)}</span></a>`).join('')}</div><div class="actions"><a class="btn" href="#map">개념 지도로</a></div>`;
+}
+// ---------- 개념 지도 ----------
+function drawSmall(cv, fn) { const r = cv.getBoundingClientRect(), d = Math.min(devicePixelRatio || 1, 2); cv.width = Math.round(r.width * d); cv.height = Math.round(r.height * d); const x = cv.getContext('2d'); x.dpr = d; fn(x, cv.width, cv.height) }
+function renderMap() {
+  const box = document.getElementById('chapters');
+  if (!box.childElementCount) box.innerHTML = CHAPTERS.map(([t, q, list, les], i) => { const it = list.split('|'), base = it.filter(c => c[0] !== '*'), deep = it.filter(c => c[0] === '*').map(c => c.slice(1));
+    return `<section class="ch"><canvas class="ch-pic" data-i="${i}" aria-hidden="true"></canvas><h3 class="disp">${i}장 ${esc(t)}</h3><p class="q">${esc(q)}</p>${base.length ? `<ul>${base.map(c => `<li>${esc(c)}</li>`).join('')}</ul>` : ''}${deep.length ? `<p class="deep-h">심화</p><ul class="deep">${deep.map(c => `<li>${esc(c)}</li>`).join('')}</ul>` : ''}${les ? `<a class="go" href="#lesson-${les}">레슨 ${NUM[les - 1]}으로 보기</a>` : ''}</section>` }).join('');
+  box.querySelectorAll('canvas').forEach(cv => drawSmall(cv, on(CHPIC[+cv.dataset.i])));
+  { const fx = LESSONS[0].cuts[0].fx; token++; cancelAnimationFrame(raf); busy = false; prepFx(fx); E.still(frameAt(fx, endRT(fx))) } // 이어 보기 그림: 움직임 줄이기에서도 끝 그림 한 장
+}
+// ---------- 길 찾기 ----------
+let READY = false;
+function route() {
+  if (!READY) return; token++; cancelAnimationFrame(raf); busy = false; document.documentElement.classList.toggle('rm', reduced());
+  const h = location.hash || '#home', m = h.match(/^#lesson-(\d)/), v = m ? 'lesson' : h === '#map' ? 'map' : 'hero';
+  document.querySelectorAll('.view').forEach(e => e.classList.toggle('on', e.id === 'v-' + v));
+  document.querySelector('[data-nav="map"]').setAttribute('aria-current', v === 'map' ? 'page' : 'false');
+  if (v === 'hero') { E.mount(document.getElementById('st-hero')); playHero() }
+  if (v === 'map') { E.mount(document.getElementById('st-resume')); renderMap() }
+  if (v === 'lesson') { const L = LESSONS[+m[1] - 1] || LESSONS[0]; if (LS.L !== L) { LS.L = L; LS.ci = 0 } LS.mode = 'cut'; E.mount(document.getElementById('st-lesson')); renderCut() }
+  scrollTo(0, 0);
+}
+document.getElementById('hero-replay').onclick = () => playHero();
+document.getElementById('st-hero').onclick = () => { if (busy) { finish(HERO_FX); document.getElementById('hero-copy').classList.add('on'); document.getElementById('hero-kicker').style.opacity = 0 } else playHero() };
+document.getElementById('st-lesson').onclick = () => { if (LS.mode !== 'cut') return; const cut = LS.L.cuts[LS.ci]; if (busy) { finish(cut.fx); const c = document.getElementById('ct'); if (c) c.classList.remove('wait') } else renderCut() };
+document.getElementById('st-resume').onclick = () => location.hash = '#lesson-1';
+for (const id of ['st-hero', 'st-lesson', 'st-resume']) document.getElementById(id).addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); e.currentTarget.click() } });
+const msw = document.getElementById('motion-sw');
+msw.onclick = () => { ST.userRM = !reduced(); msw.setAttribute('aria-pressed', ST.userRM); msw.textContent = ST.userRM ? '움직임 켜기' : '움직임 줄이기'; route() };
+let rz = 0; addEventListener('resize', () => { clearTimeout(rz); rz = setTimeout(() => { if (!E.stage) return; const r = E.stage.getBoundingClientRect(); if (Math.round(r.width) === E.W && Math.round(r.height) === E.H) return; MAPC.clear(); route() }, 250) });
+addEventListener('hashchange', route);
+document.addEventListener('visibilitychange', () => { if (document.hidden && busy) { const v = document.querySelector('.view.on'); if (v && v.id === 'v-lesson') finish(LS.L.cuts[LS.ci].fx); else if (v && v.id === 'v-hero') finish(HERO_FX) } });
+window.__epic = { E, LESSONS, LS, FX, HERO_FX, ready: false, get busy() { return busy }, cut(i) { LS.ci = i; LS.mode = 'cut'; renderCut() }, quiz(i) { LS.mode = 'quiz'; LS.qi = i; renderQuiz() },
+  seek(kind, li, ci, rt) { token++; cancelAnimationFrame(raf); busy = false; const fx = kind === 'hero' ? HERO_FX : LESSONS[li].cuts[ci].fx; prepFx(fx); if (reduced()) { E.still(pairStill(fx)); return [endRT(fx), fx.hit || fx.ev] } E.still(frameAt(fx, Math.min(rt, endRT(fx)))); return [endRT(fx), fx.big ? fx.hit : fx.ev] } };
+(async () => {
+  await Promise.all(ASSETS.map(async a => { IMG[a] = await load(a) })); keyMap();
+  await Promise.all([document.fonts.load('100px "Black Han Sans"', '상대넥서스를부수면이겨요'), document.fonts.load('600 20px "Gothic A1"', '미니언금아이템처치포탑넥서스상점')]).catch(() => {});
+  if (reduced()) { msw.textContent = '움직임 켜기'; msw.setAttribute('aria-pressed', 'true') }
+  READY = true; route(); window.__epic.ready = true;
+})().catch(e => console.error(e));
+
+</script>
+</body>
+</html>

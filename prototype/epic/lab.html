@@ -1,0 +1,653 @@
+<title>입자 엔진 시험장</title>
+<style>
+:root{
+  --paper:#ECE6DA; --paper-2:#E2DACB; --ink:#1F1B17; --ink-2:#4A433B; --rule:#B9AE9C;
+  --accent:#B5452B; --stage-paper:#E9E2D4; --stage-char:#2E2925;
+  --page:var(--paper); --text:var(--ink); --text-2:var(--ink-2);
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --page:#26221E; --paper-2:#322D28; --text:#EFE8DC; --text-2:#C9BFB0; --rule:#5A5148; --accent:#E07A55;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"]{
+  --page:#26221E; --paper-2:#322D28; --text:#EFE8DC; --text-2:#C9BFB0; --rule:#5A5148; --accent:#E07A55;
+  color-scheme: dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--page);color:var(--text);font:16px/1.55 "Noto Sans KR",system-ui,sans-serif;overflow-x:hidden}
+.wrap{max-width:1440px;margin:0 auto;padding:16px}
+h1{font:400 28px/1.2 "Black Han Sans","Noto Sans KR",sans-serif;margin:4px 0 4px;letter-spacing:.01em}
+.sub{color:var(--text-2);margin:0 0 14px;font-size:15px}
+#stage{position:relative;width:100%;border-radius:6px;overflow:hidden;background:var(--stage-paper);touch-action:pan-y}
+#stage.char{background:var(--stage-char)}
+#stage canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+#hud{position:absolute;left:10px;top:10px;font:12px/1.4 ui-monospace,Menlo,monospace;color:#1F1B17;background:rgba(236,230,218,.86);padding:6px 8px;border-radius:4px;pointer-events:none;white-space:pre}
+#stage.char #hud{color:#EFE8DC;background:rgba(46,41,37,.8)}
+#stage canvas#still{opacity:0;pointer-events:none}
+.bar{display:flex;flex-wrap:wrap;gap:10px 18px;margin:14px 0 0;align-items:flex-start}
+.grp{display:flex;flex-direction:column;gap:6px;min-width:0}
+.grp>span{font-size:13px;color:var(--text-2)}
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+button,select{font:inherit;font-size:14px;color:var(--text);background:var(--paper-2);border:1px solid var(--rule);border-radius:4px;padding:6px 10px;cursor:pointer}
+button[aria-pressed="true"]{background:var(--text);color:var(--page);border-color:var(--text)}
+button.play{background:var(--accent);border-color:var(--accent);color:#fff}
+.note{font-size:13px;color:var(--text-2);margin-top:14px;max-width:70ch}
+footer{margin-top:28px;font-size:12px;color:var(--text-2);border-top:1px solid var(--rule);padding-top:10px}
+@media (max-width:600px){ h1{font-size:24px} .bar{gap:10px} }
+</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
+
+<div class="wrap">
+  <h1>입자 엔진 시험장</h1>
+  <p class="sub">그림을 가루로 쪼갰다가 다른 모양으로 다시 모아요. 가루 하나하나가 그림의 실제 색을 가져요.</p>
+  <div id="stage"><canvas id="cv"></canvas><canvas id="still" aria-hidden="true"></canvas><div id="hud">준비 중…</div></div>
+  <div class="bar">
+    <div class="grp"><span>장면</span><div class="seg" id="seqs"></div></div>
+    <div class="grp"><span>엔진</span><div class="seg" id="engines"></div></div>
+    <div class="grp"><span>입자 수</span><select id="count"></select></div>
+    <div class="grp"><span>움직임 결</span><div class="seg" id="feels"></div></div>
+    <div class="grp"><span>짝짓기</span><div class="seg" id="maps"></div></div>
+    <div class="grp"><span>부서지는 시작점</span><div class="seg" id="origins"></div></div>
+    <div class="grp"><span>바탕</span><div class="seg" id="bgs"></div></div>
+    <div class="grp"><span>움직임 줄이기</span><div class="seg" id="rms"></div></div>
+  </div>
+  <p class="note">그림을 누르면 다음 모양으로 넘어가요. 그림 위를 손가락이나 마우스로 쓸면 가루가 비켜나요. 시험용 화면이에요.</p>
+  <footer>
+    챔피언·스킬 이미지: Riot Games Data Dragon<br>
+    GRIMOIRE isn't endorsed by Riot Games and doesn't reflect the views or opinions of Riot Games or anyone officially involved in producing or managing Riot Games properties. Riot Games, and all associated properties are trademarks or registered trademarks of Riot Games, Inc.
+  </footer>
+</div>
+
+<script type="module">
+// ============================================================
+//  GRIMOIRE 입자 엔진 (시험판) — p8-motion
+//  그림 → 가루 → 다른 모양. 엔진 4종을 같은 움직임 수식으로 비교한다.
+// ============================================================
+const T0 = performance.now();
+const Q = new URLSearchParams(location.search);
+// 두 버전을 잰다: 0.169.0(공식 min 파일 1개) / 0.186.1(팀 벤치 문서가 고른 버전, 공식 min 없음 → 원본 2개 파일)
+const THREE_URL = Q.get('three') === '0.186.1' ? 'https://cdn.jsdelivr.net/npm/three@0.186.1/build/three.module.js' : 'https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.min.js';
+const marks = {};
+const mark = k => { marks[k] = Math.round(performance.now()) };
+const RM_MEDIA = matchMedia('(prefers-reduced-motion: reduce)');
+
+const S = {
+  engine: Q.get('engine') || 'webgl',
+  n: +(Q.get('n') || 0),
+  map: Q.get('map') || 'hilbert',
+  origin: Q.get('origin') || 'center',
+  bg: Q.get('bg') || 'paper',
+  rm: Q.get('rm') || 'auto',
+  seq: Q.get('seq') || 'nexus',
+  bench: +(Q.get('bench') || 0),
+  feel: Q.get('feel') || 'flow',
+};
+const isPhone = () => innerWidth < 700;
+if (!S.n) S.n = isPhone() ? 30000 : 80000;
+const reduced = () => S.rm === 'on' || (S.rm === 'auto' && RM_MEDIA.matches);
+
+// ---------------- 재료 ----------------
+const loadImg = src => new Promise((res, rej) => { const i = new Image(); i.decoding = 'async'; i.onload = () => res(i); i.onerror = () => rej(new Error('img ' + src)); i.src = 'assets/' + src });
+const IMG = {};
+async function need(...names) { await Promise.all(names.filter(n => !IMG[n]).map(async n => { IMG[n] = await loadImg(n) })) }
+
+// ---------------- 그림 그리기 (우리가 직접 그린 모양) ----------------
+// 모두 (ctx, w, h) 샘플 캔버스 좌표로 그린다.
+const DRAW = {
+  nexus(ctx, w, h) { // 받침대 위에 떠 있는 수정 (공식 그림을 베끼지 않은 일반형)
+    const u = Math.min(w, h), cx = w / 2;
+    // 받침 3단
+    const base = (y, ww, hh, c1, c2) => { const g = ctx.createLinearGradient(0, y, 0, y + hh); g.addColorStop(0, c1); g.addColorStop(1, c2); ctx.fillStyle = g; ctx.beginPath(); ctx.moveTo(cx - ww / 2, y + hh); ctx.lineTo(cx - ww / 2 + hh * .6, y); ctx.lineTo(cx + ww / 2 - hh * .6, y); ctx.lineTo(cx + ww / 2, y + hh); ctx.closePath(); ctx.fill() };
+    base(h * .86, u * .86, u * .1, '#8C8577', '#5D574E');
+    base(h * .78, u * .66, u * .085, '#A39C8C', '#716A5E');
+    base(h * .72, u * .44, u * .065, '#BDB5A3', '#8A8273');
+    // 고리 (받침 위)
+    ctx.strokeStyle = '#6F6A60'; ctx.lineWidth = u * .028; ctx.beginPath(); ctx.ellipse(cx, h * .7, u * .3, u * .06, 0, Math.PI * 1.05, Math.PI * 1.95); ctx.stroke();
+    // 수정: 위아래로 긴 팔면체, 면마다 밝기를 다르게
+    const top = h * .06, mid = h * .36, bot = h * .66, hw = u * .2;
+    const face = (pts, col) => { ctx.fillStyle = col; ctx.beginPath(); ctx.moveTo(...pts[0]); for (const p of pts.slice(1)) ctx.lineTo(...p); ctx.closePath(); ctx.fill() };
+    face([[cx, top], [cx - hw, mid], [cx - hw * .2, mid + u * .02]], '#9FC3E6');
+    face([[cx, top], [cx - hw * .2, mid + u * .02], [cx + hw, mid]], '#6E9FD3');
+    face([[cx - hw, mid], [cx, bot], [cx - hw * .2, mid + u * .02]], '#4F7FBF');
+    face([[cx - hw * .2, mid + u * .02], [cx, bot], [cx + hw, mid]], '#355F9E');
+    // 수정 속 밝은 심
+    const g = ctx.createRadialGradient(cx, mid, 0, cx, mid, hw * .7); g.addColorStop(0, 'rgba(232,242,252,.95)'); g.addColorStop(1, 'rgba(232,242,252,0)'); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(cx, mid, hw * .7, 0, Math.PI * 2); ctx.fill();
+  },
+  minion(ctx, w, h) { // 상대(빨강) 근거리 미니언: 투구 + 몸통 + 짧은 칼. 일반형 실루엣
+    const u = Math.min(w, h), cx = w / 2, cy = h * .55;
+    ctx.fillStyle = '#5B4B45'; // 다리
+    ctx.fillRect(cx - u * .14, cy + u * .18, u * .09, u * .2); ctx.fillRect(cx + u * .05, cy + u * .18, u * .09, u * .2);
+    let g = ctx.createLinearGradient(0, cy - u * .2, 0, cy + u * .25); g.addColorStop(0, '#C9473C'); g.addColorStop(1, '#7E2723');
+    ctx.fillStyle = g; ctx.beginPath(); ctx.ellipse(cx, cy + u * .04, u * .22, u * .22, 0, 0, Math.PI * 2); ctx.fill(); // 몸
+    ctx.fillStyle = '#8E8A82'; ctx.beginPath(); ctx.ellipse(cx, cy - u * .2, u * .17, u * .16, 0, Math.PI, 0); ctx.lineTo(cx + u * .2, cy - u * .14); ctx.lineTo(cx - u * .2, cy - u * .14); ctx.closePath(); ctx.fill(); // 투구
+    ctx.fillStyle = '#C9473C'; ctx.beginPath(); ctx.moveTo(cx - u * .03, cy - u * .36); ctx.lineTo(cx + u * .03, cy - u * .36); ctx.lineTo(cx + u * .015, cy - u * .46); ctx.lineTo(cx - u * .015, cy - u * .46); ctx.fill(); // 깃
+    ctx.fillStyle = '#2B2320'; ctx.fillRect(cx - u * .12, cy - u * .17, u * .24, u * .04); // 눈 틈
+    ctx.save(); ctx.translate(cx + u * .26, cy - u * .02); ctx.rotate(-.5); ctx.fillStyle = '#C8CBCF'; ctx.fillRect(-u * .025, -u * .3, u * .05, u * .3); ctx.fillStyle = '#7A5B3A'; ctx.fillRect(-u * .07, 0, u * .14, u * .035); ctx.fillRect(-u * .02, u * .035, u * .04, u * .08); ctx.restore(); // 칼
+    ctx.fillStyle = '#9C9890'; ctx.beginPath(); ctx.ellipse(cx - u * .22, cy + u * .02, u * .09, u * .13, 0, 0, Math.PI * 2); ctx.fill(); // 방패
+  },
+  coins(ctx, w, h) { // 금화 더미
+    const u = Math.min(w, h);
+    const coin = (x, y, r) => {
+      ctx.fillStyle = '#8A5E17'; ctx.beginPath(); ctx.ellipse(x, y + r * .18, r, r * .62, 0, 0, Math.PI * 2); ctx.fill();
+      const g = ctx.createRadialGradient(x - r * .35, y - r * .3, r * .1, x, y, r * 1.05); g.addColorStop(0, '#F7E2A0'); g.addColorStop(.55, '#D9A63B'); g.addColorStop(1, '#A8731F');
+      ctx.fillStyle = g; ctx.beginPath(); ctx.ellipse(x, y, r, r * .62, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.strokeStyle = '#B98428'; ctx.lineWidth = r * .1; ctx.beginPath(); ctx.ellipse(x, y, r * .7, r * .43, 0, 0, Math.PI * 2); ctx.stroke();
+    };
+    const pile = [[.5, .78, .2], [.3, .8, .17], [.7, .8, .17], [.4, .64, .17], [.6, .64, .17], [.5, .5, .17], [.18, .66, .13], [.82, .66, .13], [.5, .34, .15]];
+    for (const [x, y, r] of pile) coin(w * x, h * y, u * r);
+  },
+  sword(ctx, w, h) { // 아이템: 곧은 장검 (일반형)
+    const u = Math.min(w, h);
+    ctx.save(); ctx.translate(w / 2, h / 2); ctx.rotate(-Math.PI / 4);
+    let g = ctx.createLinearGradient(-u * .05, 0, u * .05, 0); g.addColorStop(0, '#E7EAEE'); g.addColorStop(.5, '#A9AFB7'); g.addColorStop(1, '#6E747C');
+    ctx.fillStyle = g; ctx.beginPath(); ctx.moveTo(0, -u * .46); ctx.lineTo(u * .055, -u * .38); ctx.lineTo(u * .055, u * .12); ctx.lineTo(-u * .055, u * .12); ctx.lineTo(-u * .055, -u * .38); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = '#C79A3A'; ctx.fillRect(-u * .19, u * .12, u * .38, u * .05);
+    ctx.fillStyle = '#6B4628'; ctx.fillRect(-u * .035, u * .17, u * .07, u * .2);
+    ctx.fillStyle = '#C79A3A'; ctx.beginPath(); ctx.arc(0, u * .41, u * .055, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+  },
+  text(str, color) {
+    return (ctx, w, h) => { const fs = Math.min(h * .78, w / (str.length * .98)); ctx.font = `${fs}px "Black Han Sans"`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = color; ctx.fillText(str, w / 2, h * .53) };
+  },
+  image(name, fit = 'cover', keyBlack = false) {
+    return (ctx, w, h) => {
+      const im = IMG[name], ir = im.width / im.height, r = w / h;
+      let dw, dh; if ((fit === 'cover') === (ir > r)) { dh = h; dw = h * ir } else { dw = w; dh = w / ir }
+      ctx.drawImage(im, (w - dw) / 2, (h - dh) / 2, dw, dh);
+      if (keyBlack) { const d = ctx.getImageData(0, 0, w, h); const a = d.data; for (let i = 0; i < a.length; i += 4) if (a[i] + a[i + 1] + a[i + 2] < 60) a[i + 3] = 0; ctx.putImageData(d, 0, 0) }
+    };
+  },
+  icons(names) { // 스킬 아이콘 가로 한 줄
+    return (ctx, w, h) => { const n = names.length, gap = w * .04, s = Math.min(h, (w - gap * (n - 1)) / n); const x0 = (w - (s * n + gap * (n - 1))) / 2; names.forEach((nm, i) => ctx.drawImage(IMG[nm], x0 + i * (s + gap), (h - s) / 2, s, s)) };
+  },
+};
+
+// ---------------- 모양 만들기: 그림 → N개 점 ----------------
+const shapeCache = new Map();
+function frameOf(kind, W, H) { // 무대 안에서 모양이 차지할 상자
+  const portrait = H > W * .9;
+  switch (kind) {
+    case 'full': return { x: 0, y: 0, w: W, h: H };
+    case 'square': { const s = Math.min(W, H) * .86; return { x: (W - s) / 2, y: (H - s) / 2, w: s, h: s } }
+    case 'wide': { const w = W * .9, h = Math.min(H * .5, w * .4); return { x: (W - w) / 2, y: (H - h) / 2, w, h } }
+    case 'token': { const s = Math.min(W, H) * (portrait ? .62 : .56); return { x: (W - s) / 2, y: (H - s) / 2, w: s, h: s } }
+    case 'row': { const w = W * .9, h = Math.min(H * .4, w / 4.6); return { x: (W - w) / 2, y: (H - h) / 2, w, h } }
+    case 'tall': { const h = H * .94, w = Math.min(W * .9, h * .55); return { x: (W - w) / 2, y: (H - h) / 2, w, h } }
+  }
+}
+function makeShape(def, N, W, H) {
+  const key = def.id + '|' + N + '|' + W + 'x' + H;
+  if (shapeCache.has(key)) return shapeCache.get(key);
+  const t = performance.now();
+  const fr = frameOf(def.frame, W, H), aspect = fr.w / fr.h;
+  // 1) 채움 비율 어림 (낮은 해상도로 한 번 그려 본다)
+  let fill = 1;
+  if (!def.opaque) {
+    const pw = 160, ph = Math.max(8, Math.round(160 / aspect));
+    const pc = new OffscreenCanvas(pw, ph), px = pc.getContext('2d', { willReadFrequently: true }); def.draw(px, pw, ph);
+    const a = px.getImageData(0, 0, pw, ph).data; let m = 0; for (let i = 3; i < a.length; i += 4) if (a[i] > 127) m++; fill = Math.max(.02, m / (pw * ph));
+  }
+  // 2) 칸 하나 = 입자 하나가 되도록 해상도를 고른다
+  // 빈 칸(구멍)이 생기지 않게 칸 수 M을 N보다 조금 적게 맞춘다. 남는 입자는 같은 칸에 겹친다.
+  let area = N * .95 / fill, sw, sh, data, idx, M = 0;
+  for (let tries = 0; tries < 4; tries++) {
+    sw = Math.max(4, Math.round(Math.sqrt(area * aspect))); sh = Math.max(4, Math.round(sw / aspect));
+    const cv = new OffscreenCanvas(sw, sh), ctx = cv.getContext('2d', { willReadFrequently: true });
+    ctx.imageSmoothingQuality = 'high'; def.draw(ctx, sw, sh);
+    data = ctx.getImageData(0, 0, sw, sh).data; idx = new Int32Array(sw * sh); M = 0;
+    for (let p = 0, q = 3; p < sw * sh; p++, q += 4) if (data[q] > 127) idx[M++] = p;
+    if (M <= N) break; area *= N / M * .97;
+  }
+  const kx = fr.w / sw, ky = fr.h / sh;
+  const x = new Float32Array(N), y = new Float32Array(N), c = new Uint8Array(N * 3);
+  for (let i = 0; i < N; i++) {
+    let p;
+    if (M >= N) { const j = i + ((Math.random() * (M - i)) | 0); p = idx[j]; idx[j] = idx[i]; idx[i] = p }
+    else p = idx[i < M ? i : (Math.random() * M) | 0];
+    const px = p % sw, py = (p / sw) | 0;
+    const jit = i < M ? 0 : .5;
+    x[i] = fr.x + (px + .5 + (Math.random() - .5) * jit) * kx;
+    y[i] = fr.y + (py + .5 + (Math.random() - .5) * jit) * ky;
+    c[i * 3] = data[p * 4]; c[i * 3 + 1] = data[p * 4 + 1]; c[i * 3 + 2] = data[p * 4 + 2];
+  }
+  const sh_ = { id: def.id, x, y, c, size: Math.max(kx, ky) * 1.06, keep: def.keep || 0, cx: fr.x + fr.w / 2, cy: fr.y + fr.h / 2, ms: performance.now() - t, M };
+  shapeCache.set(key, sh_);
+  return sh_;
+}
+
+// ---------------- 장면 목록 ----------------
+const SH = {
+  jinx: { id: 'jinx', frame: 'full', opaque: true, draw: DRAW.image('splash-Jinx.jpg'), img: ['splash-Jinx.jpg'] },
+  ahri: { id: 'ahri', frame: 'full', opaque: true, draw: DRAW.image('splash-Ahri.jpg'), img: ['splash-Ahri.jpg'] },
+  nexus: { id: 'nexus', frame: 'square', draw: DRAW.nexus },
+  nexusKeep: { id: 'nexusKeep', frame: 'square', draw: DRAW.nexus, keep: .55 },
+  word: { id: 'word', frame: 'wide', draw: DRAW.text('넥서스', '#1F1B17'), font: '넥서스' },
+  wordKeep: { id: 'wordKeep', frame: 'wide', draw: DRAW.text('넥서스', '#1F1B17'), font: '넥서스', keep: 1 },
+  minion: { id: 'minion', frame: 'token', draw: DRAW.minion },
+  coins: { id: 'coins', frame: 'token', draw: DRAW.coins },
+  sword: { id: 'sword', frame: 'token', draw: DRAW.sword },
+  jinxFace: { id: 'jinxFace', frame: 'token', opaque: true, draw: DRAW.image('champ-Jinx.png', 'contain'), img: ['champ-Jinx.png'] },
+  map: { id: 'map', frame: 'square', draw: DRAW.image('map11.png', 'contain', true), img: ['map11.png'] },
+  ahriFace: { id: 'ahriFace', frame: 'token', opaque: true, draw: DRAW.image('champ-Ahri.png', 'contain'), img: ['champ-Ahri.png'] },
+  ahriSkills: { id: 'ahriSkills', frame: 'row', draw: DRAW.icons(['spell-AhriQ.png', 'spell-AhriW.png', 'spell-AhriE.png', 'spell-AhriR.png']), img: ['spell-AhriQ.png', 'spell-AhriW.png', 'spell-AhriE.png', 'spell-AhriR.png'] },
+  thresh: { id: 'thresh', frame: 'tall', opaque: true, draw: DRAW.image('loading-Thresh.jpg', 'cover'), img: ['loading-Thresh.jpg'] },
+};
+const SEQS = {
+  nexus: { label: '원화 → 넥서스 → 글자', steps: ['jinx', 'nexusKeep', 'word', 'jinx'] },
+  gold: { label: '미니언 → 금화 → 아이템', steps: ['minion', 'coins', 'sword', 'jinxFace', 'minion'] },
+  map: { label: '지도 → 원화', steps: ['map', 'ahri', 'map'] },
+  skills: { label: '초상화 → 스킬', steps: ['ahriFace', 'ahriSkills', 'thresh', 'ahriFace'] },
+};
+
+// ---------------- 움직임 수식 (GPU와 CPU가 같은 식을 쓴다) ----------------
+// p = 입자별 진행(0→1). k = 이동 비율. env = 흩어짐 세기(0→1→0).
+const GLSL_VS = `
+precision highp float;
+in vec2 aFrom; in vec2 aTo; in vec3 aC0; in vec3 aC1; in vec4 aRnd; in float aVis; in float aArr;
+uniform vec2 uRes; uniform vec2 uC; uniform vec4 uPtr;
+uniform float uT, uDur, uSpread, uBurst, uSwirl, uGrav, uS0, uS1, uDust, uDpr, uFlow, uFreq, uJit, uAir, uAirMin, uDepth;
+out vec4 vC; out float vEnv;
+vec2 curl(vec2 p, float t){
+  float A = p.x * 1.3 + t * 0.6, B = p.y * 1.7 - t * 0.45, C = (p.x * 0.7 - p.y * 1.1) * 2.1 + t * 0.9;
+  float dx = 1.3 * cos(A) * sin(B) + 0.882 * cos(C);
+  float dy = 1.7 * sin(A) * cos(B) - 1.386 * cos(C);
+  return vec2(dy, -dx);
+}
+float eio(float x){ return x < 0.5 ? 4.0*x*x*x : 1.0 - pow(-2.0*x + 2.0, 3.0) / 2.0; }
+float eo(float x){ float y = 1.0 - x; return 1.0 - y*y*y; }
+void main(){
+  // 떠나는 때는 옛 모양 자리로, 닿는 때는 새 모양 자리로 정한다 → 새 그림이 매끈한 물결로 채워진다
+  float dep = aRnd.x * uSpread, arr = uDur + aArr * uSpread;
+  float p = clamp((uT - dep) / max(arr - dep, 0.4 * uDur), 0.0, 1.0);
+  float k = eio(clamp((p - 0.28) / 0.72, 0.0, 1.0));
+  float env = eo(min(p / 0.22, 1.0)) * (1.0 - smoothstep(0.5, 1.0, p));
+  vec2 d = aFrom - uC; float L = length(d);
+  vec2 dir = L > 0.001 ? d / L : vec2(cos(aRnd.z * 6.2831), sin(aRnd.z * 6.2831));
+  float an = (aRnd.z - 0.5) * 0.9 + uSwirl * aRnd.w * env;
+  float cs = cos(an), sn = sin(an);
+  dir = vec2(dir.x * cs - dir.y * sn, dir.x * sn + dir.y * cs);
+  vec2 base = mix(aFrom, aTo, k);
+  vec2 fl = curl(base * uFreq + aRnd.zw * uJit, uT * 0.8) * uFlow * (0.55 + 0.45 * aRnd.y) * env;
+  vec2 pos = base + dir * uBurst * (0.3 + 0.7 * aRnd.y) * env + fl + vec2(0.0, uGrav * env * env * aRnd.y);
+  float zf = env * aRnd.y * aRnd.y * uDepth;           // 앞으로 튀어나오는 파편: 커지고 화면 밖으로 벌어진다
+  pos = uRes * 0.5 + (pos - uRes * 0.5) * (1.0 + zf * 0.6);
+  vec2 q = pos - uPtr.xy; float ql = length(q);
+  if (uPtr.z > 0.0 && ql < uPtr.z && ql > 0.001) pos += q / ql * (uPtr.z - ql) * uPtr.w;
+  vec2 cl = pos / uRes * 2.0 - 1.0;
+  gl_Position = vec4(cl.x, -cl.y, 0.0, 1.0);
+  gl_PointSize = max(1.0, mix(uS0, uS1, k) * (1.0 - uDust * env) * (1.0 + zf * 2.5) * uDpr);
+  vC = vec4(mix(aC0, aC1, smoothstep(0.45, 0.9, p)), mix(1.0, mix(uAirMin, uAir, aVis), smoothstep(0.05, 0.5, env))); vEnv = env;
+}`;
+const GLSL_FS = `
+precision mediump float;
+in vec4 vC; in float vEnv; out vec4 o;
+void main(){
+  if (vEnv > 0.12) { vec2 q = gl_PointCoord - 0.5; if (dot(q, q) > 0.25) discard; }
+  o = vec4(vC.rgb * vC.a, vC.a);
+}`;
+const eio = x => x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+const eo = x => { const y = 1 - x; return 1 - y * y * y };
+function curlJS(px, py, t, out) {
+  const A = px * 1.3 + t * .6, B = py * 1.7 - t * .45, C = (px * .7 - py * 1.1) * 2.1 + t * .9;
+  const dx = 1.3 * Math.cos(A) * Math.sin(B) + .882 * Math.cos(C), dy = 1.7 * Math.sin(A) * Math.cos(B) - 1.386 * Math.cos(C);
+  out[0] = dy; out[1] = -dx;
+}
+const CL = [0, 0];
+const smooth = (a, b, x) => { let t = (x - a) / (b - a); t = t < 0 ? 0 : t > 1 ? 1 : t; return t * t * (3 - 2 * t) };
+
+// ---------------- 입자 상태 ----------------
+const P = { N: 0, fx: null, fy: null, tx: null, ty: null, c0: null, c1: null, rnd: null };
+const U = { t: 99, dur: 1.4, spread: .5, burst: 120, swirl: 1.2, grav: 0, s0: 2, s1: 2, dust: .55, cx: 0, cy: 0, flow: 0, freq: .003, jit: .3, air: 1, airMin: 1, depth: 0, ptr: [0, 0, 0, 0] };
+let W = 0, H = 0, DPR = 1, curShape = null;
+function alloc(N) {
+  P.N = N; P.fx = new Float32Array(N); P.fy = new Float32Array(N); P.tx = new Float32Array(N); P.ty = new Float32Array(N);
+  P.c0 = new Uint8Array(N * 3); P.c1 = new Uint8Array(N * 3); P.rnd = new Float32Array(N * 4); P.vis = new Uint8Array(N); P.arr = new Float32Array(N);
+  for (let i = 0; i < N * 4; i++) P.rnd[i] = Math.random();
+}
+// CPU에서 지금 위치를 계산 (Canvas2D 그리기와 중간에 끊을 때)
+const CUR = { x: null, y: null, s: null, c: null, a: null };
+function evalAll() {
+  const N = P.N; if (!CUR.x || CUR.x.length !== N) { CUR.x = new Float32Array(N); CUR.y = new Float32Array(N); CUR.s = new Float32Array(N); CUR.c = new Uint8Array(N * 3); CUR.a = new Float32Array(N) }
+  const { t, dur, spread, burst, swirl, grav, s0, s1, dust, cx, cy, flow, freq, jit, air, airMin, depth } = U, hw = W / 2, hh = H / 2, [px, py, pr, pw] = U.ptr, VIS = P.vis, A = CUR.a, ARR = P.arr;
+  const fx = P.fx, fy = P.fy, tx = P.tx, ty = P.ty, rnd = P.rnd, c0 = P.c0, c1 = P.c1, X = CUR.x, Y = CUR.y, Sz = CUR.s, C = CUR.c;
+  const settled = t >= dur + spread;
+  for (let i = 0; i < N; i++) {
+    const r = i * 4; let x, y, s, env = 0, cm;
+    if (settled) { x = tx[i]; y = ty[i]; s = s1; cm = 1 }
+    else {
+      const dep = rnd[r] * spread, arr = dur + ARR[i] * spread; let p = (t - dep) / Math.max(arr - dep, .4 * dur); p = p < 0 ? 0 : p > 1 ? 1 : p;
+      let kk = (p - .28) / .72; kk = kk < 0 ? 0 : kk > 1 ? 1 : kk; const k = eio(kk);
+      env = eo(Math.min(p / .22, 1)) * (1 - smooth(.5, 1, p));
+      let dx = fx[i] - cx, dy = fy[i] - cy; const L = Math.hypot(dx, dy);
+      if (L > .001) { dx /= L; dy /= L } else { dx = Math.cos(rnd[r + 2] * 6.2831); dy = Math.sin(rnd[r + 2] * 6.2831) }
+      const an = (rnd[r + 2] - .5) * .9 + swirl * rnd[r + 3] * env, cs = Math.cos(an), sn = Math.sin(an);
+      const ddx = dx * cs - dy * sn, ddy = dx * sn + dy * cs, amp = burst * (.3 + .7 * rnd[r + 1]) * env;
+      const bx = fx[i] + (tx[i] - fx[i]) * k, by = fy[i] + (ty[i] - fy[i]) * k;
+      let flx = 0, fly = 0; if (flow > 0 && env > 0) { curlJS(bx * freq + rnd[r + 2] * jit, by * freq + rnd[r + 3] * jit, t * .8, CL); const fa = flow * (.55 + .45 * rnd[r + 1]) * env; flx = CL[0] * fa; fly = CL[1] * fa }
+      x = bx + ddx * amp + flx; y = by + ddy * amp + fly + grav * env * env * rnd[r + 1];
+      const zf = env * rnd[r + 1] * rnd[r + 1] * depth; x = hw + (x - hw) * (1 + zf * .6); y = hh + (y - hh) * (1 + zf * .6);
+      s = (s0 + (s1 - s0) * k) * (1 - dust * env) * (1 + zf * 2.5); cm = smooth(.45, .9, p);
+    }
+    if (pr > 0) { const qx = x - px, qy = y - py, ql = Math.hypot(qx, qy); if (ql < pr && ql > .001) { x += qx / ql * (pr - ql) * pw; y += qy / ql * (pr - ql) * pw } }
+    X[i] = x; Y[i] = y; Sz[i] = s < 1 ? 1 : s; A[i] = env > 0 ? 1 + ((airMin + (air - airMin) * VIS[i] / 255) - 1) * smooth(.05, .5, env) : 1;
+    const j = i * 3; C[j] = c0[j] + (c1[j] - c0[j]) * cm; C[j + 1] = c0[j + 1] + (c1[j + 1] - c0[j + 1]) * cm; C[j + 2] = c0[j + 2] + (c1[j + 2] - c0[j + 2]) * cm;
+  }
+}
+
+// ---------------- 짝짓기: 어느 입자가 어느 자리로 갈까 ----------------
+function hilbert(x, y, n) { let d = 0; for (let s = n >> 1; s > 0; s >>= 1) { const rx = (x & s) ? 1 : 0, ry = (y & s) ? 1 : 0; d += s * s * ((3 * rx) ^ ry); if (ry === 0) { if (rx === 1) { x = n - 1 - x; y = n - 1 - y } const t = x; x = y; y = t } } return d }
+// 16비트 열쇠(힐베르트 곡선 위치)로 세는 정렬: O(N), 큰 N에서도 빠르다
+const KEYS = { k: null, cnt: new Uint32Array(65537) };
+function orderBy(xs, ys, cs, N, mode) {
+  if (!KEYS.k || KEYS.k.length < N) KEYS.k = new Uint16Array(N);
+  const keys = KEYS.k, cnt = KEYS.cnt; cnt.fill(0);
+  let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity;
+  for (let i = 0; i < N; i++) { const x = xs[i], y = ys[i]; if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y }
+  const sx = 255.999 / Math.max(1, x1 - x0), sy = 255.999 / Math.max(1, y1 - y0);
+  for (let i = 0; i < N; i++) {
+    let k;
+    if (mode === 'luma') { const j = i * 3; const l = (cs[j] * 3 + cs[j + 1] * 6 + cs[j + 2]) / 10 | 0; k = (l << 8) | (hilbert(((xs[i] - x0) * sx / 16) | 0, ((ys[i] - y0) * sy / 16) | 0, 16)) }
+    else if (mode === 'sweep') k = ((xs[i] - x0) * sx * 256) | 0;
+    else k = hilbert(((xs[i] - x0) * sx) | 0, ((ys[i] - y0) * sy) | 0, 256);
+    keys[i] = k; cnt[k + 1]++;
+  }
+  for (let k = 1; k <= 65536; k++) cnt[k] += cnt[k - 1];
+  const o = new Int32Array(N); for (let i = 0; i < N; i++) o[cnt[keys[i]]++] = i; return o;
+}
+
+// ---------------- 모양으로 보내기 ----------------
+let morphT0 = 0, running = false;
+function morphTo(shape, opt = {}) {
+  const N = P.N, t = performance.now();
+  const inFlight = U.t < U.dur + U.spread;
+  if (inFlight) { evalAll(); P.fx.set(CUR.x); P.fy.set(CUR.y); P.c0.set(CUR.c); U.s0 = U.s0 + (U.s1 - U.s0) * Math.min(1, U.t / (U.dur + U.spread)) }
+  else if (curShape) { P.fx.set(P.tx); P.fy.set(P.ty); P.c0.set(P.c1); U.s0 = U.s1 }
+  else { // 첫 등장: 가루가 흩어진 데서 모인다
+    const m = Math.max(W, H) * .5;
+    for (let i = 0; i < N; i++) { const a = Math.random() * 6.2831, r = m * (.35 + Math.random() * .65); P.fx[i] = shape.x[i] + Math.cos(a) * r; P.fy[i] = shape.y[i] + Math.sin(a) * r }
+    P.c0.set(shape.c); U.s0 = shape.size * .5;
+  }
+  // 날아가는 동안 보일지: 색이 또렷한 가루(머리카락, 옷)는 보이고, 어두운 배경 가루는 거의 사라졌다가 도착하며 나타난다
+  for (let i = 0; i < N; i++) { const j = i * 3, r = P.c0[j], g = P.c0[j + 1], b = P.c0[j + 2], mx = Math.max(r, g, b), mn = Math.min(r, g, b);
+    const ch = Math.min(1, Math.max(0, ((mx - mn) / 255 - .1) / .3)), lu = Math.min(1, Math.max(0, (mx / 255 - .2) / .35)); let v = ch * lu; if (Math.random() < .12) v = Math.max(v, .5); P.vis[i] = v * 255 }
+  const mapMode = opt.map || S.map;
+  if (mapMode === 'random') { const o = new Int32Array(N); for (let i = 0; i < N; i++) o[i] = i; for (let i = N - 1; i > 0; i--) { const j = (Math.random() * (i + 1)) | 0, s = o[i]; o[i] = o[j]; o[j] = s } for (let i = 0; i < N; i++) { const s = o[i]; P.tx[i] = shape.x[s]; P.ty[i] = shape.y[s]; P.c1[i * 3] = shape.c[s * 3]; P.c1[i * 3 + 1] = shape.c[s * 3 + 1]; P.c1[i * 3 + 2] = shape.c[s * 3 + 2] } }
+  else {
+    const op = orderBy(P.fx, P.fy, P.c0, N, mapMode), os = orderBy(shape.x, shape.y, shape.c, N, mapMode);
+    for (let k = 0; k < N; k++) { const i = op[k], s = os[k]; P.tx[i] = shape.x[s]; P.ty[i] = shape.y[s]; P.c1[i * 3] = shape.c[s * 3]; P.c1[i * 3 + 1] = shape.c[s * 3 + 1]; P.c1[i * 3 + 2] = shape.c[s * 3 + 2] }
+  }
+  if (shape.keep) { const a = shape.keep; for (let j = 0; j < N * 3; j++) P.c1[j] = P.c1[j] * (1 - a) + P.c0[j] * a }
+  // 부서지는 순서(지연): 시작점에서 퍼져 나간다
+  let ox = W / 2, oy = H / 2; const org = opt.origin || S.origin;
+  if (org === 'left') ox = -W * .1; if (org === 'point' && opt.at) { ox = opt.at[0]; oy = opt.at[1] }
+  let mx = 0; const dd = new Float32Array(N);
+  for (let i = 0; i < N; i++) { const d = org === 'left' ? P.fx[i] - ox : Math.hypot(P.fx[i] - ox, P.fy[i] - oy); dd[i] = d; if (d > mx) mx = d }
+  for (let i = 0; i < N; i++) { const r = i * 4; P.rnd[r] = Math.min(1, dd[i] / mx * .85 + Math.random() * .15) }
+  { // 닿는 순서: 새 모양의 가운데에서 바깥으로
+    let am = 0; for (let i = 0; i < N; i++) { const d = Math.hypot(P.tx[i] - shape.cx, P.ty[i] - shape.cy); dd[i] = d; if (d > am) am = d }
+    for (let i = 0; i < N; i++) P.arr[i] = Math.min(1, dd[i] / am * .85 + Math.random() * .15);
+  }
+  U.cx = org === 'point' ? ox : (curShape ? curShape.cx : W / 2); U.cy = org === 'point' ? oy : (curShape ? curShape.cy : H / 2);
+  U.s1 = shape.size; U.t = 0;
+  Object.assign(U, FEEL[opt.feel || S.feel](), opt.motion || {});
+  engine.upload(); curShape = shape; morphT0 = performance.now();
+  lastSetup = performance.now() - t; kick();
+}
+let lastSetup = 0;
+// 벤치용: 짝짓기를 다시 하지 않고 출발↔도착만 맞바꾼다 (GPU는 버퍼를 다시 올리지 않는다)
+function swapPP() {
+  [P.fx, P.tx] = [P.tx, P.fx]; [P.fy, P.ty] = [P.ty, P.fy]; [P.c0, P.c1] = [P.c1, P.c0]; [U.s0, U.s1] = [U.s1, U.s0];
+  if (engine.swap) engine.swap(); U.t = 0; morphT0 = performance.now();
+}
+// 움직임 결 3가지: 같은 엔진, 다른 숫자
+const FEEL = {
+  flow: () => { const m = Math.min(W, H); return { dur: 1.6, spread: .9, burst: m * .04, swirl: .4, grav: 0, dust: .25, flow: m * .2, freq: 1 / (m * .34), jit: .08, air: .85, airMin: .05, depth: .8 } },
+  burst: () => { const m = Math.min(W, H); return { dur: 1.4, spread: .5, burst: m * .3, swirl: 1.2, grav: 0, dust: .4, flow: m * .06, freq: 1 / (m * .3), jit: .5, air: .9, airMin: .1, depth: 1.4 } },
+  sand: () => { const m = Math.min(W, H); return { dur: 1.8, spread: 1.0, burst: m * .03, swirl: .2, grav: m * .45, dust: .15, flow: m * .05, freq: 1 / (m * .25), jit: .25, air: .9, airMin: .35, depth: .2 } },
+};
+
+// ---------------- 엔진 4종 ----------------
+const cv = document.getElementById('cv');
+function bgRGB() { return S.bg === 'char' ? [46, 41, 37] : [233, 226, 212] }
+const ENGINES = {
+  // 1) Canvas2D 기본: 입자마다 fillRect. 가장 흔한 방식, 비교 기준
+  rect: {
+    label: 'Canvas2D 기본',
+    async init() { this.ctx = cv.getContext('2d', { alpha: false }) },
+    upload() {},
+    draw() {
+      evalAll(); const ctx = this.ctx, [r, g, b] = bgRGB(); ctx.setTransform(DPR, 0, 0, DPR, 0, 0); ctx.fillStyle = `rgb(${r},${g},${b})`; ctx.fillRect(0, 0, W, H);
+      const X = CUR.x, Y = CUR.y, Sz = CUR.s, C = CUR.c;
+      for (let i = 0; i < P.N; i++) { if (CUR.a[i] < 1 && CUR.a[i] < ((i * 2654435761) >>> 0) / 4294967296) continue; const j = i * 3, s = Sz[i]; ctx.fillStyle = `rgb(${C[j]},${C[j + 1]},${C[j + 2]})`; ctx.fillRect(X[i] - s / 2, Y[i] - s / 2, s, s) }
+    },
+    destroy() {}
+  },
+  // 2) Canvas2D 픽셀: 화면 버퍼에 직접 색을 써 넣고 한 번에 올린다
+  pix: {
+    label: 'Canvas2D 픽셀',
+    async init() { this.ctx = cv.getContext('2d', { alpha: false }); this.resize() },
+    resize() { this.bw = Math.round(W * Math.min(DPR, 2)); this.bh = Math.round(H * Math.min(DPR, 2)); this.k = this.bw / W; cv.width = this.bw; cv.height = this.bh; this.img = this.ctx.createImageData(this.bw, this.bh); this.buf = new Uint32Array(this.img.data.buffer) },
+    upload() {},
+    draw() {
+      evalAll(); const [r, g, b] = bgRGB(), bg = (255 << 24) | (b << 16) | (g << 8) | r, buf = this.buf, bw = this.bw, bh = this.bh, k = this.k;
+      buf.fill(bg); const X = CUR.x, Y = CUR.y, Sz = CUR.s, C = CUR.c;
+      for (let i = 0; i < P.N; i++) {
+        if (CUR.a[i] < 1 && CUR.a[i] < ((i * 2654435761) >>> 0) / 4294967296) continue;
+        const s = Math.max(1, Math.round(Sz[i] * k)), x0 = Math.round(X[i] * k - s / 2), y0 = Math.round(Y[i] * k - s / 2); const j = i * 3;
+        const col = (255 << 24) | (C[j + 2] << 16) | (C[j + 1] << 8) | C[j];
+        const xa = x0 < 0 ? 0 : x0, xb = x0 + s > bw ? bw : x0 + s, ya = y0 < 0 ? 0 : y0, yb = y0 + s > bh ? bh : y0 + s;
+        for (let y = ya; y < yb; y++) { const row = y * bw; for (let x = xa; x < xb; x++) buf[row + x] = col }
+      }
+      this.ctx.putImageData(this.img, 0, 0);
+    },
+    destroy() {}
+  },
+  // 3) WebGL2 직접: 움직임 수식을 GPU 정점 셰이더가 계산
+  webgl: {
+    label: 'WebGL',
+    async init() {
+      const gl = this.gl = cv.getContext('webgl2', { antialias: false, alpha: false, powerPreference: 'high-performance', preserveDrawingBuffer: !!S.bench || Q.has('shot') });
+      if (!gl) throw new Error('webgl2 없음');
+      const sh = (type, src) => { const s = gl.createShader(type); gl.shaderSource(s, '#version 300 es\n' + src); gl.compileShader(s); if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(s)); return s };
+      const pr = this.pr = gl.createProgram(); gl.attachShader(pr, sh(gl.VERTEX_SHADER, GLSL_VS)); gl.attachShader(pr, sh(gl.FRAGMENT_SHADER, GLSL_FS)); gl.linkProgram(pr);
+      if (!gl.getProgramParameter(pr, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(pr));
+      this.vao = gl.createVertexArray(); gl.bindVertexArray(this.vao);
+      this.b = {}; const attr = (name, size, type, norm) => { const loc = gl.getAttribLocation(pr, name), buf = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, buf); gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc, size, type, norm, 0, 0); this.b[name] = buf };
+      attr('aFrom', 2, gl.FLOAT, false); attr('aTo', 2, gl.FLOAT, false); attr('aC0', 3, gl.UNSIGNED_BYTE, true); attr('aC1', 3, gl.UNSIGNED_BYTE, true); attr('aRnd', 4, gl.FLOAT, false); attr('aVis', 1, gl.UNSIGNED_BYTE, true); attr('aArr', 1, gl.FLOAT, false);
+      this.u = {}; for (const n of ['uRes', 'uC', 'uPtr', 'uT', 'uDur', 'uSpread', 'uBurst', 'uSwirl', 'uGrav', 'uS0', 'uS1', 'uDust', 'uDpr', 'uFlow', 'uFreq', 'uJit', 'uAir', 'uAirMin', 'uDepth']) this.u[n] = gl.getUniformLocation(pr, n);
+      this.ff = new Float32Array(P.N * 2); this.tt = new Float32Array(P.N * 2);
+    },
+    upload() {
+      const gl = this.gl, N = P.N; if (this.ff.length !== N * 2) { this.ff = new Float32Array(N * 2); this.tt = new Float32Array(N * 2) }
+      for (let i = 0; i < N; i++) { this.ff[i * 2] = P.fx[i]; this.ff[i * 2 + 1] = P.fy[i]; this.tt[i * 2] = P.tx[i]; this.tt[i * 2 + 1] = P.ty[i] }
+      const put = (n, d) => { gl.bindBuffer(gl.ARRAY_BUFFER, this.b[n]); gl.bufferData(gl.ARRAY_BUFFER, d, gl.STATIC_DRAW) };
+      put('aFrom', this.ff); put('aTo', this.tt); put('aC0', P.c0); put('aC1', P.c1); put('aRnd', P.rnd); put('aVis', P.vis); put('aArr', P.arr);
+    },
+    draw() {
+      const gl = this.gl, u = this.u, [r, g, b] = bgRGB();
+      gl.viewport(0, 0, cv.width, cv.height); gl.clearColor(r / 255, g / 255, b / 255, 1); gl.clear(gl.COLOR_BUFFER_BIT);
+      gl.useProgram(this.pr); gl.bindVertexArray(this.vao);
+      gl.uniform2f(u.uRes, W, H); gl.uniform2f(u.uC, U.cx, U.cy); gl.uniform4f(u.uPtr, ...U.ptr);
+      gl.uniform1f(u.uT, U.t); gl.uniform1f(u.uDur, U.dur); gl.uniform1f(u.uSpread, U.spread); gl.uniform1f(u.uBurst, U.burst); gl.uniform1f(u.uSwirl, U.swirl);
+      gl.uniform1f(u.uGrav, U.grav); gl.uniform1f(u.uS0, U.s0); gl.uniform1f(u.uS1, U.s1); gl.uniform1f(u.uDust, U.dust); gl.uniform1f(u.uDpr, DPR); gl.uniform1f(u.uFlow, U.flow); gl.uniform1f(u.uFreq, U.freq); gl.uniform1f(u.uJit, U.jit); gl.uniform1f(u.uAir, U.air); gl.uniform1f(u.uAirMin, U.airMin); gl.uniform1f(u.uDepth, U.depth);
+      gl.enable(gl.BLEND); gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
+      gl.drawArrays(gl.POINTS, 0, P.N);
+    },
+    swap() {
+      const gl = this.gl, b = this.b; [b.aFrom, b.aTo] = [b.aTo, b.aFrom]; [b.aC0, b.aC1] = [b.aC1, b.aC0]; gl.bindVertexArray(this.vao);
+      const bind = (name, size, type, norm) => { gl.bindBuffer(gl.ARRAY_BUFFER, b[name]); gl.vertexAttribPointer(gl.getAttribLocation(this.pr, name), size, type, norm, 0, 0) };
+      bind('aFrom', 2, gl.FLOAT, false); bind('aTo', 2, gl.FLOAT, false); bind('aC0', 3, gl.UNSIGNED_BYTE, true); bind('aC1', 3, gl.UNSIGNED_BYTE, true);
+    },
+    destroy() { const e = this.gl && this.gl.getExtension('WEBGL_lose_context'); if (e) e.loseContext() }
+  },
+  // 4) three.js: 같은 셰이더를 RawShaderMaterial로 감싼다
+  three: {
+    label: 'three.js',
+    async init() {
+      const t = performance.now(); const THREE = this.T = await import(THREE_URL); marks.threeLoad = Math.round(performance.now() - t);
+      this.r = new THREE.WebGLRenderer({ canvas: cv, antialias: false, alpha: false, powerPreference: 'high-performance', preserveDrawingBuffer: !!S.bench || Q.has('shot') });
+      this.r.setPixelRatio(DPR); this.r.setSize(W, H, false);
+      this.scene = new THREE.Scene(); this.cam = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+      this.geo = new THREE.BufferGeometry(); this.geo.boundingSphere = new THREE.Sphere(new THREE.Vector3(), Infinity); // 2D 좌표라 자동 계산을 막는다
+      const un = {}; for (const n of ['uRes', 'uC', 'uPtr', 'uT', 'uDur', 'uSpread', 'uBurst', 'uSwirl', 'uGrav', 'uS0', 'uS1', 'uDust', 'uDpr', 'uFlow', 'uFreq', 'uJit', 'uAir', 'uAirMin', 'uDepth']) un[n] = { value: n === 'uRes' || n === 'uC' ? new THREE.Vector2() : n === 'uPtr' ? new THREE.Vector4() : 0 };
+      this.mat = new THREE.RawShaderMaterial({ glslVersion: THREE.GLSL3, vertexShader: '#define aFrom position\n' + GLSL_VS, fragmentShader: GLSL_FS, uniforms: un, depthTest: false, depthWrite: false, transparent: true, blending: THREE.CustomBlending, blendSrc: THREE.OneFactor, blendDst: THREE.OneMinusSrcAlphaFactor });
+      this.pts = new THREE.Points(this.geo, this.mat); this.pts.frustumCulled = false; this.scene.add(this.pts);
+    },
+    upload() {
+      const T = this.T, N = P.N, g = this.geo, ff = new Float32Array(N * 2), tt = new Float32Array(N * 2);
+      for (let i = 0; i < N; i++) { ff[i * 2] = P.fx[i]; ff[i * 2 + 1] = P.fy[i]; tt[i * 2] = P.tx[i]; tt[i * 2 + 1] = P.ty[i] }
+      g.setAttribute('position', new T.BufferAttribute(ff, 2)); g.setAttribute('aTo', new T.BufferAttribute(tt, 2));
+      g.setAttribute('aC0', new T.BufferAttribute(P.c0.slice(), 3, true)); g.setAttribute('aC1', new T.BufferAttribute(P.c1.slice(), 3, true)); g.setAttribute('aRnd', new T.BufferAttribute(P.rnd.slice(), 4)); g.setAttribute('aVis', new T.BufferAttribute(P.vis.slice(), 1, true)); g.setAttribute('aArr', new T.BufferAttribute(P.arr.slice(), 1));
+    },
+    swap() { const g = this.geo, a = g.getAttribute('position'), b = g.getAttribute('aTo'), c = g.getAttribute('aC0'), d = g.getAttribute('aC1'); g.setAttribute('position', b); g.setAttribute('aTo', a); g.setAttribute('aC0', d); g.setAttribute('aC1', c) },
+    draw() {
+      const u = this.mat.uniforms, [r, g, b] = bgRGB();
+      this.r.setClearColor(new this.T.Color().setRGB(r / 255, g / 255, b / 255, this.T.SRGBColorSpace), 1);
+      u.uRes.value.set(W, H); u.uC.value.set(U.cx, U.cy); u.uPtr.value.set(...U.ptr);
+      u.uT.value = U.t; u.uDur.value = U.dur; u.uSpread.value = U.spread; u.uBurst.value = U.burst; u.uSwirl.value = U.swirl; u.uGrav.value = U.grav; u.uS0.value = U.s0; u.uS1.value = U.s1; u.uDust.value = U.dust; u.uDpr.value = DPR; u.uFlow.value = U.flow; u.uFreq.value = U.freq; u.uJit.value = U.jit; u.uAir.value = U.air; u.uAirMin.value = U.airMin; u.uDepth.value = U.depth;
+      this.r.render(this.scene, this.cam);
+    },
+    destroy() { try { this.r.dispose(); this.r.forceContextLoss() } catch {} }
+  },
+};
+let engine = null;
+
+// ---------------- 무대 크기 ----------------
+const stage = document.getElementById('stage');
+function sizeStage() {
+  const w = stage.clientWidth; const h = isPhone() ? Math.round(w * 1.12) : Math.round(Math.min(w * 9 / 16, innerHeight - 140));
+  stage.style.height = h + 'px'; W = w; H = h; DPR = Math.min(devicePixelRatio || 1, S.engine === 'rect' ? 1 : 3);
+  if (S.engine === 'pix') { engine && engine.resize && engine.resize() } else { cv.width = Math.round(W * DPR); cv.height = Math.round(H * DPR) }
+}
+
+// ---------------- 돌리기 ----------------
+const hud = document.getElementById('hud');
+const FT = []; let lastDraw = 0, lastF = 0, frames = 0, firstDrawn = false, drawMs = 0;
+function kick() { if (!running) { running = true; lastF = performance.now(); requestAnimationFrame(loop) } }
+function loop(now) {
+  const dt = now - lastF; lastF = now; if (frames > 0) FT.push(dt); if (FT.length > 240) FT.shift(); frames++;
+  if (!frozen) U.t = (now - morphT0) / 1000;
+  const t = performance.now(); engine.draw(); const dms = performance.now() - t; drawMs = drawMs * .9 + dms * .1; lastDraw = dms;
+  if (!firstDrawn) { firstDrawn = true; requestAnimationFrame(() => { mark('firstFrame'); onFirst() }) }
+  if (bench.on) bench.tick(now);
+  const busy = U.t < U.dur + U.spread + .05 || U.ptr[2] > 0 || bench.on || autoplay.on;
+  if (frames % 15 === 0) updHud();
+  if (busy) requestAnimationFrame(loop); else { running = false; updHud(true) }
+}
+function fpsNow() { if (FT.length < 5) return 0; const a = FT.slice(-60); return 1000 / (a.reduce((s, v) => s + v, 0) / a.length) }
+function updHud(idle) {
+  hud.textContent = `${ENGINES[S.engine].label} · 입자 ${P.N.toLocaleString()}\n` + (idle ? '멈춤(정지 화면은 그리지 않아요)' : `${fpsNow().toFixed(0)} fps · 그리기 ${drawMs.toFixed(1)}ms`) + `\n첫 그림 ${marks.firstFrame ?? '…'}ms · 짝짓기 ${lastSetup.toFixed(0)}ms`;
+}
+
+// ---------------- 자동 재생 ----------------
+const autoplay = { on: false, i: 0, timer: 0 };
+async function playSeq(name, loop = false) {
+  clearTimeout(autoplay.timer); S.seq = name; const seq = SEQS[name]; autoplay.on = true; autoplay.i = 0;
+  const defs = seq.steps.map(s => SH[s]);
+  const ready = d => Promise.all([need(...(d.img || [])), d.font ? document.fonts.load('100px "Black Han Sans"', d.font) : 0]);
+  await ready(defs[0]); // 첫 모양 재료만 기다리고, 나머지는 뒤에서 받는다
+  const rest = Promise.all(defs.slice(1).map(ready));
+  const step = async () => {
+    if (autoplay.i > 0) await rest;
+    const def = defs[autoplay.i]; const shp = makeShape(def, P.N, W, H);
+    if (reduced()) showStill(def, shp); else morphTo(shp);
+    autoplay.i++;
+    if (autoplay.i < defs.length || loop) { if (autoplay.i >= defs.length) autoplay.i = 1; autoplay.timer = setTimeout(step, (U.dur + U.spread) * 1000 + 1100) } else autoplay.on = false;
+  };
+  step(); refreshButtons();
+}
+// 움직임 줄이기: 입자 비행 없이, 완성된 모양끼리 짧게 겹쳐 바꾼다
+const still = document.getElementById('still');
+function showStill(def, shp) {
+  // 지금 화면을 위 캔버스에 복사해 두고, 새 모양을 그린 뒤 위 캔버스를 0.35초 동안 지운다
+  if (firstDrawn) { still.width = cv.width; still.height = cv.height; engine.draw(); still.getContext('2d').drawImage(cv, 0, 0); still.style.transition = 'none'; still.style.opacity = 1 }
+  P.fx.set(shp.x); P.fy.set(shp.y); P.tx.set(shp.x); P.ty.set(shp.y); P.c0.set(shp.c); P.c1.set(shp.c);
+  U.s0 = U.s1 = shp.size; U.t = 99; curShape = shp;
+  engine.upload(); engine.draw(); if (!firstDrawn) { firstDrawn = true; requestAnimationFrame(() => { mark('firstFrame'); onFirst() }) }
+  requestAnimationFrame(() => requestAnimationFrame(() => { still.style.transition = 'opacity .35s ease-out'; still.style.opacity = 0 }));
+  updHud(true);
+}
+
+// ---------------- 벤치 (자동 측정) ----------------
+const bench = {
+  on: false, t0: 0, ft: [], dms: [],
+  start(secs) { this.on = true; this.secs = secs; this.t0 = 0; this.ft = []; this.dms = []; this.last = 0 },
+  tick(now) {
+    if (!this.t0) { this.t0 = now; this.last = now; return }
+    this.ft.push(now - this.last); this.last = now; this.dms.push(lastDraw);
+    // 계속 날아다니게: 도착하기 전에 반대 모양으로 다시 보낸다
+    if (U.t > U.dur + U.spread - .05) swapPP();
+    if (now - this.t0 > this.secs * 1000) { this.on = false; this.finish() }
+  },
+  finish() {
+    const ft = this.ft.slice().sort((a, b) => a - b), avg = this.ft.reduce((s, v) => s + v, 0) / this.ft.length;
+    const p95 = ft[Math.floor(ft.length * .95)], drop = this.ft.filter(v => v > 25).length;
+    const sorted = this.dms.slice().sort((a, b) => a - b);
+    window.__result = { engine: S.engine, n: P.N, W, H, dpr: DPR, fps: +(1000 / avg).toFixed(1), p95: +p95.toFixed(1), long: drop, frames: this.ft.length, jsMs: +(this.dms.reduce((s, v) => s + v, 0) / this.dms.length).toFixed(2), jsP95: +sorted[Math.floor(sorted.length * .95)].toFixed(2), mapMs: +benchMap.toFixed(1), sampleMs: +(benchShapes.reduce((s, x) => s + x.ms, 0) / 2).toFixed(1), marks };
+  }
+};
+let benchShapes = [], benchMap = 0;
+
+// ---------------- 시작 ----------------
+async function boot() {
+  mark('boot');
+  stage.classList.toggle('char', S.bg === 'char');
+  sizeStage(); alloc(S.n);
+  engine = ENGINES[S.engine]; await engine.init(); mark('engine');
+  sizeStage();
+  if (S.bench) {
+    await need('splash-Jinx.jpg'); mark('img');
+    benchShapes = [makeShape(SH.jinx, P.N, W, H), makeShape(SH.nexusKeep, P.N, W, H)]; mark('sample');
+    S.feel = Q.get('feel') || 'flow';
+    morphTo(benchShapes[0]); U.t = 99; engine.draw();
+    morphTo(benchShapes[1], { map: 'hilbert' }); benchMap = lastSetup;
+    setTimeout(() => { bench.start(S.bench); swapPP() }, 600);
+    return;
+  }
+  playSeq(S.seq, false);
+}
+function onFirst() { window.__first = marks.firstFrame; updHud(!running) }
+
+// ---------------- 조작 ----------------
+const mk = (box, items, cur, on) => { const el = document.getElementById(box); el.innerHTML = ''; for (const [v, label] of items) { const b = document.createElement('button'); b.textContent = label; b.dataset.v = v; b.setAttribute('aria-pressed', v === cur()); b.onclick = () => on(v); el.appendChild(b) } };
+function refreshButtons() {
+  mk('seqs', Object.entries(SEQS).map(([k, v]) => [k, v.label]), () => S.seq, v => playSeq(v));
+  mk('engines', Object.entries(ENGINES).map(([k, v]) => [k, v.label]), () => S.engine, v => { const q = new URLSearchParams(location.search); q.set('engine', v); q.set('n', P.N); q.set('seq', S.seq); location.search = q });
+  mk('feels', [['flow', '흐름'], ['burst', '폭발'], ['sand', '모래']], () => S.feel, v => { S.feel = v; refreshButtons() });
+  mk('maps', [['hilbert', '가까운 곳끼리'], ['random', '무작위'], ['luma', '밝기 순'], ['sweep', '왼쪽부터']], () => S.map, v => { S.map = v; refreshButtons() });
+  mk('origins', [['center', '가운데'], ['left', '왼쪽'], ['point', '누른 곳']], () => S.origin, v => { S.origin = v; refreshButtons() });
+  mk('bgs', [['paper', '종이'], ['char', '숯']], () => S.bg, v => { S.bg = v; stage.classList.toggle('char', v === 'char'); kick() });
+  mk('rms', [['auto', '기기 설정 따름'], ['on', '켜기'], ['off', '끄기']], () => S.rm, v => { S.rm = v; refreshButtons() });
+  const sel = document.getElementById('count'); sel.innerHTML = '';
+  for (const n of [...new Set([2500, 5000, 10000, 20000, 30000, 40000, 60000, 80000, 160000, 320000, 640000, P.N])].sort((a, b) => a - b)) { const o = document.createElement('option'); o.value = n; o.textContent = n.toLocaleString() + '개'; if (n === P.N) o.selected = true; sel.appendChild(o) }
+  sel.onchange = () => { const q = new URLSearchParams(location.search); q.set('engine', S.engine); q.set('n', sel.value); q.set('seq', S.seq); location.search = q };
+}
+cv.addEventListener('click', e => {
+  if (!curShape || bench.on) return; const r = cv.getBoundingClientRect(); const at = [e.clientX - r.left, e.clientY - r.top];
+  const defs = SEQS[S.seq].steps; clearTimeout(autoplay.timer); autoplay.on = false;
+  const idx = (defs.indexOf(curShape.id) + 1) % defs.length; const def = SH[defs[idx === 0 ? 1 : idx]];
+  const shp = makeShape(def, P.N, W, H); if (reduced()) showStill(def, shp); else morphTo(shp, { at });
+});
+cv.addEventListener('pointermove', e => { if (bench.on || reduced()) return; const r = cv.getBoundingClientRect(); U.ptr = [e.clientX - r.left, e.clientY - r.top, Math.min(W, H) * .09, .9]; kick() });
+cv.addEventListener('pointerleave', () => { U.ptr = [0, 0, 0, 0]; kick() });
+let rz = 0; addEventListener('resize', () => { clearTimeout(rz); rz = setTimeout(() => { if (bench.on) return; const oldW = W; sizeStage(); if (W !== oldW && curShape) { shapeCache.clear(); const def = SH[curShape.id]; const shp = makeShape(def, P.N, W, H); curShape = null; morphTo(shp); U.t = 99; kick() } }, 200) });
+let frozen = false;
+// 캡처용: 시간을 멈추고 원하는 순간을 그린다
+async function goto(seqName, stepIdx, feel) {
+  clearTimeout(autoplay.timer); autoplay.on = false; frozen = true; if (feel) S.feel = feel;
+  const defs = SEQS[seqName].steps.map(s => SH[s]); await need(...defs.flatMap(d => d.img || []));
+  for (const d of defs) if (d.font) await document.fonts.load('100px "Black Han Sans"', d.font);
+  curShape = null; morphTo(makeShape(defs[stepIdx - 1], P.N, W, H)); U.t = 99; engine.draw();
+  morphTo(makeShape(defs[stepIdx], P.N, W, H)); U.t = 0; engine.draw();
+}
+function at(t) { U.t = t; engine.draw(); return U.dur + U.spread }
+window.__lab = { S, P, U, marks, SH, SEQS, morphTo, makeShape, need, playSeq, goto, at, get W() { return W }, get H() { return H } };
+refreshButtons();
+boot().catch(e => { hud.textContent = '오류: ' + e.message; console.error(e) });
+</script>

@@ -1,0 +1,1087 @@
+<title>GRIMOIRE 작전판</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gothic+A1:wght@400;500;700;800;900&family=Nanum+Pen+Script&display=swap">
+<style>
+/* 배치: PC는 왼쪽 레일 + '큰 작전판 7 : 글 단 5', 폰은 1단 + 아래 탭. 토큰은 team/design.md 2장 확정값. */
+:root{
+  --paper:#FFFFFF; --ink:#16171A; --ink-2:#5A5D65; --line:#E3E4DF; --board:#F3F4F0; --hi:#FFE34A;
+  --obj-ink:#16171A; --hi-soft:#FFF2AE; --blue:#2E66E0; --blue-t:#2E66E0; --red:#DE3F3B; --red-t:#C7302C; --gain:#F0BE00; --loss:#B7BAC0; --hurt:#F2A29E;
+  --btn:#16171A; --btn-ink:#FFFFFF; --frame:#DCDED8; --shade:rgba(0,0,0,.45);
+  --f:"Gothic A1","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif; --f-pen:"Nanum Pen Script","Gothic A1",cursive;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--paper:#1C1D20;--ink:#F1F1EF;--ink-2:#A9ACB3;--line:#34363B;--blue-t:#7FA6FF;--red-t:#FF8A86;--btn:#F1F1EF;--btn-ink:#16171A;--frame:#3A3C41;--shade:rgba(0,0,0,.8);color-scheme:dark}}
+:root[data-theme="dark"]{--paper:#1C1D20;--ink:#F1F1EF;--ink-2:#A9ACB3;--line:#34363B;--blue-t:#7FA6FF;--red-t:#FF8A86;--btn:#F1F1EF;--btn-ink:#16171A;--frame:#3A3C41;--shade:rgba(0,0,0,.8);color-scheme:dark}
+
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--f);font-size:17px;line-height:1.6;font-weight:500;word-break:keep-all;overflow-wrap:break-word;-webkit-font-smoothing:antialiased}
+h1,h2,h3,h4,p,ul,ol,dl,dd,figure{margin:0}
+ul,ol{padding:0;list-style:none}
+h1,h2,h3,h4{text-wrap:balance}
+button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer;text-align:inherit}
+a{color:inherit}
+img{max-width:100%;display:block}
+svg{display:block}
+:focus-visible{outline:3px solid var(--ink);outline-offset:3px;border-radius:12px}
+.obj :focus-visible{outline-color:var(--obj-ink)}
+[hidden]{display:none!important}
+.vh{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.t13{font-size:13px;line-height:1.5}.t17{font-size:17px}.t22{font-size:22px;line-height:1.35;font-weight:900;letter-spacing:-.02em}.t30{font-size:30px;line-height:1.25;font-weight:900;letter-spacing:-.03em}
+.mute{color:var(--ink-2)}
+.b8{font-weight:800}
+
+/* 시연 막대: 앱 틀 바깥 한 곳 */
+.demo{background:var(--line);color:var(--ink);font-size:13px;padding-block:8px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center}
+.demo b{font-weight:800}
+.demo .sw{display:flex;flex-wrap:wrap;gap:4px}
+.demo button{font-size:13px;font-weight:700;padding:4px 10px;border-radius:12px;min-height:32px}
+.demo button[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+
+/* 앱 틀 */
+.app{display:block;min-height:100vh}
+.rail{display:none}
+.main{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-top:16px;padding-bottom:calc(96px + env(safe-area-inset-bottom,0px));max-width:1240px;margin:0 auto}
+.tabs{position:fixed;left:0;right:0;bottom:0;z-index:20;display:grid;grid-template-columns:repeat(5,1fr);background:var(--paper);border-top:1px solid var(--line);padding:6px max(4px,env(safe-area-inset-right,0px)) calc(8px + env(safe-area-inset-bottom,0px)) max(4px,env(safe-area-inset-left,0px))}
+.tabs a{display:grid;justify-items:center;gap:2px;font-size:13px;line-height:1.3;text-decoration:none;padding:4px 0;min-height:48px;border-radius:12px}
+.tabs svg,.rail svg{width:24px;height:24px}
+.tabs a[aria-current="page"],.rail a[aria-current="page"]{font-weight:900}
+@media (min-width:1024px){
+  .app{display:grid;grid-template-columns:232px minmax(0,1fr)}
+  .rail{display:flex;flex-direction:column;gap:4px;position:sticky;top:0;height:100vh;padding:24px 16px;border-right:1px solid var(--line)}
+  .rail .brand{display:flex;gap:10px;align-items:center;padding:0 8px 24px}
+  .rail .brand svg{width:36px;height:36px}
+  .rail .brand b{font-size:22px;font-weight:900;letter-spacing:-.02em}
+  .rail a{display:flex;gap:12px;align-items:center;padding:10px 12px;border-radius:12px;text-decoration:none;font-size:17px}
+  .rail a:hover{background:var(--line)}
+  .rail .plan{margin-top:12px;font-size:13px;font-weight:700;padding:12px;border-top:1px solid var(--line)}
+  .tabs{display:none}
+  .main{padding:32px 32px 48px;margin:0}
+}
+
+/* 화면 머리 */
+.top{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;margin-bottom:16px}
+.top .meta{font-size:13px;font-weight:700;color:var(--ink-2)}
+.cols{display:grid;gap:24px;grid-template-columns:minmax(0,1fr)}
+@media (min-width:1024px){.cols{grid-template-columns:minmax(0,7fr) minmax(0,5fr);gap:32px;align-items:start}.cols.wide{grid-template-columns:minmax(0,8fr) minmax(0,4fr)}.cols.three{grid-template-columns:minmax(0,3fr) minmax(0,5fr) minmax(0,4fr)}.side{position:sticky;top:24px}}
+.stack{display:grid;gap:16px;align-content:start;min-width:0}
+
+/* 작전판 */
+.board{border:3px solid var(--frame);border-radius:12px;background:var(--board);overflow:hidden;box-shadow:inset 0 0 0 1px #fff,0 12px 22px -18px var(--shade);color:var(--obj-ink)}
+.board svg{width:100%;height:auto;touch-action:none}
+.obj{background:var(--board);color:var(--obj-ink);border-radius:12px}
+.ctrl{display:flex;align-items:center;gap:12px;margin-top:12px}
+.ctrl .ib{width:44px;height:44px;display:grid;place-items:center;border-radius:12px}
+.ctrl .ib svg{width:24px;height:24px}
+.ctrl .ib:disabled{opacity:.3;cursor:default}
+.cuts{flex:1;display:flex;gap:4px}
+.cuts button{flex:1;height:24px;position:relative}
+.cuts button::after{content:"";position:absolute;left:0;right:0;top:10px;height:4px;background:var(--line)}
+.cuts button[aria-current="true"]::after,.cuts button.done::after{background:var(--ink)}
+.ctrl .n{font-size:13px;font-weight:800;min-width:38px;text-align:right}
+.cap{margin-top:8px;font-size:17px;line-height:1.6;min-height:3.2em}
+.seg{display:flex;gap:24px;margin-top:4px}
+.seg button{font-size:17px;font-weight:700;color:var(--ink-2);padding:8px 0 6px;border-bottom:3px solid transparent;min-height:44px}
+.seg button[aria-pressed="true"]{color:var(--ink);border-color:var(--ink)}
+
+/* 글 부품 */
+.h22{font-size:22px;line-height:1.4;font-weight:800;letter-spacing:-.02em}
+.p{font-size:17px;line-height:1.6}
+.tag{font-size:13px;font-weight:700;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.tag::before{content:"";width:8px;height:8px;border-radius:50%;background:currentColor}
+.tag.maybe::before{background:transparent;box-shadow:inset 0 0 0 1.8px currentColor}
+.term{font:inherit;color:inherit;text-decoration:underline dotted 2px;text-underline-offset:5px;cursor:pointer}
+.tip{margin-top:8px;font-size:17px;line-height:1.5;padding:8px 12px}
+.cost{padding-top:12px;border-top:2px solid var(--ink);display:flex;align-items:center;justify-content:space-between;gap:12px}
+.big{font-size:17px;font-weight:800;line-height:1.3}
+.big em{font-style:normal;font-size:48px;font-weight:900;letter-spacing:-.04em;vertical-align:-6px;margin:0 2px}
+.nw{white-space:nowrap}
+.mins{display:flex;gap:4px;flex:none}
+.mins svg{width:20px;height:22px}
+.hps{display:grid;gap:8px}
+.hps .h{font-size:13px;font-weight:800;display:flex;justify-content:space-between}
+.hp{display:grid;grid-template-columns:24px minmax(0,1fr) 72px;gap:8px;align-items:center}
+.hp svg{width:24px;height:24px}
+.hp span{font-size:13px;font-weight:700}
+.bar{position:relative;height:11px;border:1.6px solid var(--ink);background:var(--paper);overflow:hidden}
+.bar i{position:absolute;top:0;bottom:0;left:0}
+.bar::after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent 0 calc(10% - 1px),rgba(128,128,128,.55) calc(10% - 1px) 10%) 0 0/100% 50% no-repeat}
+.memo{padding:12px 16px;font-size:17px;line-height:1.55}
+.memo .k{font-size:13px;font-weight:800;margin-bottom:4px}
+.memo .mk{display:inline-block;width:30px;height:14px;vertical-align:-1px}
+.memo a{font-size:13px;font-weight:800;display:inline-block;margin-top:8px}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;min-height:56px;border-radius:12px;background:var(--btn);color:var(--btn-ink);font-size:17px;font-weight:800;text-decoration:none;padding:0 16px}
+.btn:active{transform:translateY(1px)}
+.btn.obj-btn{background:var(--obj-ink);color:#fff}
+.link{font-size:17px;font-weight:800;text-decoration:none;display:inline-flex;gap:6px;align-items:center;min-height:44px}
+.link svg{width:20px;height:20px}
+.txtbtn{font-size:13px;font-weight:800;color:var(--ink-2);min-height:44px;padding:0 4px}
+.flow div{display:grid;grid-template-columns:56px minmax(0,1fr);gap:12px;padding:12px 0;border-top:1px solid var(--line);align-items:baseline}
+.flow span{font-size:13px;font-weight:800}
+.flow p{font-size:17px;line-height:1.5}
+.flow .do p{font-size:22px;font-weight:900;line-height:1.35}
+.row{display:grid;grid-template-columns:76px minmax(0,1fr) 24px;gap:16px;align-items:center;padding:12px 0;border-top:2px solid var(--ink);text-decoration:none;width:100%}
+.row img{width:76px;height:76px;object-fit:cover;object-position:62% 24%;border-radius:12px}
+.row .t{font-size:17px;font-weight:800;display:block}
+.row .m{font-size:13px;display:block}
+.row .w{color:var(--blue-t);font-weight:800}
+.row svg{width:24px;height:24px}
+
+/* 퀴즈 */
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.opt{border:2px solid var(--frame);border-radius:12px;padding:12px;display:grid;gap:4px;min-height:92px;align-content:start;background:var(--paper)}
+.opt svg{width:40px;height:24px;color:var(--ink)}
+.opt span{font-size:17px;font-weight:700;line-height:1.35}
+.opt[aria-pressed="true"]{border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink)}
+.opt.ok{border-color:var(--ink)}
+.band{padding:16px;border-radius:12px;display:grid;gap:8px}
+.band.w{background:var(--hi-soft);color:var(--obj-ink)}
+.band.r{background:var(--paper);color:var(--ink);box-shadow:inset 0 0 0 2px var(--ink)}
+.band h3{font-size:22px;font-weight:900}
+.band .btn{background:var(--obj-ink);color:#fff;margin-top:4px}
+.band.r .btn{background:var(--btn);color:var(--btn-ink)}
+@media (max-width:1023px){.band{position:sticky;bottom:calc(76px + env(safe-area-inset-bottom,0px));border-radius:12px 12px 0 0;margin:0 -16px;padding:16px}}
+.qtabs{display:flex;gap:24px;margin-bottom:16px}
+.qdots{display:flex;gap:4px;margin:8px 0 16px}
+.qdots i{width:32px;height:4px;background:var(--line)}
+.qdots i.on{background:var(--ink)}
+
+/* 목차 */
+.toc h3{font-size:13px;font-weight:800;margin:16px 0 4px;color:var(--ink-2)}
+.toc a,.toc .row2{display:flex;justify-content:space-between;gap:12px;padding:12px 0;border-top:1px solid var(--line);text-decoration:none;font-size:17px;min-height:44px}
+.toc a[aria-current="page"]{font-weight:900}
+.toc small{font-size:13px;color:var(--ink-2);white-space:nowrap}
+.lv{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:700;white-space:nowrap}
+.lv svg{width:16px;height:16px}
+
+/* 정석 · 나 */
+.people{display:flex;flex-wrap:wrap;gap:16px 24px;padding:16px}
+.people .g{display:grid;gap:8px;justify-items:start}
+.people .g .ic{display:flex;gap:2px}
+.people .g svg{width:28px;height:40px}
+.people .g p{font-size:13px;font-weight:800}
+.dots{padding:16px}
+.dots svg{width:100%;height:auto}
+.mastery li{display:grid;grid-template-columns:24px minmax(0,1fr) auto;gap:12px;align-items:center;padding:12px 0;border-top:1px solid var(--line)}
+.mastery svg{width:24px;height:24px}
+
+/* 시트 (자세히 보기 · 틀렸어요) */
+.scrim{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:40}
+.sheet{position:fixed;z-index:41;left:0;right:0;bottom:0;max-height:86vh;overflow:auto;background:var(--paper);color:var(--ink);border-radius:12px 12px 0 0;padding:16px max(16px,env(safe-area-inset-right,0px)) calc(24px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));animation:up .2s ease-out}
+@media (min-width:1024px){.sheet{left:auto;top:0;bottom:0;width:480px;max-height:none;border-radius:12px 0 0 12px;padding:32px;animation:side .2s ease-out}}
+@keyframes up{from{transform:translateY(24px);opacity:0}}
+@keyframes side{from{transform:translateX(24px);opacity:0}}
+.sheet header{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:16px}
+.sheet table{width:100%;border-collapse:collapse;font-size:13px;line-height:1.5}
+.sheet th,.sheet td{text-align:left;vertical-align:top;padding:8px 8px;border-top:1px solid var(--line)}
+.sheet th{font-weight:800;width:38%}
+.sheet .note{font-size:13px;color:var(--ink-2);margin-top:12px}
+.reasons{display:grid;gap:8px}
+.reasons button{border:2px solid var(--frame);border-radius:12px;padding:12px 16px;min-height:56px;font-size:17px;font-weight:700}
+
+/* 상태 화면 */
+.state{padding:24px 0;display:grid;gap:16px;max-width:640px}
+.state .ph{aspect-ratio:480/380;max-width:640px}
+.hidecard{padding:16px}
+
+.foot{margin-top:48px;padding-top:16px;border-top:1px solid var(--line);font-size:13px;line-height:1.55;color:var(--ink-2);display:grid;gap:8px;max-width:960px}
+svg .a-draw{stroke-dasharray:100;animation:ringdraw .55s .35s cubic-bezier(.3,.7,.2,1) both}
+@keyframes ringdraw{from{stroke-dashoffset:100}to{stroke-dashoffset:0}}
+@media (prefers-reduced-motion:reduce){svg .a-draw,.sheet{animation:none}}
+
+/* 상태별 보이기 */
+[data-mode="real"] .only-best,[data-mode="best"] .only-real{display:none!important}
+@media (max-width:1023px){
+  .cols .side.first{order:-1}
+  body[data-sub=""] .lesson-pane{display:none!important}
+  body[data-sub="lesson"] #toc,body[data-sub="lesson-mid"] #toc{display:none!important}
+  body:not([data-screen="me"]) #foot{display:none}
+}
+@media (min-width:1024px){.back-toc{display:none!important}}
+.back-toc{margin-left:-8px}
+.ib{border-radius:12px}
+
+/* copy-v2 부품 */
+.demo select{font:inherit;font-size:13px;font-weight:700;min-height:32px;border-radius:12px;padding:2px 8px;background:var(--paper);color:var(--ink);border:1px solid var(--frame)}
+.rail .brand span{display:grid}.rail .brand small{font-size:13px;color:var(--ink-2);font-weight:700;white-space:pre}
+.metas{display:flex;flex-wrap:wrap;gap:4px 14px;align-items:center}
+.lk{font-size:13px;font-weight:800;color:var(--ink);text-decoration:underline;text-underline-offset:3px;min-height:32px;display:inline-flex;align-items:center}
+.top .lk{font-size:13px}
+.verd{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.scenes{color:var(--ink);max-width:300px;margin-top:4px}
+.scenes svg{width:100%;height:auto}
+.more{margin-top:32px;max-width:720px}
+.more ul{margin-top:8px}
+.more li{display:grid;grid-template-columns:72px minmax(0,1fr) auto;gap:12px;align-items:center;padding:12px 0;border-top:1px solid var(--line);font-size:17px}
+.more .tc{font-size:13px;font-weight:800}
+.segl{font-size:17px;font-weight:700;color:var(--ink-2);padding:8px 0 6px;border-bottom:3px solid transparent;min-height:44px;text-decoration:none;display:inline-flex;align-items:center}
+.segl[aria-current="page"]{color:var(--ink);border-color:var(--ink)}
+.view{margin-top:16px}
+.books>li{border-top:2px solid var(--ink)}
+.bk{display:grid;grid-template-columns:minmax(0,1fr) 120px;gap:16px;align-items:center;width:100%;padding:12px 0;min-height:52px;font-size:17px;font-weight:800}
+.pbar{height:6px;background:var(--line);position:relative;display:block}
+.pbar i{position:absolute;left:0;top:0;bottom:0;background:var(--ink)}
+.chs>li{border-top:1px solid var(--line)}
+.ch{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px 0 10px 12px;font-size:17px}
+.lvi svg,.lv svg{width:18px;height:18px}
+.lv{display:inline-flex;gap:6px;align-items:center;font-size:13px;font-weight:800}
+.lessons{padding:0 0 8px 24px}
+.lessons a{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:8px 0;min-height:44px;text-decoration:none;font-size:17px;font-weight:700}
+.clist{margin-top:12px;max-width:720px}
+.clist li,.clist a{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 0;border-top:1px solid var(--line);font-size:17px;text-decoration:none;min-height:44px}
+.clist li>a{border:0;padding:0;width:100%;font-weight:800}
+.sigs{display:flex;flex-wrap:wrap;gap:16px 24px;margin-bottom:16px}
+.sigs li{display:flex;gap:8px;align-items:center;font-size:17px;font-weight:700}
+.sigs svg{width:40px;height:40px}
+.exc{display:grid;grid-template-columns:40px minmax(0,1fr) 24px;gap:12px;align-items:center;padding:12px 0;border-top:1px solid var(--line);text-decoration:none;font-size:17px;min-height:52px}
+.exc svg{width:28px;height:28px}.exc .chev{width:24px;height:24px}
+.minibar{display:block;width:40px;height:12px;border:1.6px solid var(--ink);background:var(--paper);position:relative;overflow:hidden}
+.minibar i{position:absolute;left:0;top:0;bottom:0;width:30%;background:var(--blue)}
+.minibar::after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent 0 calc(10% - 1px),rgba(128,128,128,.55) calc(10% - 1px) 10%) 0 0/100% 50% no-repeat}
+.trhead{display:flex;align-items:center;gap:12px;width:100%}
+.trhead .ib{width:44px;height:44px;display:grid;place-items:center}.trhead .ib svg{width:24px;height:24px}
+.steps{flex:1;display:flex;gap:4px;max-width:420px}
+.steps i{flex:1;height:6px;background:var(--line)}
+.steps i.on{background:var(--ink)}
+.top{align-items:center}
+.why{font-size:17px;line-height:1.5;padding:8px 0;border-top:1px solid var(--line)}
+.opt:disabled{cursor:default}
+.bignum p{font-size:17px;font-weight:700}
+.bignum .n48{font-size:48px;font-weight:900;letter-spacing:-.04em;line-height:1.1}
+.skillrow{display:flex;gap:12px;align-items:center;font-size:17px}
+.flow.small div{grid-template-columns:52px minmax(0,1fr);padding:8px 0}
+.flow.small .do p{font-size:17px;font-weight:900}
+.memo .flow div:first-child{border-top:0}
+.memo .links{display:flex;gap:16px;margin-top:4px}
+.lines li{font-size:17px;line-height:1.55;padding:8px 0;border-top:1px solid var(--line)}
+.hint{display:flex;gap:6px;align-items:center}.hint svg{width:16px;height:16px}
+.state .board{max-width:560px}
+.acts{display:flex;flex-wrap:wrap;gap:12px 20px;align-items:center}
+.acts .btn{width:auto;min-width:200px}
+.queue li{display:grid;grid-template-columns:24px minmax(0,1fr) auto;gap:12px;align-items:center;padding:12px 0;border-top:1px solid var(--line);font-size:17px}
+.queue svg{width:22px;height:24px}
+.verdicts{margin-top:16px;display:grid;gap:6px;font-size:13px}
+.verdicts p{display:flex;gap:8px;align-items:center}
+.sheet small{font-size:13px;color:var(--ink-2);margin-left:4px}
+.row .lk{margin-top:2px}
+.row{grid-template-columns:76px minmax(0,1fr)}
+.row .m.metas{display:flex}
+.obj .lk,.obj a{color:var(--obj-ink)}
+@media (max-width:1023px){
+  #s-review .cols{display:flex;flex-direction:column;gap:12px}
+  #s-review .cols>.stack{display:contents}
+  #s-review .cols>.stack>*{order:8}
+  #s-review .cols>.stack>.seg{order:1}#s-review .cols>.stack>.board{order:2}#s-review .cols>.stack>.h22{order:3}#s-review .cols>.stack>.tip{order:4}#s-review .cols>.stack>.p{order:4}#s-review .cols>.stack>.ctrl{order:5}#s-review .cols>.stack>.cap{order:6}#s-review .cols>.stack>.scenes{order:7}
+  #s-review .ctrl{margin-top:0}
+}
+</style>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+ <defs>
+  <clipPath id="cC" clipPathUnits="objectBoundingBox"><circle cx=".5" cy=".5" r=".5"/></clipPath>
+  <filter id="fRough" filterUnits="userSpaceOnUse" x="-200" y="-200" width="1400" height="1400"><feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed="7" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="2.6" xChannelSelector="R" yChannelSelector="G"/></filter>
+  <filter id="fSoft" filterUnits="userSpaceOnUse" x="-200" y="-200" width="1400" height="1400"><feGaussianBlur stdDeviation="2.2"/></filter>
+  <filter id="fGray"><feColorMatrix type="matrix" values=".2 .7 .1 0 0 .2 .7 .1 0 0 .2 .7 .1 0 0 0 0 0 1 0"/><feComponentTransfer><feFuncR type="linear" slope=".62"/><feFuncG type="linear" slope=".62"/><feFuncB type="linear" slope=".62"/></feComponentTransfer></filter>
+  <filter id="fGrayL"><feColorMatrix type="matrix" values=".2 .7 .1 0 0 .2 .7 .1 0 0 .2 .7 .1 0 0 0 0 0 1 0"/><feComponentTransfer><feFuncR type="linear" slope=".7" intercept=".2"/><feFuncG type="linear" slope=".7" intercept=".2"/><feFuncB type="linear" slope=".7" intercept=".2"/></feComponentTransfer></filter>
+  <radialGradient id="gRim" cx="34%" cy="26%" r="82%"><stop offset="0" stop-color="#fff" stop-opacity=".6"/><stop offset=".42" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".28"/></radialGradient>
+  <pattern id="pDots" width="18" height="18" patternUnits="userSpaceOnUse"><circle cx="9" cy="9" r=".9" fill="#D9DBD4"/></pattern>
+ </defs>
+ <!-- 아이콘: 24 격자, 2px 둥근 끝 선 한 벌 -->
+ <symbol id="i-today" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="15" rx="2.5"/><path d="M4 10h16M8.5 3v4M15.5 3v4"/></g><circle cx="12" cy="15" r="1.7" fill="currentColor"/></symbol>
+ <symbol id="i-review" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 12a7.5 7.5 0 1 0 2.2-5.3"/><path d="M4.5 4.5v4h4"/><path d="M12 8.5V12l2.5 2"/></g></symbol>
+ <symbol id="i-codex" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 6.2c3-1.6 6-1.6 9 0V19c-3-1.6-6-1.6-9 0z"/><path d="M21 6.2c-3-1.6-6-1.6-9 0V19c3-1.6 6-1.6 9 0z"/></g></symbol>
+ <symbol id="i-train" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/></g><circle cx="12" cy="12" r="1.4" fill="currentColor"/></symbol>
+ <symbol id="i-canon" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="7.5" r="2.8"/><path d="M7.2 19c.8-3.2 2.6-4.6 4.8-4.6s4 1.4 4.8 4.6"/><circle cx="5" cy="10" r="2"/><path d="M1.8 18.5c.5-2 1.6-3 3.2-3"/><circle cx="19" cy="10" r="2"/><path d="M22.2 18.5c-.5-2-1.6-3-3.2-3"/></g></symbol>
+ <symbol id="i-me" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8.5" r="3.6"/><path d="M5 20c1.4-3.8 4-5.4 7-5.4s5.6 1.6 7 5.4"/></g></symbol>
+ <symbol id="i-prev" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+ <symbol id="i-next" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+ <symbol id="i-close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></symbol>
+ <symbol id="i-hand" viewBox="0 0 24 24"><path d="M9 11V5a1.6 1.6 0 0 1 3.2 0v5.5M12.2 10V8.6a1.6 1.6 0 0 1 3.2 0v2M15.4 10.2a1.6 1.6 0 0 1 3.2 0V15a6 6 0 0 1-6 6h-.8a6 6 0 0 1-5-2.7L4 14.8a1.6 1.6 0 0 1 2.6-1.8L9 15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+ <symbol id="i-play" viewBox="0 0 24 24"><path d="M8 5.5v13l10-6.5z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></symbol>
+ <symbol id="logoA" viewBox="0 0 48 48"><circle cx="28" cy="25" r="15.5" fill="#FFE34A"/><circle cx="26" cy="24" r="15" fill="none" stroke="currentColor" stroke-width="3.4" stroke-dasharray="6.2 4.4" stroke-linecap="round"/><circle cx="32" cy="21" r="5.2" fill="currentColor"/><path d="M2.5 30.5H17M12 25.5l5 5-5 5" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+</svg>
+<div class="demo" role="region" aria-label="시연 막대">
+ <b>프로토타입</b><span>화면 속 게임과 기록은 장면 대본을 따른 예시 데이터예요.</span>
+ <label for="state-pick">상태 화면 보기</label>
+ <select id="state-pick">
+  <option value="normal">정상 화면</option>
+  <option value="S1">S1 불러오는 중</option><option value="S2">S2 정밀 분석 대기</option><option value="S3">S3 빈 상태: 분석한 판 없음</option><option value="S4">S4 빈 상태: 복기할 판 없음</option>
+  <option value="S5">S5 판정 전</option><option value="S6">S6 고수 기록 모으는 중</option><option value="S7">S7 오류: 판을 못 불러옴</option><option value="S8">S8 오류: 패치가 바뀜</option>
+  <option value="S9">S9 오류: 리플레이를 못 받음</option><option value="S10">S10 오류: 장면 그리기 실패</option><option value="S11">S11 기록이 흐릿한 구간</option><option value="S12">S12 기본 분석만 한 판</option>
+  <option value="S13">S13 연결 끊김</option><option value="S14">S14 무료 대기열</option><option value="S15">S15 무료 하루 복기 한도</option><option value="S16">S16 이의 시트</option>
+ </select>
+</div>
+
+<div class="app">
+ <nav class="rail" aria-label="메뉴">
+  <div class="brand"><svg viewBox="0 0 48 48" aria-hidden="true"><use href="#logoA"/></svg><span><b>GRIMOIRE</b><small>그리모어  롤 복기 작전판</small></span></div>
+  <a href="#today" data-nav="today"><svg aria-hidden="true"><use href="#i-today"/></svg>오늘</a>
+  <a href="#review" data-nav="review"><svg aria-hidden="true"><use href="#i-review"/></svg>복기</a>
+  <a href="#codex" data-nav="codex"><svg aria-hidden="true"><use href="#i-codex"/></svg>교과서</a>
+  <a href="#train" data-nav="train"><svg aria-hidden="true"><use href="#i-train"/></svg>연습</a>
+  <a href="#me" data-nav="me"><svg aria-hidden="true"><use href="#i-me"/></svg>나</a>
+  <p class="plan">무료</p>
+ </nav>
+
+ <main class="main" id="main">
+ <!-- ============ 오늘 ============ -->
+ <section class="screen" id="s-today" data-screen="today" aria-labelledby="today-h">
+  <div class="normal">
+   <div class="top"><div><p class="meta">11월 4일 수요일</p><h1 class="t22" id="today-h">오늘은 이것 하나만.</h1></div></div>
+   <div class="cols wide">
+    <div class="stack">
+     <div class="board"><svg class="draw" data-draw="today" viewBox="0 0 480 360" role="img" aria-label="오늘 연습 그림: 회색 신드라 Q 아이콘, 내 원 안에 선 신드라, 그러면 한 걸음 앞으로 가서 Q"></svg></div>
+     <p class="t13 b8">오늘 연습</p>
+     <h2 class="t17 b8">상대 스킬이 회색이면, 한 걸음 앞으로</h2>
+     <p class="p">방금 판 12:42 장면으로 그림 문제 3개를 만들었어요.</p>
+     <a class="btn" href="#train" data-goq="0">연습하기</a>
+    </div>
+    <div class="stack side first">
+     <div class="row"><img src="assets/ddragon/splash-Ahri.jpg" alt=""><span><span class="t">아리 vs 신드라</span><span class="m metas"><span class="w">승리</span><span>12분 전</span></span><a class="lk" href="#review">고칠 장면 보기</a></span></div>
+    </div>
+   </div>
+  </div>
+  <div class="statebox" hidden></div>
+ </section>
+
+ <!-- ============ 복기 ============ -->
+ <section class="screen" id="s-review" data-screen="review" aria-labelledby="review-h" hidden>
+  <div class="normal" id="review-card" data-mode="real">
+   <div class="top"><div class="metas meta"><a class="lk" href="#today">뒤로</a><span>미드</span><span id="review-h">아리 vs 신드라</span></div><button class="txtbtn" data-sheet="dispute">틀렸어요</button></div>
+   <div class="cols">
+    <div class="stack">
+     <div class="seg" role="group" aria-label="실제와 이렇게 했다면"><button data-mode="real" aria-pressed="true">실제</button><button data-mode="best" aria-pressed="false">이렇게 했다면</button></div>
+     <div class="board"><svg class="draw" id="board-a" viewBox="0 0 480 380" role="img" aria-label=""></svg></div>
+     <div class="ctrl" data-for="a"><button class="ib" data-step="-1" aria-label="이전 컷"><svg aria-hidden="true"><use href="#i-prev"/></svg></button><div class="cuts" role="group" aria-label="컷 고르기"></div><button class="ib" data-step="1" aria-label="다음 컷"><svg aria-hidden="true"><use href="#i-next"/></svg></button><span class="n"></span></div>
+     <p class="cap" id="cap-a" aria-live="polite"></p>
+     <div class="scenes" role="img" aria-label="이 판의 같은 장면 6번 중 4번 물러났어요. 지금 보는 장면은 12:42"><svg id="scene-dots" viewBox="0 0 300 52" aria-hidden="true"></svg></div>
+    </div>
+    <div class="stack side">
+     <h2 class="h22 only-real">뒤로 물러나서 <button class="term" data-tip="t-dt" aria-expanded="false">딜교 타이밍</button>을 놓쳤어요.</h2>
+     <h2 class="h22 only-best">들어갔다면 딜교는 아리 쪽이었어요.</h2>
+     <p class="obj tip" id="t-dt" hidden>딜교 타이밍: 상대가 바로 반격하지 못하는 틈</p>
+     <p class="p only-real">그 <button class="term" data-tip="t-bm" aria-expanded="false">백무빙</button> 사이에 신드라가 먼저 W를 맞혔어요.</p>
+     <p class="obj tip" id="t-bm" hidden>백무빙: 상대 반대쪽으로 짧게 물러나는 움직임</p>
+     <p class="p only-best">고수 10명 중 6명이 이 장면에서 이렇게 해요.</p>
+     <div class="hps only-real">
+      <div class="hp"><svg data-chip="Ahri,b"></svg><div class="bar"><i style="width:52%;background:var(--blue)"></i><i style="left:52%;width:28%;background:var(--hurt)"></i></div><span>많이 깎임</span></div>
+      <div class="hp"><svg data-chip="Syndra,r"></svg><div class="bar"><i style="width:74%;background:var(--red)"></i><i style="left:74%;width:6%;background:var(--hurt)"></i></div><span>조금</span></div></div>
+     <div class="hps only-best">
+      <div class="hp"><svg data-chip="Ahri,b"></svg><div class="bar"><i style="width:80%;background:var(--blue)"></i></div><span>그대로</span></div>
+      <div class="hp"><svg data-chip="Syndra,r"></svg><div class="bar"><i style="width:56%;background:var(--red)"></i><i style="left:56%;width:24%;background:var(--hurt)"></i></div><span>많이 깎임</span></div></div>
+     <div class="cost only-real"><p class="big"><span class="nw">미니언 약<em>5</em>마리 값</span> 손해</p><div class="mins" data-mins="5,grey"></div></div>
+     <p class="verd only-real"><span class="tag">확인됨</span><button class="lk" data-sheet="detail-a">자세히</button></p>
+     <div class="cost only-best"><p class="big"><span class="nw">미니언 약<em>3</em>마리 값</span> 이득</p><div class="mins" data-mins="3,gold"></div></div>
+     <p class="verd only-best"><span class="tag maybe">아마도</span><button class="lk" data-sheet="detail-a">자세히</button></p>
+     <div class="obj memo"><p class="k">다음 판에 볼 것</p>
+      <div class="flow small"><div><span>언제</span><p>상대 스킬이 회색이고 내 원 안이면</p></div><div><span>무엇을</span><p>한 걸음 앞으로, 평타 한 대 + Q</p></div><div><span>왜</span><p>상대가 주력 스킬 없이 맞서야 해요</p></div></div>
+      <p class="links"><a class="lk" href="#lesson-mid">레슨 보기</a><a class="lk only-best" href="#canon-card">고수 기록 보기</a></p></div>
+     <a class="btn" href="#train" data-goq="1">다시 풀기</a>
+    </div>
+   </div>
+   <div class="more">
+    <h2 class="t13 b8">이 판에서 더 볼 것</h2>
+    <ul>
+     <li><span class="tc">10:00</span><span>막타가 조금 적었어요</span><span class="tag">확인됨</span></li>
+     <li><span class="tc">14:31</span><span>강 아래에서 둘에게 잡혔어요</span><span class="tag">확인됨</span></li>
+     <li><span class="tc">잘한 것</span><span>포탑 아래 막타가 늘었어요</span><span></span></li>
+    </ul>
+   </div>
+  </div>
+  <div class="hidecard obj" id="review-hidden" hidden role="status"><p class="b8">이 장면을 숨겼어요.</p><p class="p" id="review-hidden-t"></p><button class="txtbtn" id="review-undo">되돌리기</button></div>
+  <div class="statebox" hidden></div>
+ </section>
+ <!-- ============ 교과서 (레슨 | 정석) ============ -->
+ <section class="screen" id="s-codex" data-screen="codex" aria-labelledby="codex-h" hidden>
+  <div class="normal">
+   <div class="top"><div><h1 class="t30" id="codex-h">교과서</h1></div></div>
+   <div class="seg" role="group" aria-label="교과서 탭"><a class="segl" href="#codex" data-ctab="lesson">레슨</a><a class="segl" href="#canon" data-ctab="canon">정석</a></div>
+
+   <!-- 목차 -->
+   <div class="view" data-view="toc">
+    <div class="cols">
+     <div class="stack">
+      <div class="board"><svg class="draw" id="thumb-b" viewBox="0 50 380 300" role="img" aria-label="이어 읽을 레슨 그림: 케이틀린이 징크스 원 안에 들어온 자리"></svg></div>
+      <p class="t13 b8 metas"><span>1권 라인전</span><span>딜교</span></p>
+      <h2 class="t22">사거리가 더 긴 상대와 딜교</h2>
+      <p class="lv" data-lvkey="adc"></p>
+      <a class="btn" href="#lesson">이어 읽기</a>
+     </div>
+     <div class="stack side">
+      <ul class="books" id="books"></ul>
+      <p class="t13">어느 장이든 처음부터 읽을 수 있어요.</p>
+     </div>
+    </div>
+   </div>
+
+   <!-- 레슨 읽기: 원딜 -->
+   <div class="view" data-view="lesson" hidden>
+    <p class="metas meta"><a class="lk" href="#codex">뒤로</a><span>1권 라인전</span></p>
+    <h2 class="t22" style="margin:8px 0 16px">사거리가 더 긴 상대와 딜교</h2>
+    <div class="cols">
+     <div class="stack">
+      <div class="board"><svg class="draw" id="board-b" viewBox="0 0 488 380" role="img" aria-label=""></svg></div>
+      <p class="hint t13 b8" id="hint-b"><svg aria-hidden="true"><use href="#i-hand"/></svg>케이틀린 자석을 끌어 보세요.</p>
+      <div class="ctrl" data-for="b"><button class="ib" data-step="-1" aria-label="이전 컷"><svg aria-hidden="true"><use href="#i-prev"/></svg></button><div class="cuts" role="group" aria-label="컷 고르기"></div><button class="ib" data-step="1" aria-label="다음 컷"><svg aria-hidden="true"><use href="#i-next"/></svg></button><span class="n"></span></div>
+      <p class="cap" id="cap-b" aria-live="polite"></p>
+     </div>
+     <div class="stack side">
+      <p class="p">케이틀린 원이 더 커서, 그냥 서 있으면 케이틀린만 때려요.</p>
+      <div class="obj memo"><p class="k">규칙</p><div class="flow small"><div><span>언제</span><p>케이틀린이 막타 치러 내 <button class="term" data-tip="t-ar" aria-expanded="false">평타 원</button> 안으로 들어오면</p></div><div class="do"><span>무엇을</span><p>한 걸음 앞으로 + 평타</p></div><div><span>왜</span><p>막타 치는 동안엔 피하기 어렵고, 내 원 안이라 닿아요.</p></div></div>
+       <p class="tip" id="t-ar" hidden>평타 원: 내 발밑 원 안에 들어오면 평타가 닿아요</p></div>
+      <div><p class="t13 b8">흔한 실수</p><ul class="lines"><li>케이틀린 원 안에 먼저 들어가 기다리면 공짜로 맞아요.</li><li>미니언부터 치면 때릴 틈을 놓쳐요.</li></ul></div>
+      <div><p class="t13 b8">이럴 땐 참아요</p><ul class="lines"><li>상대 서폿이 수풀로 들어가 안 보이면, 우리 미니언 뒤에 서요.</li></ul></div>
+      <a class="btn" href="#train" data-goq="2">문제 풀기</a>
+      <button class="lk" data-sheet="detail-b">자세히</button>
+     </div>
+    </div>
+   </div>
+
+   <!-- 레슨 읽기: 미드 -->
+   <div class="view" data-view="lesson-mid" hidden>
+    <p class="metas meta"><a class="lk" href="#codex">뒤로</a><span>1권 라인전</span></p>
+    <h2 class="t22" style="margin:8px 0 16px">상대 스킬이 회색일 때 딜교</h2>
+    <div class="cols">
+     <div class="stack">
+      <p class="t13 b8 metas"><span>내 판</span><span>12:42</span></p>
+      <div class="board"><svg class="draw" id="board-amid" viewBox="0 0 480 380" role="img" aria-label="내 판 12:42 그 순간: 신드라 Q가 회색이고 신드라는 아리 원 안"></svg></div>
+     </div>
+     <div class="stack side">
+      <p class="p">신드라가 Q로 막타를 치면, Q가 돌아올 때까지 주력 스킬 없이 맞서야 해요.</p>
+      <div class="obj memo"><p class="k">규칙</p><div class="flow small"><div><span>언제</span><p>상대가 주력 스킬로 막타를 쳐서 아이콘이 회색이고, 상대가 내 원 안일 때</p></div><div class="do"><span>무엇을</span><p>한 걸음 앞으로 + 평타 + 스킬</p></div><div><span>왜</span><p>상대가 주력 스킬 없이 맞서야 해요</p></div></div></div>
+      <div><p class="t13 b8">흔한 실수</p><ul class="lines"><li>Q가 빠졌는데 제자리에 서 있으면 틈이 그냥 지나가요.</li><li>때리기 전에 뒤로 물러나면 신드라가 내 원 밖으로 나가요.</li></ul></div>
+      <div><p class="t13 b8">이럴 땐 참아요</p><ul class="lines"><li>상대 정글이 가까우면 들어가지 않아요. <a class="lk" href="#canon-c">장면 보기</a></li><li>내 체력바가 3칸쯤 남았으면 막타만 챙겨요.</li></ul></div>
+      <a class="btn" href="#train" data-goq="1">문제 풀기</a>
+     </div>
+    </div>
+   </div>
+
+   <!-- 레슨 읽기: 서폿 (d) -->
+   <div class="view" data-view="lesson-sup" hidden>
+    <p class="metas meta"><a class="lk" href="#codex">뒤로</a><span>1권 라인전</span></p>
+    <h2 class="t22" style="margin:8px 0 16px">상대 원딜이 막타 치러 오면 같이 때리기</h2>
+    <div class="cols">
+     <div class="stack">
+      <div class="board"><svg class="draw" id="board-d" viewBox="0 0 440 440" role="img" aria-label=""></svg></div>
+      <div class="ctrl" data-for="d"><button class="ib" data-step="-1" aria-label="이전 컷"><svg aria-hidden="true"><use href="#i-prev"/></svg></button><div class="cuts" role="group" aria-label="컷 고르기"></div><button class="ib" data-step="1" aria-label="다음 컷"><svg aria-hidden="true"><use href="#i-next"/></svg></button><span class="n"></span></div>
+      <p class="cap" id="cap-d" aria-live="polite"></p>
+     </div>
+     <div class="stack side">
+      <div class="obj memo"><p class="k">규칙</p><div class="flow small"><div><span>언제</span><p>상대 원딜이 막타 치러 우리 원딜 원 안에 들어오면</p></div><div class="do"><span>무엇을</span><p>같이 때리기</p></div><div><span>왜</span><p>상대 원딜 체력을 깎아 라인을 우리가 쥐어요.</p></div></div></div>
+      <a class="btn" href="#train" data-goq="2">문제 풀기</a>
+     </div>
+    </div>
+   </div>
+
+   <!-- 정석 목록 -->
+   <div class="view" data-view="canon" hidden>
+    <p class="p" style="margin-top:16px">같은 장면에서 고수들이 가장 많이 고른 행동을 모았어요.</p>
+    <ul class="clist">
+     <li><a href="#canon-card"><span>상대 스킬이 회색일 때</span><span class="tag">확인됨</span></a></li>
+     <li><span>상대가 막타 칠 때</span><span class="tag">확인됨</span></li>
+     <li id="canon-exp" hidden><span>라인을 밀지, 당길지 고르기</span><span class="tag maybe">실험 중</span></li>
+     <li id="canon-exp2" hidden><span>상대 정글 동선 읽기</span><span class="tag maybe">실험 중</span></li>
+    </ul>
+    <button class="lk" id="canon-more" aria-expanded="false">실험 중인 것도 보기</button>
+   </div>
+
+   <!-- 정석 카드 -->
+   <div class="view" data-view="canon-card" hidden>
+    <p class="metas meta"><a class="lk" href="#canon">뒤로</a><span>미드</span></p>
+    <h2 class="t22" style="margin:8px 0 12px">상대 스킬이 회색일 때</h2>
+    <ul class="sigs"><li><span data-sig="1"></span>Q 없음</li><li><span data-sig="2"></span>내 원 안</li><li><span data-sig="3"></span>정글 멀리</li></ul>
+    <div class="cols wide">
+     <div class="stack">
+      <div class="board"><svg class="draw" data-draw="canon" viewBox="0 0 480 360" role="img" aria-label="고수 10명이 있다면: 앞으로 나가 평타 6명, 막타 기다리기 3명, 뒤로 물러나기 1명과 이번 판의 나"></svg></div>
+      <p class="p">앞으로 나간 쪽이 평균적으로 미니언 약 3마리 값 더 이득이었어요. <span class="tag">확인됨</span> <button class="lk" data-sheet="detail-canon">자세히</button></p>
+     </div>
+     <div class="stack side">
+      <h3 class="t17 b8">이럴 땐 이득이 사라져요</h3>
+      <a class="exc" href="#canon-c"><svg data-chip="LeeSin,r"></svg><span>상대 정글이 가까울 때</span><svg class="chev" aria-hidden="true"><use href="#i-next"/></svg></a>
+      <div class="exc"><span class="minibar" aria-hidden="true"><i></i></span><span>내 체력바가 3칸쯤 남았을 때</span></div>
+      <button class="btn" id="goal-btn">목표로 정하기</button>
+      <p class="p b8" id="goal-done" role="status" hidden>다음 판에 이 장면을 볼게요.</p>
+      <a class="lk" href="#lesson-mid">레슨 보기</a>
+     </div>
+    </div>
+   </div>
+
+   <!-- 정석 예외 장면 (c) -->
+   <div class="view" data-view="canon-c" hidden>
+    <p class="metas meta"><a class="lk" href="#canon-card">뒤로</a><span>상대 정글이 가까울 때</span></p>
+    <div class="cols" style="margin-top:12px">
+     <div class="stack">
+      <div class="board"><svg class="draw" id="board-c" viewBox="0 0 480 380" role="img" aria-label=""></svg></div>
+      <div class="ctrl" data-for="c"><button class="ib" data-step="-1" aria-label="이전 컷"><svg aria-hidden="true"><use href="#i-prev"/></svg></button><div class="cuts five" role="group" aria-label="컷 고르기"></div><button class="ib" data-step="1" aria-label="다음 컷"><svg aria-hidden="true"><use href="#i-next"/></svg></button><span class="n"></span></div>
+     </div>
+     <div class="stack side">
+      <p class="h22" id="cap-c" aria-live="polite"></p>
+      <p class="verd" id="c-cost" hidden><span class="b8">이득 없음</span><span class="tag maybe">아마도</span></p>
+     </div>
+    </div>
+   </div>
+  </div>
+  <div class="statebox" hidden></div>
+ </section>
+ <!-- ============ 연습: 그림 문제 3 + 반응 연습 ============ -->
+ <section class="screen" id="s-train" data-screen="train" aria-labelledby="train-h" hidden>
+  <div class="normal">
+   <div class="top"><div class="trhead"><a class="ib" href="#today" aria-label="닫기"><svg aria-hidden="true"><use href="#i-close"/></svg></a><div class="steps" aria-label="연습 4개 중 진행"><i></i><i></i><i></i><i></i></div></div><h1 class="vh" id="train-h">연습</h1></div>
+   <div class="cols" id="quiz">
+    <div class="stack"><div class="board"><svg class="draw" id="board-q" viewBox="0 0 480 380" role="img" aria-label=""></svg></div></div>
+    <div class="stack side">
+     <h2 class="t22" id="q-text"></h2>
+     <div class="opts" role="group" aria-label="보기" id="q-opts"></div>
+     <p class="why" id="q-why" hidden></p>
+     <div class="band" id="q-band" role="status" hidden><h3 id="q-band-h"></h3><p class="p" id="q-band-p"></p><button class="btn" id="q-next">다음 문제</button></div>
+    </div>
+   </div>
+   <div class="cols" id="drill" hidden>
+    <div class="stack"><div class="board"><svg class="draw" id="board-r" viewBox="0 0 480 380" role="img" aria-label="반응 연습 판: 신드라가 걸어와 Q를 쓰고 다시 물러나요"></svg></div></div>
+    <div class="stack side">
+     <h2 class="t22">딱 그 순간을 잡아요</h2>
+     <p class="p">신드라 Q가 회색이 되고 내 원 안에 들어오면 누르세요.</p>
+     <button class="btn" id="d-go">시작하기</button>
+     <div class="band" id="d-band" role="status" hidden><h3 id="d-band-h"></h3><p class="p" id="d-band-p"></p><button class="btn" id="d-next">다음</button><button class="lk" data-sheet="detail-drill">자세히</button></div>
+    </div>
+   </div>
+   <div class="stack" id="t-end" hidden style="max-width:560px">
+    <h2 class="t22">오늘 연습 끝!</h2>
+    <p class="p">다음 판에서 이 장면이 오면 바뀌었는지 볼게요.</p>
+    <a class="btn" href="#today">오늘로 가기</a>
+   </div>
+  </div>
+  <div class="statebox" hidden></div>
+ </section>
+
+ <!-- ============ 나 ============ -->
+ <section class="screen" id="s-me" data-screen="me" aria-labelledby="me-h" hidden>
+  <div class="normal">
+   <div class="top"><div><h1 class="t30" id="me-h">나</h1></div></div>
+   <div class="cols">
+    <div class="stack">
+     <p class="skillrow"><b>상대 스킬이 회색일 때 딜교</b><span class="lv" data-lvkey="mid"></span></p>
+     <div class="bignum"><p>회색 Q 장면에서 앞으로 나간 판</p><p class="n48">4판</p><p>최근 5판 중</p></div>
+     <div class="board"><svg class="draw" data-draw="growth" viewBox="0 0 480 210" role="img" aria-label="최근 5판 중 앞으로 나간 판 수를 이은 곡선. 처음 5판엔 1판, 지금은 4판. 13번째 판에서 한 번 내려갔어요"></svg></div>
+    </div>
+    <div class="stack side">
+     <p class="verd"><b class="t22">좋아졌어요</b><span class="tag">확인됨</span></p>
+     <p class="p">이제 목표로 걸지 않아도 되는지 다음 5판에서 볼게요.</p>
+     <a class="btn" href="#codex">다음 연습 받기</a>
+     <button class="lk" data-sheet="detail-me">자세히</button>
+     <ul class="mastery">
+      <li><span data-lvi="1"></span><span>포탑 아래 막타</span><span class="t13 b8">몸에 익음</span></li>
+      <li><span data-lvi=".33"></span><span>10:00 막타</span><span class="t13 b8 metas"><span>알아요</span><span>아직 보는 중이에요</span></span></li>
+      <li><span data-lvi=".33"></span><span>강 아래 시야 확인</span><span class="t13 b8">알아요</span></li>
+     </ul>
+     <p class="p">이번 주에 2일 연습했어요.</p>
+    </div>
+   </div>
+  </div>
+  <div class="statebox" hidden></div>
+ </section>
+
+ <footer class="foot" id="foot">
+  <p lang="en">GRIMOIRE isn't endorsed by Riot Games and doesn't reflect the views or opinions of Riot Games or anyone officially involved in producing or managing Riot Games properties. Riot Games, and all associated properties are trademarks or registered trademarks of Riot Games, Inc.</p>
+  <p>GRIMOIRE는 Riot Games의 보증을 받지 않았으며, Riot Games 또는 Riot Games 자산의 제작과 관리에 공식적으로 관여한 누구의 견해도 반영하지 않습니다. Riot Games와 관련 자산은 Riot Games, Inc.의 상표 또는 등록 상표입니다.</p>
+  <p>챔피언과 스킬 이미지: Riot Games Data Dragon</p>
+ </footer>
+ </main>
+
+ <nav class="tabs" aria-label="메뉴">
+  <a href="#today" data-nav="today"><svg aria-hidden="true"><use href="#i-today"/></svg>오늘</a>
+  <a href="#review" data-nav="review"><svg aria-hidden="true"><use href="#i-review"/></svg>복기</a>
+  <a href="#codex" data-nav="codex"><svg aria-hidden="true"><use href="#i-codex"/></svg>교과서</a>
+  <a href="#train" data-nav="train"><svg aria-hidden="true"><use href="#i-train"/></svg>연습</a>
+  <a href="#me" data-nav="me"><svg aria-hidden="true"><use href="#i-me"/></svg>나</a>
+ </nav>
+</div>
+
+<div class="scrim" id="scrim" hidden></div>
+<section class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-h" hidden tabindex="-1">
+ <header><h2 class="t22" id="sheet-h"></h2><button class="lk" id="sheet-x">닫기</button></header>
+ <div id="sheet-b"></div>
+</section>
+
+<template id="tpl-detail-a" data-title="자세히 보기">
+ <table><tbody>
+  <tr><th>신드라 Q 남은 시간</th><td>약 5.7초, 기본 7초 <small>16.21.1</small></td></tr>
+  <tr><th>아리와 신드라 거리</th><td>520, 아리 평타 사거리 550 <small>16.21.1</small></td></tr>
+  <tr><th>딜교 타이밍 길이</th><td>0.8초</td></tr>
+  <tr><th>백무빙</th><td>약 0.5초, 위협 반대쪽으로 175</td></tr>
+  <tr><th>체력 주고받기</th><td>−180 (신드라 W 128, 평타 54, 미니언 32)</td></tr>
+  <tr><th>실제 손해</th><td>−96골드, 미니언 약 5마리 값 <span class="tag">확인됨</span></td></tr>
+  <tr><th>이렇게 했다면</th><td>+67골드, 미니언 약 3마리 값, 95% 범위 +22~+111 <span class="tag maybe">아마도</span></td></tr>
+  <tr><th>이 판의 같은 장면</th><td>6번 중 4번 물러남</td></tr>
+  <tr><th>미니언 값 환산</th><td>미니언 1마리 ≈ 20골드 (웨이브 평균 약 118.7골드 ÷ 6)</td></tr>
+  <tr><th>본 방법</th><td>정밀 분석: 내 PC 프로그램이 리플레이를 다시 보며 움직임과 스킬까지 본 판</td></tr>
+ </tbody></table>
+</template>
+<template id="tpl-detail-canon" data-title="자세히 보기">
+ <table><tbody>
+  <tr><th>같은 상황</th><td>2,412번, 1,870판, 611명, 마스터 이상</td></tr>
+  <tr><th>패치</th><td>26.19, 26.20, 26.21 (최근 패치에 더 큰 무게)</td></tr>
+  <tr><th>고수들이 한 것</th><td>앞으로 나가 평타 58%, 막타 기다리기 27%, 뒤로 물러나기 15%</td></tr>
+  <tr><th>10명 그림</th><td>위 비율을 10명으로 줄여 그렸어요 (6, 3, 1)</td></tr>
+  <tr><th>앞으로 나간 쪽 이득</th><td>물러난 쪽보다 +54골드, 95% 범위 +41~+67 <span class="tag">확인됨</span></td></tr>
+  <tr><th>승률</th><td>승률 차이는 아직 판단할 수 없어요 (+1.8%p, 95% 범위 −0.6~+4.2)</td></tr>
+  <tr><th>상대 정글이 가까울 때</th><td>−12골드, 95% 범위 −31~+6</td></tr>
+  <tr><th>내 체력이 35%보다 적을 때</th><td>−8골드, 95% 범위 −25~+9 (화면의 '체력바 3칸쯤')</td></tr>
+  <tr><th>비교한 방법</th><td>같은 체력, 스킬, 라인 상황끼리 비교하고 다른 조건을 보정했어요. 함께 나타난 결과라서 원인이라고 단정하지는 않아요.</td></tr>
+ </tbody></table>
+</template>
+<template id="tpl-detail-b" data-title="자세히 보기">
+ <table><tbody>
+  <tr><th>평타 사거리</th><td>케이틀린 650, 징크스 525, 쓰레쉬 450 <small>16.21.1</small>. 판 위 원은 사거리 비율 그대로예요</td></tr>
+  <tr><th>케이틀린 E</th><td>90구경 투망, 재사용 16/14/12/10/8초 <small>16.21.1</small></td></tr>
+ </tbody></table>
+</template>
+<template id="tpl-detail-drill" data-title="자세히 보기">
+ <table><tbody>
+  <tr><th>딜교 타이밍</th><td>0.8초</td></tr>
+  <tr><th>누른 때</th><td id="drill-when">타이밍이 열리고 몇 초 뒤인지 0.1초 단위로 적어요</td></tr>
+  <tr><th>사람 반응 시간</th><td>보통 0.2~0.25초</td></tr>
+ </tbody></table>
+</template>
+<template id="tpl-detail-me" data-title="자세히 보기">
+ <table><tbody>
+  <tr><th>세는 판</th><td>정밀 분석을 한 판 가운데, 연습하는 포지션에서 회색 Q 장면이 1번 이상 있던 판만 세요.</td></tr>
+  <tr><th>앞으로 나간 판</th><td>그 판의 회색 Q 장면에서 앞으로 나간 번이 물러난 번보다 많았던 판이에요. 두 횟수가 같은 판은 넣지 않아요.</td></tr>
+  <tr><th>장면이 없던 판</th><td>회색 Q 장면이 한 번도 없던 판은 기록에 넣지 않아요.</td></tr>
+  <tr><th>빼는 움직임</th><td>스킬을 피하거나 막타를 치려고, 또는 미니언이나 포탑에 맞지 않으려고 물러난 건 물러난 번으로 세지 않아요.</td></tr>
+  <tr><th>판별 기록</th><td>0 0 1 0 0 / 0 1 1 0 1 / 1 1 0 1 1</td></tr>
+  <tr><th>비교</th><td>처음 5판과 최근 5판</td></tr>
+  <tr><th>판정 방법</th><td>처음 5판과 최근 5판을 비교해 2판 이상 늘면 좋아졌어요, 2판 이상 줄면 조금 줄었어요, 그 사이면 그대로예요. 5판이 다 모이기 전에는 아직 보는 중이에요.</td></tr>
+ </tbody></table>
+</template>
+<template id="tpl-detail-s8" data-title="자세히 보기">
+ <table><tbody><tr><th>패치</th><td>26.21 리플레이는 26.22에서 열 수 없어요</td></tr></tbody></table>
+</template>
+<template id="tpl-dispute" data-title="무엇이 틀렸나요?">
+ <p class="p" style="margin-bottom:16px">고르면 이 장면을 바로 숨겨요.</p>
+ <div class="reasons"><button data-reason="안 물러났어요">안 물러났어요</button><button data-reason="이유가 있었어요">이유가 있었어요</button><button data-reason="이 매치업은 달라요">이 매치업은 달라요</button><button data-reason="그림이 실제와 달라요">그림이 실제와 달라요</button></div>
+</template>
+<script>
+/* ===== 작전판 키트 (team/design.md 6장) =====
+   판 좌표는 px. 사거리 원 반지름만 '평타 사거리 × k'로 계산한다(아리·신드라 550, 징크스 525, 케이틀린 650, 쓰레쉬 450).
+   말(자석) 크기는 읽기 쉽게 키운 값이다. 장면 사실은 plain-language.md (a)(b)·퀴즈를 따른다. */
+var KIT=(function(){
+var D='assets/ddragon/';
+var CH=function(n){return D+'champ-'+n+'.png'},SP=function(n){return D+'spell-'+n+'.png'};
+var f=function(v){return Math.round(v*10)/10};
+var INK='#16171A',BLUE='#2E66E0',RED='#DE3F3B',HI='#FFE34A',GAIN='#F0BE00',LOSS='#B7BAC0',HURT='#F2A29E';
+function rng(s){var t=s>>>0;return function(){t+=0x6D2B79F5;var x=Math.imul(t^t>>>15,1|t);x^=x+Math.imul(x^x>>>7,61|x);return((x^x>>>14)>>>0)/4294967296}}
+function blob(cx,cy,rx,ry,seed,n,j){n=n||9;j=j||.2;var R=rng(seed),p=[];for(var i=0;i<n;i++){var a=i/n*Math.PI*2,m=1-j+R()*j*2;p.push([cx+Math.cos(a)*rx*m,cy+Math.sin(a)*ry*m])}return p}
+function smooth(p){var n=p.length,d='M'+f(p[0][0])+' '+f(p[0][1]);for(var i=0;i<n;i++){var a=p[(i-1+n)%n],b=p[i],c=p[(i+1)%n],e=p[(i+2)%n];d+='C'+f(b[0]+(c[0]-a[0])/6)+' '+f(b[1]+(c[1]-a[1])/6)+' '+f(c[0]-(e[0]-b[0])/6)+' '+f(c[1]-(e[1]-b[1])/6)+' '+f(c[0])+' '+f(c[1])}return d+'Z'}
+function arc(x1,y1,x2,y2,bend){var mx=(x1+x2)/2,my=(y1+y2)/2,dx=x2-x1,dy=y2-y1,L=Math.hypot(dx,dy)||1,cx=mx-dy/L*bend,cy=my+dx/L*bend;return{d:'M'+f(x1)+' '+f(y1)+'Q'+f(cx)+' '+f(cy)+' '+f(x2)+' '+f(y2),ang:Math.atan2(y2-cy,x2-cx)}}
+function head(x,y,a,l,s){l=l||10;s=s||.5;return'M'+f(x-l*Math.cos(a-s))+' '+f(y-l*Math.sin(a-s))+'L'+f(x)+' '+f(y)+'L'+f(x-l*Math.cos(a+s))+' '+f(y-l*Math.sin(a+s))}
+var K={f:f,blob:blob,smooth:smooth,CH:CH,SP:SP,INK:INK,BLUE:BLUE,RED:RED};
+K.bg=function(W,H){return'<rect width="'+W+'" height="'+H+'" fill="#F3F4F0"/><rect width="'+W+'" height="'+H+'" fill="url(#pDots)"/>'};
+K.wall=function(cx,cy,rx,ry,s){return'<path d="'+smooth(blob(cx,cy,rx,ry,s))+'" fill="#E5E6E0" stroke="#CDD0C8" stroke-width="1.2"/>'};
+K.bush=function(cx,cy,rx,ry,s){return'<path d="'+smooth(blob(cx,cy,rx,ry,s,8,.3))+'" fill="#E1E8DC" stroke="#C9D2C2" stroke-width="1.2"/>'};
+K.laneH=function(W,y0,y1,x0,x1){x0=x0==null?-5:x0;x1=x1==null?W+5:x1;return'<rect x="'+x0+'" y="'+y0+'" width="'+(x1-x0)+'" height="'+(y1-y0)+'" fill="#EBEAE3" fill-opacity=".92"/><path d="M'+x0+' '+y0+'H'+x1+'M'+x0+' '+y1+'H'+x1+'" stroke="#D4D3CB" stroke-width="1.2"/>'};
+K.laneV=function(H,x0,x1){return'<rect x="'+x0+'" y="-5" width="'+(x1-x0)+'" height="'+(H+10)+'" fill="#EBEAE3" fill-opacity=".92"/><path d="M'+x0+' 0V'+H+'M'+x1+' 0V'+H+'" stroke="#D4D3CB" stroke-width="1.2"/>'};
+K.riverV=function(H,x0,x1){var s='<rect x="'+x0+'" y="-5" width="'+(x1-x0)+'" height="'+(H+10)+'" fill="#DCE8EF"/>';for(var y=24;y<H;y+=46)s+='<path d="M'+(x0+10)+' '+y+'q6 -5 12 0t12 0" stroke="#B8D0DE" stroke-width="1.4" fill="none"/>';return s};
+K.riverH=function(W,y0,y1){var s='<rect x="-5" y="'+y0+'" width="'+(W+10)+'" height="'+(y1-y0)+'" fill="#DCE8EF"/>';for(var x=20;x<W;x+=52)s+='<path d="M'+x+' '+((y0+y1)/2)+'q6 -5 12 0t12 0" stroke="#B8D0DE" stroke-width="1.4" fill="none"/>';return s};
+K.poly=function(pts,fill){return'<path d="M'+pts.map(function(p){return f(p[0])+' '+f(p[1])}).join('L')+'Z" fill="'+fill+'"/>'};
+K.mag=function(n,x,y,team,R){R=R||22;var c=team==='b'?BLUE:RED;return'<g transform="translate('+f(x)+' '+f(y)+')"><ellipse cx="1.5" cy="'+f(R*.38)+'" rx="'+f(R*1.02)+'" ry="'+f(R*.78)+'" fill="#000" opacity=".22" filter="url(#fSoft)"/><circle r="'+R+'" fill="'+c+'"/><circle r="'+R+'" fill="url(#gRim)"/><image href="'+CH(n)+'" x="'+f(-R+4.5)+'" y="'+f(-R+4.5)+'" width="'+f(2*R-9)+'" height="'+f(2*R-9)+'" clip-path="url(#cC)"/><circle r="'+f(R-4.5)+'" fill="none" stroke="#000" stroke-opacity=".25"/></g>'};
+K.ghost=function(x,y,R){R=R||22;return'<circle cx="'+f(x)+'" cy="'+f(y)+'" r="'+R+'" fill="#fff" fill-opacity=".55" stroke="'+INK+'" stroke-width="2" stroke-dasharray="4 4" filter="url(#fRough)"/>'};
+K.min=function(x,y,team,r,col,outline){r=r||8.5;var c=col||(team==='b'?BLUE:RED);return'<g transform="translate('+f(x)+' '+f(y)+')"><ellipse cx="1" cy="'+f(r*.5)+'" rx="'+r+'" ry="'+f(r*.75)+'" fill="#000" opacity=".22" filter="url(#fSoft)"/><circle r="'+r+'" fill="'+c+'"'+(outline?' stroke="'+INK+'" stroke-width="1.5"':'')+'/><circle r="'+r+'" fill="url(#gRim)"/></g>'};
+K.hp=function(x,y,fr,team,lost,w){w=w||48;lost=lost||0;var c=team==='b'?BLUE:RED,X=x-w/2;var s='<rect x="'+f(X)+'" y="'+f(y)+'" width="'+w+'" height="8" fill="#fff" stroke="'+INK+'" stroke-width="1.3"/><rect x="'+f(X+1)+'" y="'+f(y+1)+'" width="'+f((w-2)*fr)+'" height="6" fill="'+c+'"/>';if(lost)s+='<rect x="'+f(X+1+(w-2)*fr)+'" y="'+f(y+1)+'" width="'+f((w-2)*lost)+'" height="6" fill="'+HURT+'"/>';for(var i=1;i<10;i++)s+='<path d="M'+f(X+w*i/10)+' '+f(y+1)+'v3.5" stroke="'+INK+'" stroke-opacity=".35" stroke-width=".8"/>';return s};
+K.pen=function(d,c,w,ex){return'<path d="'+d+'" fill="none" stroke="'+(c||INK)+'" stroke-width="'+(w||3)+'" stroke-linecap="round" stroke-linejoin="round" filter="url(#fRough)" '+(ex||'')+'/>'};
+K.arrow=function(x1,y1,x2,y2,bend,c,w,dash){var a=arc(x1,y1,x2,y2,bend||0);return K.pen(a.d+head(x2,y2,a.ang,10),c,w,dash?'stroke-dasharray="'+dash+'"':'')};
+K.ring=function(x,y,r,c,op,dash){return'<circle cx="'+f(x)+'" cy="'+f(y)+'" r="'+f(r)+'" fill="none" stroke="'+c+'" stroke-width="2.6" stroke-dasharray="'+(dash||'9 7')+'" stroke-linecap="round" opacity="'+(op==null?1:op)+'" filter="url(#fRough)"/>'};
+K.hiRing=function(x,y,r,an){return'<g><circle cx="'+f(x)+'" cy="'+f(y)+'" r="'+f(r)+'" fill="'+HI+'" fill-opacity=".06"/><circle class="'+(an===false?'':'a-draw')+'" cx="'+f(x)+'" cy="'+f(y)+'" r="'+f(r)+'" fill="none" stroke="'+HI+'" stroke-width="13" stroke-opacity=".8" pathLength="100" transform="rotate(-100 '+f(x)+' '+f(y)+')"/></g>'};
+K.note=function(x,y,t,s,rot){s=s||24;rot=rot==null?-4:rot;return'<text x="'+f(x)+'" y="'+f(y)+'" font-family="\'Nanum Pen Script\',cursive" font-size="'+s+'" fill="'+INK+'" transform="rotate('+rot+' '+f(x)+' '+f(y)+')">'+t+'</text>'};
+K.skill=function(name,x,y,s,cd,box,light){s=s||24;var h=s/2,R=s*.75,sweep='';if(cd){var a0=-Math.PI/2+(1-cd)*Math.PI*2;sweep='<path d="M'+h+' '+h+'L'+f(h+R*Math.cos(a0))+' '+f(h+R*Math.sin(a0))+'A'+R+' '+R+' 0 '+(cd>.5?1:0)+' 1 '+h+' '+f(h-R)+'Z" fill="#000" fill-opacity="'+(light?.26:.5)+'"/>'}
+ var b=box===false?'':'<rect x="-2.5" y="-2.5" width="'+(s+5)+'" height="'+(s+5)+'" rx="4" fill="#fff" stroke="'+INK+'" stroke-width="1.3"/>';
+ return'<g transform="translate('+f(x-h)+' '+f(y-h)+')">'+b+'<svg width="'+s+'" height="'+s+'" viewBox="0 0 '+s+' '+s+'" overflow="hidden"><image href="'+SP(name)+'" width="'+s+'" height="'+s+'" '+(cd?'filter="url(#'+(light?'fGrayL':'fGray')+')"':'')+'/>'+sweep+'</svg></g>'};
+K.map=function(x,y,s,mx,my){s=s||50;return'<g transform="translate('+x+' '+y+')"><rect x="-3" y="-3" width="'+(s+6)+'" height="'+(s+6)+'" rx="6" fill="#fff" stroke="#CDD0C8"/><image href="'+D+'map11.png" width="'+s+'" height="'+s+'"/>'+K.pen('M'+f(s*mx+7)+' '+f(s*my)+'a7 7 0 1 1 -1 -4',INK,2.2)+'</g>'};
+K.feet=function(pts){return pts.map(function(p){return'<ellipse cx="'+f(p[0])+'" cy="'+f(p[1])+'" rx="3.2" ry="2" fill="'+INK+'" opacity=".75" transform="rotate('+(p[2]||0)+' '+f(p[0])+' '+f(p[1])+')"/>'}).join('')};
+K.poof=function(x,y){return K.pen('M'+(x-12)+' '+y+'h-6M'+(x+12)+' '+y+'h6M'+x+' '+(y-12)+'v-6M'+(x-9)+' '+(y-9)+'l-4 -4M'+(x+9)+' '+(y-9)+'l4 -4',INK,2.2)+'<circle cx="'+x+'" cy="'+y+'" r="7" fill="#fff" fill-opacity=".7" stroke="'+INK+'" stroke-width="1.5" stroke-dasharray="3 3"/>'};
+K.spark=function(x,y){return K.pen('M'+x+' '+(y-14)+'v-6M'+(x+11)+' '+(y-10)+'l4 -4M'+(x-11)+' '+(y-10)+'l-4 -4',INK,2)};
+K.loop=function(cx,cy,rx,ry,seed){return K.pen(smooth(blob(cx,cy,rx,ry,seed,10,.08)),INK,2.4)};
+// 판 밖 부품(손익 줄·사람·숙련)
+K.miniMin=function(c){return'<svg viewBox="-11 -11 22 24" aria-hidden="true">'+K.min(0,0,'b',9,c==='gold'?GAIN:LOSS,true)+(c==='gold'?'':'<path d="M-4 0h8" stroke="'+INK+'" stroke-width="1.6" stroke-linecap="round"/>')+'</svg>'};
+K.chip=function(n,t){return K.mag(n,0,0,t,11).replace(/<ellipse[^>]*\/>/,'')};
+K.person=function(kind){var fill=kind==='full'?'currentColor':kind==='half'?'url(#none)':'none';return'<svg viewBox="0 0 28 40" aria-hidden="true"><circle cx="14" cy="9" r="6.5" fill="'+(kind==='full'?'currentColor':'none')+'" stroke="currentColor" stroke-width="2"/><path d="M3 38c0-10 4.6-16 11-16s11 6 11 16z" fill="'+(kind==='full'?'currentColor':'none')+'" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>'+(kind==='half'?'<path d="M14 22c-6.4 0-11 6-11 16h11z" fill="currentColor"/>':'')+(kind==='me'?'<circle cx="23" cy="6" r="4.5" fill="'+BLUE+'" stroke="#fff" stroke-width="1.5"/>':'')+'</svg>'};
+K.level=function(q){var a=q*2*Math.PI,x=12+8*Math.sin(a),y=12-8*Math.cos(a);var p=q<=0?'':q>=1?'<circle cx="12" cy="12" r="8" fill="currentColor"/>':'<path d="M12 12V4A8 8 0 '+(q>.5?1:0)+' 1 '+f(x)+' '+f(y)+'Z" fill="currentColor"/>';return'<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2"/>'+p+'</svg>'};
+K.mk=function(){return K.pen('M2 7.5H25M19.5 2.5l5.5 5-5.5 5','currentColor',2.4)};
+/* 손글씨 겹침 검사(design.md 6.2): 그려진 판 svg를 받아, 손글씨 글자 상자(위아래 20%씩 줄임)가
+   원 띠·자석·미니언·스킬 타일·체력바·마커 선·다른 글자와 닿는 곳을 돌려준다. 바닥(벽·수풀·라인·강)은 세지 않는다.
+   화면에서는 부르지 않고, team/logs/proto-v5/test.mjs가 모든 컷에서 부른다. */
+K.overlaps=function(svg){
+ var FL=/^(#F3F4F0|url\(#pDots\)|#E5E6E0|#E1E8DC|#EBEAE3|#DCE8EF|#D4D3CB|#B8D0DE|#C9D2C2|#D9DBD4)$/i;
+ var els=[].slice.call(svg.querySelectorAll('circle,ellipse,rect,path,image,text'));
+ var isNote=function(e){return e.tagName==='text'&&/Nanum/.test(e.getAttribute('font-family')||'')};
+ function skip(e){var fl=e.getAttribute('fill')||'',st=e.getAttribute('stroke')||'',fo=+(e.getAttribute('fill-opacity')||1);
+  if(e.closest('defs,clipPath,pattern,mask'))return true;if(FL.test(fl)||FL.test(st))return true;
+  if((e.getAttribute('filter')||'').indexOf('fSoft')>=0)return true;
+  if(fl&&fl!=='none'&&!st&&fo<.2)return true;return false}
+ function P(m,x,y){return{x:m.a*x+m.c*y+m.e,y:m.b*x+m.d*y+m.f}}
+ var hits=[];
+ els.filter(isNote).forEach(function(n){var b=n.getBBox(),dy=b.height*.2,R=[b.x,b.y+dy,b.x+b.width,b.y+b.height-dy],Mi=n.getScreenCTM().inverse();
+  function inR(p,pad){return p.x>=R[0]-pad&&p.x<=R[2]+pad&&p.y>=R[1]-pad&&p.y<=R[3]+pad}
+  function dmin(p){return Math.hypot(Math.max(R[0]-p.x,0,p.x-R[2]),Math.max(R[1]-p.y,0,p.y-R[3]))}
+  function dmax(p){return Math.hypot(Math.max(Math.abs(p.x-R[0]),Math.abs(p.x-R[2])),Math.max(Math.abs(p.y-R[1]),Math.abs(p.y-R[3])))}
+  els.forEach(function(e){if(e===n||skip(e))return;var m=Mi.multiply(e.getScreenCTM()),sc=Math.hypot(m.a,m.b),t=e.tagName,st=e.getAttribute('stroke'),sw=(st&&st!=='none'?+(e.getAttribute('stroke-width')||1):0)*sc,hit=false;
+   if(t==='circle'||t==='ellipse'){var c=P(m,+e.getAttribute('cx')||0,+e.getAttribute('cy')||0),r=(t==='circle'?+e.getAttribute('r'):Math.max(+e.getAttribute('rx'),+e.getAttribute('ry')))*sc,fl=e.getAttribute('fill');
+    hit=fl==='none'?dmin(c)<=r+sw/2&&dmax(c)>=r-sw/2:dmin(c)<=r+sw/2}
+   else if(t==='path'){var L=e.getTotalLength();for(var s=0;s<=L&&!hit;s+=1.5){var q=e.getPointAtLength(s);hit=inR(P(m,q.x,q.y),sw/2)}}
+   else{var bb=e.getBBox(),pad=sw/2,mi=m.inverse();if(isNote(e)){var d2=bb.height*.2;bb={x:bb.x,y:bb.y+d2,width:bb.width,height:bb.height-2*d2}}
+    for(var i=0;i<=10&&!hit;i++)for(var j=0;j<=10&&!hit;j++)hit=inR(P(m,bb.x+bb.width*i/10,bb.y+bb.height*j/10),pad);
+    [[R[0],R[1]],[R[2],R[1]],[R[0],R[3]],[R[2],R[3]],[(R[0]+R[2])/2,(R[1]+R[3])/2]].forEach(function(c){var q=P(mi,c[0],c[1]);if(q.x>=bb.x-pad&&q.x<=bb.x+bb.width+pad&&q.y>=bb.y-pad&&q.y<=bb.y+bb.height+pad)hit=true})}
+   if(hit)hits.push({note:n.textContent,with:t+(e.getAttribute('stroke')?' stroke '+e.getAttribute('stroke'):'')+(e.getAttribute('fill')?' fill '+e.getAttribute('fill'):'')+(t==='text'?' "'+e.textContent+'"':'')})})});
+ return hits};
+return K})();
+
+</script>
+<script>
+/* ===== 장면 데이터 (copy-v2.md 5.0 구도 표, 5.1 손글씨 좌표 — design.md 6.2에 같은 표) =====
+   사거리 원 반지름 = 평타 사거리 × k. 손글씨는 판(컷)마다 2곳까지, 원·선과 겹치지 않는 자리. */
+var SCENES=(function(K){
+var B=K.BLUE,R=K.RED,INK=K.INK,f=K.f;
+var r=function(range,k){return range*k};
+function floorMid(W,H){return K.bg(W,H)+K.wall(60,26,96,42,11)+K.wall(262,20,104,40,12)+K.wall(56,356,100,54,13)+K.wall(270,360,104,50,14)+K.riverV(H,384,452)+K.laneH(W,92,288)}
+function floorBot(W,H){return K.bg(W,H)+K.wall(90,-6,140,50,21)+K.wall(300,22,90,46,22)+K.bush(418,52,52,28,24)+K.laneH(W,87,297)+K.wall(190,372,240,60,23)}
+function laneRot(cx,cy,deg,w,river){var s='<g transform="rotate('+deg+' '+cx+' '+cy+')">';if(river)s+='<rect x="'+(cx+river[0])+'" y="'+(cy-700)+'" width="'+river[1]+'" height="1400" fill="#DCE8EF"/>';return s+'<rect x="'+(cx-900)+'" y="'+(cy-w/2)+'" width="1800" height="'+w+'" fill="#EBEAE3" fill-opacity=".92"/><path d="M'+(cx-900)+' '+(cy-w/2)+'H'+(cx+900)+'M'+(cx-900)+' '+(cy+w/2)+'H'+(cx+900)+'" stroke="#D4D3CB" stroke-width="1.2"/></g>'}
+
+// ---------- (a) 복기 12:42 · 미드 가로 · k .27 ----------
+var A={W:480,H:380,k:.27,a0:[198,190],back:[151,197],fwd:[240,214],syn:[322,170],blue:[[236,150],[252,176],[266,146],[232,172]],red:[[288,128],[284,176],[298,198]],kill:[312,210]};
+function sceneA(cut,mode){var W=A.W,H=A.H,rr=r(550,A.k),best=mode==='best'&&cut>=3&&cut<=5,s=floorMid(W,H)+K.map(420,318,50,.5,.5);
+ var me=cut<3||cut===6?A.a0:(best?A.fwd:A.back);
+ if(cut===1)s+=K.ring(A.syn[0],A.syn[1],rr,R,.75)+K.ring(A.a0[0],A.a0[1],rr,B);
+ if(cut===2||cut===6)s+=K.hiRing(A.a0[0],A.a0[1],rr)+K.ring(A.a0[0],A.a0[1],rr,B);
+ if(cut===3)s+=best?K.hiRing(A.fwd[0],A.fwd[1],rr)+K.ring(A.fwd[0],A.fwd[1],rr,B):K.ring(A.back[0],A.back[1],rr,B);
+ if(cut===4&&best)s+=K.ring(A.fwd[0],A.fwd[1],rr,B,.6);
+ A.blue.forEach(function(p){s+=K.min(p[0],p[1],'b')});A.red.forEach(function(p){s+=K.min(p[0],p[1],'r')});
+ if(cut===1)s+=K.min(A.kill[0],A.kill[1],'r')+K.hp(A.kill[0],A.kill[1]-16,.12,'r',0,20);
+ if(cut===2)s+=K.pen('M'+(A.syn[0]-4)+' '+(A.syn[1]+22)+'Q'+(A.syn[0]+6)+' '+(A.syn[1]+30)+' '+(A.kill[0]+2)+' '+(A.kill[1]-10),INK,2.2,'stroke-dasharray="2 6"')+K.poof(A.kill[0],A.kill[1]);
+ if(cut>=3&&cut<=5)s+=K.ghost(A.a0[0],A.a0[1]);
+ var hpA=cut>=4&&cut<=5&&!best?[.52,.28]:[.8,0],hpS=cut>=4&&cut<=5&&best?[.56,.24]:cut>=4&&cut<=5?[.74,.06]:[.8,0];
+ s+=K.mag('Ahri',me[0],me[1],'b')+K.hp(me[0],me[1]-36,hpA[0],'b',hpA[1])+K.skill('AhriQ',me[0]+24,me[1]+20,20,cut===4&&!best?.9:0);
+ s+=K.mag('Syndra',A.syn[0],A.syn[1],'r')+K.hp(A.syn[0],A.syn[1]-36,hpS[0],'r',hpS[1])+K.skill('SyndraQ',A.syn[0]+20,A.syn[1]+22,22,cut===1?0:.86);
+ if(cut===1)s+=K.note(226,266,'같은 원',24,-4);
+ if(cut===2)s+=K.note(196,114,'닿아요',24,-5)+K.note(236,256,'Q 없음!',26,-5);
+ if(cut===3&&!best)s+=K.arrow(210,262,150,266,-8)+K.feet([[190,276,-10],[172,278,-4]])+K.note(196,242,'여기선 닿았다',22,-4)+K.note(318,240,'Q 없음!',26,-6);
+ if(cut===3&&best)s+=K.arrow(180,240,232,252,10)+K.note(256,280,'Q 없음!',26,-5)+K.note(312,234,'W 전에!',24,-6);
+ if(cut===4&&!best){s+=K.pen('M'+(A.syn[0]-14)+' '+(A.syn[1]-18)+'Q236 96 '+(A.back[0]+18)+' '+(A.back[1]-20),INK,2.4,'stroke-dasharray="2 6"')+K.min(A.back[0]+24,A.back[1]-22,'r',7);
+  [[284,176],[298,198]].forEach(function(p){s+=K.arrow(p[0]-10,p[1]+6,A.back[0]+28,A.back[1]+10,6,R,2.2,'4 5')});
+  s+=K.pen('M'+(A.back[0]+22)+' '+(A.back[1]-6)+'L340 120',B,2.2,'stroke-dasharray="3 6"')+K.note(226,86,'W!',28,-6)+K.note(350,104,'빗나감',24,-4)}
+ if(cut===4&&best)s+=K.arrow(260,204,300,178,-4,INK,3.2)+K.note(214,112,'평타 + Q',26,-5);
+ if(cut===5){var g=best,n=g?3:5;for(var i=0;i<n;i++)s+=K.min(36+i*24,334,'b',9,g?'#F0BE00':'#B7BAC0',true)}
+ if(cut===5&&best)s+=K.note(214,112,'평타 + Q',26,-5);
+ if(cut===6)s+=K.loop(A.syn[0]+20,A.syn[1]+22,22,20,61)+K.arrow(206,232,246,250,10);
+ return s}
+var CAP_A={1:'아리와 신드라가 미드에서 맞서고 있어요. 두 챔피언의 평타 사거리는 같아요.',
+ 2:'신드라가 Q로 막타를 쳤어요. Q가 회색이고, 신드라는 내 평타 원 안이에요.',
+ '3real':'신드라가 내 평타 원 밖으로 나갔어요.','3best':'여기서 한 걸음 앞으로 나가면 신드라는 그대로 내 원 안이에요.',
+ '4real':'물러난 걸 본 신드라가 먼저 들어와 W를 맞혔어요. 늦게 친 평타 때문에 상대 미니언까지 아리를 때려요.','4best':'평타 한 대 + Q. 신드라는 받아칠 Q가 없어요.',
+ '5real':'실제로는 아리 체력바가 많이 깎였어요.','5best':'한 걸음 앞으로 나갔다면 평균적으로 이득이었어요.',
+ 6:'상대 스킬이 회색이고 상대가 내 원 안이면, 한 걸음 앞으로 가서 평타 한 대 + Q.'};
+
+// ---------- (b) 레슨 원딜 · 바텀 가로, 원 셋 · k .25 ----------
+var Bt={W:488,H:380,k:.25,j0:[164,199],j2:[150,201],j4:[176,198],j5:[146,240],th:[114,129],c0:[323,179],c3:[256,186],c5:[300,176],cEnd:[240,188],
+ blue:[[203.4,184.2],[211.3,215.8],[224.5,160.6],[198.1,231.6],[187.6,160.6]],low:[237.6,210.6],red:[[256,236.9],[287.6,226.4]]};
+function caitAt(t){return[Bt.c0[0]+(Bt.cEnd[0]-Bt.c0[0])*t,Bt.c0[1]+(Bt.cEnd[1]-Bt.c0[1])*t]}
+function sceneB(cut,t,thumb){var W=Bt.W,H=Bt.H,k=Bt.k,rJ=r(525,k),rC=r(650,k),rT=r(450,k),s=floorBot(W,H);
+ var jinx=cut===1?Bt.j0:cut===4?Bt.j4:cut===5?Bt.j5:Bt.j2;
+ var cait=cut<=2?Bt.c0:cut===3?caitAt(t==null?.84:t):cut===5?Bt.c5:Bt.c3;
+ var inside=Math.hypot(cait[0]-jinx[0],cait[1]-jinx[1])<rJ;
+ if(cut<=3||cut===6)s+=K.ring(Bt.th[0],Bt.th[1],rT,B,.38,'3 7');
+ if(cut!==4)s+=K.ring(cait[0],cait[1],rC,R,cut===6?.5:.95);
+ if((cut===3&&inside)||cut===6)s+=K.hiRing(jinx[0],jinx[1],rJ,cut===3&&t!=null?false:undefined);
+ if(cut!==4&&cut!==5)s+=K.ring(jinx[0],jinx[1],rJ,B);
+ if(cut===2)s+=K.skill('CaitlynW',418,52,22,0)+K.note(352,108,'밟지 마세요',24,-4)+K.note(48,276,'여기서 기다리기',22,-3);
+ Bt.blue.forEach(function(p){s+=K.min(p[0],p[1],'b')});Bt.red.forEach(function(p){s+=K.min(p[0],p[1],'r')});
+ if(cut<=3)s+=K.min(Bt.low[0],Bt.low[1],'r')+K.hp(Bt.low[0],Bt.low[1]-16,.1,'r',0,20)+(cut===3?K.spark(Bt.low[0],Bt.low[1]-4):'');
+ s+=K.mag('Thresh',Bt.th[0],Bt.th[1],'b',20);
+ if(cut===4)s+=K.skill('ThreshQ',Bt.th[0]-22,Bt.th[1]-22,20,0)+K.pen('M'+(Bt.th[0]+18)+' '+(Bt.th[1]+10)+'L'+(cait[0]-20)+' '+(cait[1]-6),INK,3,'stroke-dasharray="7 4"')+K.note(132,118,'같이!',26,-8);
+ if(cut===2)s+=K.ghost(Bt.j0[0],Bt.j0[1],20)+K.arrow(Bt.j0[0]-8,Bt.j0[1]+28,Bt.j2[0]-4,Bt.j2[1]+30,6,INK,2.6);
+ if(cut===4)s+=K.ghost(Bt.j2[0],Bt.j2[1],21)+K.arrow(Bt.j4[0]+24,Bt.j4[1]-4,cait[0]-26,cait[1]-2,-6,INK,3)+K.arrow(Bt.j4[0]+24,Bt.j4[1]+8,cait[0]-24,cait[1]+10,6,INK,3)+K.arrow(Bt.red[0][0]-10,Bt.red[0][1]-4,Bt.j4[0]+16,Bt.j4[1]+18,-6,R,2.2,'4 5');
+ if(cut===5)s+=K.ghost(Bt.j4[0],Bt.j4[1],21)+K.arrow(Bt.j4[0]-6,Bt.j4[1]+26,Bt.j5[0]+4,Bt.j5[1]-24,8,INK,2.6)+K.pen('M'+(cait[0]-24)+' '+cait[1]+'L20 '+(cait[1]+14),R,2.4,'stroke-dasharray="10 6"')+K.note(52,306,'옆으로',26,-4);
+ var hc=cut>=6?[.32,0]:cut>=4?[.5,.36]:[.86,0];
+ s+=K.mag('Jinx',jinx[0],jinx[1],'b',21)+K.hp(jinx[0],jinx[1]-35,.86,'b');
+ s+='<g class="drag">'+K.mag('Caitlyn',cait[0],cait[1],'r',21)+'</g>'+K.hp(cait[0],cait[1]-35,hc[0],'r',hc[1]);
+ if(cut===3||cut===4)s+=K.skill('CaitlynE',cait[0]+24,cait[1]+18,18,.7);
+ if(cut===3){if(t==null||t>.12)s+=K.arrow(Bt.c0[0]+10,Bt.c0[1]-26,cait[0]+16,cait[1]-24,-6,R,2.6);
+  s+=inside?K.note(cait[0]+54,cait[1]+2,'지금!',30,-6):K.note(cait[0]+54,cait[1]+2,'아직',26,-5);if(!thumb)s+=K.note(cait[0]+54,cait[1]+30,'도망 스킬 없음',22,-3)}
+ if(cut===1)s+=K.note(180,138,'닿음',24,-4)+K.note(300,254,'안 닿음',24,-4);
+ if(cut===6)s+=K.arrow(Bt.j2[0]+8,Bt.j2[1]+28,Bt.j2[0]+48,Bt.j2[1]+34,-6,INK,3);
+ return{svg:s,inside:inside}}
+var CAP_B={1:'케이틀린의 평타 사거리가 징크스보다 길어요. 그냥 서 있으면 케이틀린만 때릴 수 있어요.',
+ 2:'그래서 징크스는 케이틀린 원 바로 밖, 우리 미니언 뒤에서 기다려요. 덫은 밟지 않게 피해요.',
+ 3:'케이틀린이 막타를 먹으려면 내 원 안으로 들어와야 해요. 막타를 치는 동안엔 피하기 어려워요. 지금이 기회예요.',
+ 4:'한 걸음 앞으로 나가 평타! 쓰레쉬도 사형 선고로 같이 들어가요. 우리 미니언이 더 많아서 상대 미니언에게 덜 맞아요.',
+ 5:'때렸으면 다시 케이틀린 원 밖으로 돌아가요. 케이틀린 Q는 옆으로 비켜서 피해요.',
+ 6:'상대가 막타 치러 내 평타 원 안으로 들어오면, 한 걸음 앞으로 + 평타.'};
+// ---------- Q1 미드, 신드라 둘레에 빨간 미니언 뭉치 · 가로 확대 · k .3 ----------
+function q1(v){var W=480,H=380,rr=r(550,.3),ah=v==='A'?[226,198]:[176,200],st=[226,198],sy=[306,176];var s=K.bg(W,H)+K.wall(80,40,110,46,41)+K.wall(330,30,120,40,42)+K.wall(90,350,120,46,43)+K.wall(360,352,110,44,44)+K.laneH(W,84,316);
+ s+=(v==='ok'?K.hiRing(ah[0],ah[1],rr):'')+K.ring(ah[0],ah[1],rr,B);var red=[[270,150],[276,192],[292,214],[320,214],[264,172]];
+ if(v!=='ok'&&v!=='A')[[270,150],[276,192],[292,214],[264,172]].forEach(function(p){s+='<path d="M'+p[0]+' '+p[1]+'L'+st[0]+' '+st[1]+'" stroke="'+R+'" stroke-width="1.8" stroke-dasharray="3 4" opacity=".85"/>'});
+ if(v!=='A')s+=K.ghost(st[0],st[1]);[[214,166],[214,232]].forEach(function(p){s+=K.min(p[0],p[1],'b')});red.forEach(function(p){s+=K.min(p[0],p[1],'r')});
+ if(v==='A')red.slice(0,4).forEach(function(p){s+=K.arrow(p[0]-8,p[1],ah[0]+22,ah[1],0,R,2.4)});
+ if(v==='ok')s+=K.pen('M'+(ah[0]+26)+' '+(ah[1]-6)+'L'+(sy[0]-26)+' '+(sy[1]+4),B,2.6,'stroke-dasharray="3 6"')+K.skill('AhriQ',sy[0]-40,sy[1]+8,20,0);
+ s+=K.loop(286,186,52,48,45)+K.mag('Syndra',sy[0],sy[1],'r')+K.hp(sy[0],sy[1]-36,v==='ok'?.62:.8,'r',v==='ok'?.18:0)+K.skill('SyndraQ',sy[0]+24,sy[1]+22,20,.86);
+ s+=K.mag('Ahri',ah[0],ah[1],'b')+K.hp(ah[0],ah[1]-36,v==='A'?.5:.8,'b',v==='A'?.3:0);return s}
+// ---------- Q2 미드 세로 확대 · 아리 아래, 신드라 위 · k .28 ----------
+function q2(v){var W=480,H=380,rr=r(550,.28),ah=v==='ok'?[240,180]:v==='A'?[240,262]:[240,222],sy=[244,92];var s=K.bg(W,H)+K.wall(70,140,74,150,51)+K.wall(410,190,74,150,52)+K.laneV(H,156,324);
+ if(v==='ok')s+=K.hiRing(ah[0],ah[1],rr);s+=K.ring(ah[0],ah[1],rr,B,v==='A'?.35:1);
+ [[190,150],[296,146]].forEach(function(p){s+=K.min(p[0],p[1],'b')});s+=K.min(276,104,'r')+K.min(414,74,'r')+K.min(432,112,'r');
+ s+=K.mag('Syndra',sy[0],sy[1],'r')+K.hp(sy[0],sy[1]-36,v==='ok'?.6:.8,'r',v==='ok'?.2:0)+K.skill('SyndraQ',446,34,28,.86)+K.note(352,48,'Q 없음!',26,-4);
+ if(!v){s+=K.arrow(240,194,240,160,0,INK,3)+K.arrow(240,252,240,286,0,INK,3)+K.arrow(214,232,150,196,-30,INK,3)+'<circle cx="276" cy="244" r="5" fill="'+INK+'"/>'}
+ if(v==='A')s+=K.ghost(240,222)+K.arrow(240,246,240,262-26,0,INK,2.4);
+ if(v==='ok')s+=K.ghost(240,222)+K.arrow(258,160,248,118,0,INK,3)+K.pen('M226 160L236 116',B,2.4,'stroke-dasharray="3 6"')+K.note(286,240,'평타 + Q',26,-4);
+ s+=K.mag('Ahri',ah[0],ah[1],'b')+K.hp(ah[0],ah[1]-36,.8,'b');return s}
+// ---------- Q3 바텀 대각선 확대 · 막타 직전 미니언을 가운데 · k .22 ----------
+function q3(v){var W=480,H=380,k=.22,jx=v==='ok'?[160,236]:v==='C'?[262,196]:[140,250],ct=v==='ok'?[238,176]:[330,150],mn=[206,212];var s=K.bg(W,H)+K.wall(60,40,90,60,61)+K.wall(420,330,90,60,62)+laneRot(240,200,-28,190);
+ if(v==='ok')s+=K.hiRing(jx[0],jx[1],r(525,k));s+=K.ring(ct[0],ct[1],r(650,k),R,.95)+K.ring(jx[0],jx[1],r(525,k),B);
+ [[120,206],[176,276],[100,300]].forEach(function(p){s+=K.min(p[0],p[1],'b')});[[300,210],[316,180]].forEach(function(p){s+=K.min(p[0],p[1],'r')});
+ s+=K.min(mn[0],mn[1],'r')+K.hp(mn[0],mn[1]-16,.1,'r',0,20)+K.spark(mn[0],mn[1]-4)+K.note(220,120,'곧 막타',24,-4);
+ if(!v)s+=K.arrow(308,164,232,204,6,R,2.4,'5 5');
+ if(v==='ok')s+=K.ghost(140,250,21)+K.arrow(jx[0]+22,jx[1]-14,ct[0]-24,ct[1]+6,-6,INK,3)+K.arrow(jx[0]+24,jx[1]-2,ct[0]-22,ct[1]+16,6,INK,3)+K.note(288,254,'지금!',30,-6);
+ if(v==='C')s+=K.ghost(140,250,21)+K.arrow(ct[0]-22,ct[1]+14,jx[0]+22,jx[1]-8,6,R,2.6);
+ s+=K.mag('Jinx',jx[0],jx[1],'b')+K.hp(jx[0],jx[1]-36,v==='C'?.6:.86,'b',v==='C'?.26:0)+K.mag('Caitlyn',ct[0],ct[1],'r')+K.hp(ct[0],ct[1]-36,v==='ok'?.56:.86,'r',v==='ok'?.3:0);return s}
+// ---------- 반응 연습 · 미드를 미니맵 방향 대각선, 두 챔피언만 크게 · k .27 ----------
+var DR={ah:[176,226],q:.45,k:.27};
+function drillPos(t){var a=[430,62],b=[284,150],c=[404,96];if(t<.35){var u=t/.35;return[a[0]+(b[0]-a[0])*u,a[1]+(b[1]-a[1])*u]}if(t<.72)return b;var w=(t-.72)/.28;return[b[0]+(c[0]-b[0])*w,b[1]+(c[1]-b[1])*w]}
+function drill(t,mark){var W=480,H=380,rr=r(550,DR.k),sy=drillPos(t),inside=Math.hypot(sy[0]-DR.ah[0],sy[1]-DR.ah[1])<rr,cd=t>=DR.q;
+ var s=K.bg(W,H)+K.wall(70,70,90,70,71)+K.wall(410,320,80,70,72)+laneRot(240,180,-34,150,[80,64]);
+ if(mark&&cd&&inside)s+=K.hiRing(DR.ah[0],DR.ah[1],rr);s+=K.ring(DR.ah[0],DR.ah[1],rr,B);
+ if(t<DR.q)s+=K.min(322,168,'r')+K.hp(322,152,.1,'r',0,20);else if(t<DR.q+.12)s+=K.poof(322,168);
+ s+=K.mag('Ahri',DR.ah[0],DR.ah[1],'b',26)+K.hp(DR.ah[0],DR.ah[1]-40,.8,'b')+K.mag('Syndra',sy[0],sy[1],'r',26)+K.hp(sy[0],sy[1]-40,.8,'r')+K.skill('SyndraQ',sy[0]+24,sy[1]+26,22,cd?.86:0);
+ if(mark&&cd&&inside)s+=K.note(96,330,'여기!',30,-5);
+ return{svg:s,ok:cd&&inside,cd:cd,inside:inside}}
+// ---------- (c) 정석 예외: 리 신 · 강을 가운데 가로로, 미드는 아래 귀퉁이 · k .2 ----------
+var C={ah:[130,262],sy:[222,232],ghost:[150,116],lee2:[150,116],lee3:[112,206],ah5:[96,288]};
+function sceneC(cut){var W=480,H=380,k=.2,s=K.bg(W,H)+K.riverH(W,128,206)+K.bush(150,112,44,22,81)+K.bush(330,222,40,20,82)+K.wall(60,40,90,50,83)+K.wall(300,40,140,50,84)+K.wall(430,320,70,60,85)+laneRot(176,262,-18,86);
+ var ah=cut===5?C.ah5:C.ah,lee=cut===3?C.lee3:C.lee2;
+ s+=K.map(420,8,50,cut===5?.32:.62,cut===5?.62:.38)+(cut<5?'<circle cx="'+(420+31)+'" cy="'+(8+19)+'" r="3" fill="'+R+'"/><circle cx="'+(420+31)+'" cy="'+(8+19)+'" r="9" fill="'+R+'" fill-opacity=".15"/>':'<circle cx="'+(420+16)+'" cy="'+(8+31)+'" r="3" fill="'+R+'"/>');
+ if(cut<=2)s+=K.ring(C.sy[0],C.sy[1],r(550,k),R,.6)+K.ring(ah[0],ah[1],r(550,k),B);
+ [[172,252],[176,280],[150,236]].forEach(function(p){s+=K.min(p[0],p[1],'b')});[[200,214],[248,252]].forEach(function(p){s+=K.min(p[0],p[1],'r')});
+ if(cut===1)s+='<circle cx="'+C.ghost[0]+'" cy="'+C.ghost[1]+'" r="20" fill="none" stroke="'+R+'" stroke-width="2.4" stroke-dasharray="4 4"/>'+K.note(176,92,'방금 여기',24,-4);
+ if(cut===2)s+=K.arrow(ah[0]+22,ah[1]-12,ah[0]+50,ah[1]-24,0,INK,2.8)+K.pen('M'+(lee[0]-4)+' '+(lee[1]+22)+'L'+(ah[0]-4)+' '+(ah[1]-24),R,2.4,'stroke-dasharray="10 5"')+K.note(176,92,'방금 여기',24,-4);
+ if(cut===3)s+=K.arrow(C.lee2[0]-6,C.lee2[1]+24,lee[0]+2,lee[1]-24,-8,R,2.8)+K.feet([[118,292,0],[126,296,0],[134,300,0]])+K.pen('M'+(C.sy[0]-16)+' '+(C.sy[1]-12)+'Q190 190 '+(ah[0]+20)+' '+(ah[1]-14),INK,2.4,'stroke-dasharray="2 6"')+K.note(240,330,'둘이 와요!',26,-4);
+ if(cut===5)s+=K.note(30,346,'참기',28,-4);
+ if(cut>=2&&cut<=4)s+=K.mag('LeeSin',lee[0],lee[1],'r',20)+K.skill(cut===3?'LeeSinE':'LeeSinQ',lee[0]+22,lee[1]+20,18,0);
+ var hp=cut===3?[.38,.36]:cut===4?[.18,0]:[.8,0];
+ s+=K.mag('Syndra',C.sy[0],C.sy[1],'r',19)+K.hp(C.sy[0],C.sy[1]-32,.8,'r',0,40)+K.skill('SyndraQ',C.sy[0]+20,C.sy[1]+20,18,.86);
+ s+=K.mag('Ahri',ah[0],ah[1],'b',19)+K.hp(ah[0],ah[1]-32,hp[0],'b',hp[1],40);
+ if(cut===4)s+='<rect x="'+(ah[0]-20+1)+'" y="'+(ah[1]-31)+'" width="6" height="6" fill="'+R+'"/>';
+ return s}
+var CAP_C={1:'신드라 Q는 회색인데, 리 신이 방금 강에서 보였어요.',2:'들어가면 수풀에서 리 신이 음파를 던져요.',3:'리 신이 날아와 붙고, 아리는 느려져서 빠져나가지 못해요.',4:'앞으로 나간 이득이 사라져요.',5:'리 신이 다른 곳에서 보일 때까지는 막타만 챙겨요.'};
+// ---------- (d) 서폿 쓰레쉬 · 바텀 세로 확대, 쓰레쉬 가운데 · k .2 · 440×440 ----------
+var Dd={W:440,H:440,th:[150,250],jx:[240,290],c1:[250,200],c2:[246,232]};
+function wallBox(cx,cy,rad){var s='';for(var i=0;i<5;i++){var a1=-Math.PI/2+i*2*Math.PI/5+.16,a2=-Math.PI/2+(i+1)*2*Math.PI/5-.16;s+=K.pen('M'+f(cx+rad*Math.cos(a1))+' '+f(cy+rad*Math.sin(a1))+'L'+f(cx+rad*Math.cos(a2))+' '+f(cy+rad*Math.sin(a2)),INK,5)}return s}
+function sceneD(cut){var W=Dd.W,H=Dd.H,k=.2,ct=cut===1?Dd.c1:cut===4?[250,150]:Dd.c2,s=K.bg(W,H)+K.wall(50,200,56,180,91)+K.wall(400,230,56,190,92)+K.laneV(H,116,364);
+ if(cut<=2)s+=K.ring(Dd.jx[0],Dd.jx[1],r(525,k),B);
+ [[206,318],[270,328],[236,344]].forEach(function(p){s+=K.min(p[0],p[1],'b')});[[214,164],[282,170]].forEach(function(p){s+=K.min(p[0],p[1],'r')});
+ if(cut===2)s+=K.pen('M'+(Dd.th[0]+20)+' '+(Dd.th[1]-18)+'Q'+(ct[0]+30)+' '+(ct[1]-50)+' '+(ct[0]+18)+' '+(ct[1]-22),INK,3,'stroke-dasharray="7 4"')+K.ghost(Dd.c1[0],Dd.c1[1],20)+K.arrow(Dd.jx[0]+6,Dd.jx[1]-26,ct[0]+4,ct[1]+26,4,INK,3)+K.arrow(Dd.jx[0]-10,Dd.jx[1]-24,ct[0]-12,ct[1]+24,-4,INK,3)+K.note(300,120,'끌어와!',26,-5);
+ if(cut===3)s+=K.pen('M'+ct[0]+' '+(ct[1]+22)+'L'+Dd.jx[0]+' '+(Dd.jx[1]-24),R,2.4,'stroke-dasharray="10 6"')+K.skill('ThreshW',Dd.jx[0]-34,Dd.jx[1]+6,20,0)+K.pen('M'+(Dd.jx[0]+32)+' '+Dd.jx[1]+'a32 32 0 1 1 -1 -4',INK,2.4);
+ if(cut===4)s+=wallBox(Dd.th[0]+40,Dd.th[1]-62,58)+K.feet([[256,226,0],[254,206,0],[252,192,0],[251,182,0],[250,174,0]])+K.note(300,112,'느려짐',26,-5);
+ s+=K.mag('Thresh',Dd.th[0],Dd.th[1],'b',21)+'<circle cx="'+(Dd.th[0]-19)+'" cy="'+(Dd.th[1]-19)+'" r="12.5" fill="#fff" stroke="'+INK+'" stroke-width="1.6"/><text x="'+(Dd.th[0]-19)+'" y="'+(Dd.th[1]-13)+'" font-size="17" font-weight="900" text-anchor="middle" fill="'+INK+'" font-family="Gothic A1,sans-serif">6</text>';
+ if(cut<=2)s+=K.skill('ThreshE',Dd.th[0]+24,Dd.th[1]+20,18,0);if(cut===4)s+=K.skill('ThreshR',Dd.th[0]+24,Dd.th[1]+20,18,0);
+ s+=K.mag('Jinx',Dd.jx[0],Dd.jx[1],'b',21)+K.hp(Dd.jx[0],Dd.jx[1]-35,cut>=3?.78:.86,'b',cut>=3?.08:0)+K.mag('Caitlyn',ct[0],ct[1],'r',21)+K.hp(ct[0],ct[1]-35,cut>=2?.6:.86,'r',cut>=2?.26:0);
+ if(cut===1)s+=K.note(298,188,'들어왔다',26,-5);
+ return s}
+var CAP_D={1:'케이틀린이 막타 치러 징크스 원 안까지 내려왔어요.',2:'사슬 채찍을 우리 쪽으로 휘둘러 케이틀린을 끌어와요.',3:'케이틀린이 Q로 받아치면, 랜턴을 던져 징크스를 지켜요.',4:'영혼 감옥을 깔면, 케이틀린이 벽을 부수고 나갈 때 느려져요.'};
+// ---------- 오늘 연습 규칙 그림(바닥 없음, 미니언 없음) · 480×360 ----------
+function todayFig(){var W=480,H=360;var s=K.bg(W,H)+'<g transform="translate(0 14)">';
+ s+=K.skill('SyndraQ',96,118,96,.86,false,true)+'<rect x="45" y="67" width="102" height="102" rx="10" fill="none" stroke="'+INK+'" stroke-width="2"/>'+K.note(52,214,'Q 없음!',30,-3)+K.pen('M186 104v30M171 119h30',INK,3.6);
+ s+=K.hiRing(322,120,84)+K.ring(322,120,84,B)+K.mag('Ahri',294,148,'b',22)+K.mag('Syndra',350,92,'r',22)+K.note(334,142,'닿아요',26,-4)+'</g><g transform="translate(0 26)">';
+ s+=K.mag('Ahri',96,282,'b',22)+K.arrow(132,282,268,282,-10,INK,3.4)+K.feet([[156,296,0],[182,296,0],[208,296,0]])+K.skill('AhriQ',320,282,48,0)+'</g>';return s}
+// ---------- 정석: 작전판 대신 사람 10명 세 줄 · 480×360 ----------
+function canonBoard(){var W=480,H=360,s=K.bg(W,H)+'<text x="20" y="42" font-size="20" font-weight="800" fill="'+INK+'" font-family="Gothic A1,sans-serif">고수 10명이 있다면</text>';
+ var rows=[['앞으로 나가 평타',6],['막타 기다리기',3],['뒤로 물러나기',1]];
+ var man=function(x,y){return K.person('full').replace('<svg ','<svg x="'+f(x-15)+'" y="'+f(y-22)+'" width="30" height="43" color="'+INK+'" ')};
+ rows.forEach(function(rw,i){var y=114+i*88;s+='<text x="20" y="'+(y+7)+'" font-size="18" font-weight="700" fill="'+INK+'" font-family="Gothic A1,sans-serif">'+rw[0]+'</text>';
+  for(var j=0;j<rw[1];j++)s+='<ellipse cx="'+(192+j*40)+'" cy="'+(y+22)+'" rx="14" ry="3.5" fill="#000" opacity=".12"/>'+man(192+j*40,y);
+  if(i===2)s+=K.mag('Ahri',192+40+6,y,'b',20)+K.note(192+40+6+30,y+8,'나',26,-6)});
+ return s}
+// ---------- 나: 곡선 하나 (copy-v2 6.2, 최근 5판 합) ----------
+function growth(){var P=[1,1,2,2,2,3,4,4,3,4,4],W=480,H=210,x=function(i){return 60+i*38},y=function(v){return 180-v*34};var d='';P.forEach(function(v,i){d+=(i?'L':'M')+x(i)+' '+y(v)});
+ var s='<path d="'+d+'" fill="none" stroke="'+INK+'" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>';
+ P.forEach(function(v,i){if(i<P.length-1)s+='<circle cx="'+x(i)+'" cy="'+y(v)+'" r="4" fill="#fff" stroke="'+INK+'" stroke-width="2"/>'});
+ s+='<text x="'+(x(0)-8)+'" y="'+(y(1)+34)+'" font-size="18" font-weight="700" fill="'+INK+'" font-family="Gothic A1,sans-serif">처음 5판엔 1판</text>';
+ s+=K.min(x(10),y(4),'b',12,INK);return K.bg(W,H)+s}
+// ---------- 정석 신호 그림 3개 ----------
+function sig(n){if(n===1)return'<svg viewBox="0 0 48 48" aria-hidden="true">'+K.skill('SyndraQ',24,24,36,.86)+'</svg>';
+ if(n===2)return'<svg viewBox="0 0 48 48" aria-hidden="true">'+K.ring(24,24,20,B)+K.min(30,20,'r',7)+'</svg>';
+ return'<svg viewBox="0 0 48 48" aria-hidden="true"><image href="assets/ddragon/map11.png" x="4" y="4" width="40" height="40"/><circle cx="38" cy="10" r="3.5" fill="'+R+'"/></svg>'}
+return{A:A,sceneA:sceneA,CAP_A:CAP_A,Bt:Bt,sceneB:sceneB,CAP_B:CAP_B,caitAt:caitAt,q1:q1,q2:q2,q3:q3,drill:drill,DR:DR,sceneC:sceneC,CAP_C:CAP_C,sceneD:sceneD,CAP_D:CAP_D,Dd:Dd,todayFig:todayFig,canonBoard:canonBoard,growth:growth,sig:sig};
+})(KIT);
+</script>
+<script>
+(function(){
+'use strict';
+var $=function(s,r){return(r||document).querySelector(s)},$$=function(s,r){return Array.prototype.slice.call((r||document).querySelectorAll(s))};
+var K=KIT,S=SCENES,INK='#16171A';
+function reduced(){try{return matchMedia('(prefers-reduced-motion: reduce)').matches}catch(e){return false}}
+function go(h){if(location.hash==='#'+h)route();else location.hash=h}
+
+/* ---------- 그림 채우기 ---------- */
+var STATIC={today:S.todayFig,canon:S.canonBoard,growth:S.growth};
+$$('svg[data-draw]').forEach(function(s){s.innerHTML=STATIC[s.dataset.draw]()});
+$('#thumb-b').innerHTML=S.sceneB(3,.95,true).svg;
+$('#board-amid').innerHTML=S.sceneA(2,'real');
+$$('[data-mins]').forEach(function(el){var p=el.dataset.mins.split(','),h='';for(var i=0;i<+p[0];i++)h+=K.miniMin(p[1]);el.innerHTML=h;el.setAttribute('role','img');el.setAttribute('aria-label','미니언 '+p[0]+'마리, '+(p[1]==='gold'?'금색 이득':'회색 손해'))});
+$$('svg[data-chip]').forEach(function(el){var p=el.dataset.chip.split(',');el.setAttribute('viewBox','-12 -12 24 24');el.setAttribute('aria-hidden','true');el.innerHTML=K.chip(p[0],p[1])});
+$$('[data-sig]').forEach(function(el){el.innerHTML=S.sig(+el.dataset.sig)});
+$$('[data-lvi]').forEach(function(el){el.innerHTML=K.level(+el.dataset.lvi)});
+// 숙련 4단계: 아직 / 알아요 / 해 봤어요 / 몸에 익음 (원 채움 0 · 1/3 · 2/3 · 가득)
+var LVN=['아직','알아요','해 봤어요','몸에 익음'],LV={adc:1,mid:2};
+function paintLv(){$$('[data-lvkey]').forEach(function(el){var v=LV[el.dataset.lvkey];el.innerHTML=K.level(v/3)+'<span>'+LVN[v]+'</span>'})}paintLv();
+// 이 판의 같은 장면 점: 6번 중 4번 물러남(채운 점), 지금 보는 점만 크게
+(function(){var D=[1,0,1,1,0,1],cur=3,s='';D.forEach(function(v,i){var x=20+i*40,r=i===cur?10:6;s+='<circle cx="'+x+'" cy="18" r="'+r+'" fill="'+(v?'currentColor':'none')+'" stroke="currentColor" stroke-width="2"/>'});s+='<text x="'+(20+cur*40)+'" y="46" font-size="13" font-weight="800" text-anchor="middle" fill="currentColor" font-family="Gothic A1,sans-serif">12:42</text>';$('#scene-dots').innerHTML=s})();
+// 교과서 권 목록
+var BOOKS=[['0권 협곡 입문',.6,[['맵 구조',3],['역할',3],['골드와 경험치',2],['미니언과 포탑',2],['오브젝트 기본',1],['조작 기본',3]]],
+ ['1권 라인전',.25,[['웨이브',1],['막타',3],['딜교',2,[['사거리가 더 긴 상대와 딜교','lesson','adc'],['상대 스킬이 회색일 때 딜교','lesson-mid','mid'],['상대 원딜이 막타 치러 오면 같이 때리기','lesson-sup',null]]],['어그로',1],['체력과 마나',0],['귀환',0],['소환사 주문',0],['갱 대응',0],['탑',0],['미드',1],['바텀',0]]],
+ ['2권 정글링',0,[['정글 동선',0],['캠프 관리',0],['갱 각 판단',0]]],['3권 운영',0,[['오브젝트',0],['라인 관리',0]]],['4권 한타',0,[['자리 잡기',0],['앞뒤 역할',0]]],['5권 학습법과 멘탈',.1,[['복기하는 법',1],['멘탈 관리',0]]]];
+$('#books').innerHTML=BOOKS.map(function(b,i){var ch=b[2].map(function(c){var sub=c[2]?'<ul class="lessons">'+c[2].map(function(l){return'<li><a href="#'+l[1]+'"><span>'+l[0]+'</span>'+(l[2]?'<span class="lv" data-lvkey="'+l[2]+'"></span>':'<span class="lv">'+K.level(0)+'<span>아직</span></span>')+'</a></li>'}).join('')+'</ul>':'';return'<li><div class="ch"><span>'+c[0]+'</span><span class="lvi" aria-label="'+LVN[c[1]]+'">'+K.level(c[1]/3)+'</span></div>'+sub+'</li>'}).join('');
+ return'<li><button class="bk" aria-expanded="'+(i===1)+'" aria-controls="bk'+i+'"><span>'+b[0]+'</span><span class="pbar" aria-hidden="true"><i style="width:'+(b[1]*100)+'%"></i></span></button><ul class="chs" id="bk'+i+'"'+(i===1?'':' hidden')+'>'+ch+'</ul></li>'}).join('');
+paintLv();
+$$('.bk').forEach(function(b){b.addEventListener('click',function(){var u=document.getElementById(b.getAttribute('aria-controls')),o=u.hidden;u.hidden=!o;b.setAttribute('aria-expanded',String(o))})});
+
+/* ---------- 이동: 탭 5개, 교과서 안 레슨 | 정석 ---------- */
+var CODEX={codex:'toc',lesson:'lesson','lesson-mid':'lesson-mid','lesson-sup':'lesson-sup',canon:'canon','canon-card':'canon-card','canon-c':'canon-c'};
+function route(){var h=(location.hash||'#today').slice(1),scr=h,view='';
+ if(CODEX[h]){scr='codex';view=CODEX[h]}
+ if(['today','review','codex','train','me'].indexOf(scr)<0)scr='today';
+ $$('.screen').forEach(function(s){s.hidden=s.dataset.screen!==scr});
+ $$('[data-nav]').forEach(function(a){if(a.dataset.nav===scr)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current')});
+ document.body.dataset.screen=scr;
+ if(scr==='codex'){$$('#s-codex .view').forEach(function(v){v.hidden=v.dataset.view!==view});var ct=view.indexOf('canon')===0?'canon':'lesson';$$('[data-ctab]').forEach(function(a){if(a.dataset.ctab===ct)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current')})}
+ if(scr!=='train')stopDrill();
+ applyState();try{scrollTo(0,0)}catch(e){}}
+addEventListener('hashchange',route);
+
+/* ---------- 컷 재생기 ---------- */
+function Player(ctrl,n,start,render){var st={cut:start||1,t:null},cuts=$('.cuts',ctrl),num=$('.n',ctrl);
+ for(var i=1;i<=n;i++){var b=document.createElement('button');b.type='button';b.dataset.cut=i;b.setAttribute('aria-label',i+'번 컷');cuts.appendChild(b)}
+ function draw(){render(st);$$('button',cuts).forEach(function(b){var c=+b.dataset.cut;b.classList.toggle('done',c<st.cut);b.setAttribute('aria-current',c===st.cut?'true':'false')});num.textContent=st.cut+' / '+n;$('[data-step="-1"]',ctrl).disabled=st.cut===1;$('[data-step="1"]',ctrl).disabled=st.cut===n}
+ cuts.addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;st.cut=+b.dataset.cut;st.t=null;draw()});
+ $$('[data-step]',ctrl).forEach(function(b){b.addEventListener('click',function(){st.cut=Math.max(1,Math.min(n,st.cut+(+b.dataset.step)));st.t=null;draw()})});
+ st.draw=draw;draw();return st}
+var card=$('#review-card');
+var PA=Player($('.ctrl[data-for="a"]'),6,3,function(st){var m=card.dataset.mode,c=S.CAP_A[st.cut]||S.CAP_A[st.cut+(m==='best'?'best':'real')];$('#board-a').innerHTML=S.sceneA(st.cut,m);$('#cap-a').textContent=c;$('#board-a').setAttribute('aria-label','작전판 '+st.cut+'번 컷. '+c)});
+$$('#review-card .seg button').forEach(function(b){b.addEventListener('click',function(){card.dataset.mode=b.dataset.mode;$$('#review-card .seg button').forEach(function(x){x.setAttribute('aria-pressed',String(x===b))});if(b.dataset.mode==='best'&&(PA.cut<3||PA.cut>5))PA.cut=3;PA.draw()})});
+var PB=Player($('.ctrl[data-for="b"]'),6,3,function(st){var res=S.sceneB(st.cut,st.cut===3?st.t:null);$('#board-b').innerHTML=res.svg;$('#cap-b').textContent=S.CAP_B[st.cut];$('#hint-b').hidden=st.cut!==3;
+ $('#board-b').setAttribute('aria-label','작전판 '+st.cut+'번 컷. '+S.CAP_B[st.cut]+(st.cut===3?(res.inside?' 지금 케이틀린은 내 원 안이에요.':' 지금 케이틀린은 내 원 밖이에요.'):''))});
+(function(){var svg=$('#board-b'),drag=false,B=S.Bt;svg.setAttribute('tabindex','0');
+ function pt(e){var r=svg.getBoundingClientRect();return[(e.clientX-r.left)/r.width*B.W,(e.clientY-r.top)/r.height*B.H]}
+ function toT(p){var vx=B.cEnd[0]-B.c0[0],vy=B.cEnd[1]-B.c0[1];return Math.max(0,Math.min(1,((p[0]-B.c0[0])*vx+(p[1]-B.c0[1])*vy)/(vx*vx+vy*vy)))}
+ svg.addEventListener('pointerdown',function(e){if(PB.cut!==3)return;var c=S.caitAt(PB.t==null?.84:PB.t),p=pt(e);if(Math.hypot(p[0]-c[0],p[1]-c[1])<40){drag=true;svg.setPointerCapture(e.pointerId);e.preventDefault()}});
+ svg.addEventListener('pointermove',function(e){if(!drag)return;PB.t=toT(pt(e));PB.draw()});
+ svg.addEventListener('pointerup',function(){drag=false});svg.addEventListener('pointercancel',function(){drag=false});
+ svg.addEventListener('keydown',function(e){if(PB.cut!==3)return;var t=PB.t==null?.84:PB.t;if(e.key==='ArrowLeft'){PB.t=Math.min(1,t+.1);PB.draw();e.preventDefault()}if(e.key==='ArrowRight'){PB.t=Math.max(0,t-.1);PB.draw();e.preventDefault()}})})();
+var PC=Player($('.ctrl[data-for="c"]'),5,1,function(st){$('#board-c').innerHTML=S.sceneC(st.cut);$('#cap-c').textContent=S.CAP_C[st.cut];$('#c-cost').hidden=st.cut!==4;$('#board-c').setAttribute('aria-label','작전판 '+st.cut+'번 컷. '+S.CAP_C[st.cut])});
+var PD=Player($('.ctrl[data-for="d"]'),4,1,function(st){$('#board-d').innerHTML=S.sceneD(st.cut);$('#cap-d').textContent=S.CAP_D[st.cut];$('#board-d').setAttribute('aria-label','작전판 '+st.cut+'번 컷. '+S.CAP_D[st.cut])});
+
+/* ---------- 밑줄 낱말 → 한 줄 ---------- */
+$$('.term').forEach(function(b){b.addEventListener('click',function(){var t=document.getElementById(b.dataset.tip);if(!t)return;var o=t.hidden;t.hidden=!o;b.setAttribute('aria-expanded',String(o))})});
+
+/* ---------- 연습: 그림 문제 3 + 반응 연습 ---------- */
+var IQ='<image href="assets/ddragon/spell-AhriQ.png" x="10" y="2" width="20" height="20"/>';
+var P={fwdAA:'<path d="M4 18L20 8M13 7.5h7.5V15" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" fill="none"/><circle cx="31" cy="8" r="5" fill="#DE3F3B"/>',qOnly:IQ,
+ stay:'<circle cx="20" cy="12" r="7.5" fill="none" stroke="currentColor" stroke-width="2.4"/><circle cx="20" cy="12" r="2.4" fill="currentColor"/>',back:'<path d="M20 4v16M14 14l6 6 6-6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" fill="none"/>',
+ backL:'<path d="M30 12H8M14 6l-6 6 6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" fill="none"/>',
+ fwdQ:'<path d="M10 20V6M4 11l6-6 6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" fill="none"/><image href="assets/ddragon/spell-AhriQ.png" x="19" y="2" width="20" height="20"/>',
+ side:'<path d="M30 20C12 20 8 14 8 6M4 10l4-5 4 5" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" fill="none"/>',dot:'<circle cx="20" cy="12" r="5" fill="currentColor"/>',
+ hit:'<circle cx="20" cy="13" r="7" fill="#DE3F3B"/><path d="M8 4l5 5M32 4l-5 5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>',waitIn:'<circle cx="20" cy="12" r="10" fill="none" stroke="#DE3F3B" stroke-width="2.2" stroke-dasharray="3 3"/><circle cx="20" cy="12" r="3.5" fill="currentColor"/>'};
+var QZ=[{d:S.q1,t:'아리는 어떻게 딜교할까요?',right:1,v:{0:'A'},lab:'미드. 신드라는 아리 원 안이고 Q가 회색. 신드라 둘레에 상대 미니언이 많아요.',ok:'Q 같은 스킬샷은 대부분 미니언을 화나게 하지 않아요.',no:'상대 미니언이 많을 땐 평타 대신 Q만 던져요.',
+  o:[['fwdAA','앞으로 가서 평타부터','평타를 치면 근처 미니언이 한꺼번에 나를 때려요.'],['qOnly','Q만 던지고 평타는 참기',''],['stay','아무것도 안 하기','신드라 Q가 회색인 기회를 버려요.'],['backL','뒤로 물러나기','물러난 사이 신드라가 먼저 들어와요.']]},
+ {d:S.q2,t:'아리는 어느 쪽으로 움직일까요?',right:1,v:{0:'A'},lab:'미드를 세로로. 신드라는 아리 원 안쪽 끝, Q는 회색. 신드라 옆 상대 미니언 1마리. 아리 발밑에 네 방향 화살표.',ok:'스킬이 회색이고 내 원 안이면 딜교 타이밍이에요.',no:'물러나는 건 때린 다음에 해요.',
+  o:[['back','뒤로 한 걸음','신드라가 원 밖으로 나가서 기회가 끝나요.'],['fwdQ','앞으로, 평타 + Q',''],['side','옆으로 크게 돌기','돌아가는 사이 기회가 끝나요.'],['dot','제자리에서 막타만','손해는 없지만 공짜 딜교를 놓쳐요.']]},
+ {d:S.q3,t:'케이틀린이 저 미니언을 먹으러 오면?',right:1,v:{2:'C'},lab:'바텀 대각선. 판 가운데 체력이 거의 빈 상대 미니언. 징크스는 왼쪽 아래, 케이틀린은 오른쪽 위 징크스 원 밖.',ok:'막타 치는 동안엔 피하기 어려워서 이때가 기회예요.',no:'케이틀린 원 바로 밖에서 기다렸다가 들어오면 때려요.',
+  o:[['hit','내가 먼저 막타','그 사이 케이틀린을 때릴 틈을 놓쳐요.'],['fwdAA','들어오면 앞으로 + 평타',''],['waitIn','케이틀린 원 안에서 기다리기','케이틀린 원 안에 오래 서 있으면 공짜로 맞아요.'],['backL','뒤로 물러나기','막타 치러 온 기회를 버려요.']]}];
+var step=0,answered=false;
+function steps(){$$('.steps i').forEach(function(d,j){d.classList.toggle('on',j<=step)})}
+function showQ(i){step=i;answered=false;var q=QZ[i];$('#quiz').hidden=false;$('#drill').hidden=true;$('#t-end').hidden=true;steps();
+ $('#board-q').innerHTML=q.d();$('#board-q').setAttribute('aria-label','문제 그림: '+q.lab);$('#q-text').textContent=q.t;
+ $('#q-opts').innerHTML=q.o.map(function(o,j){return'<button class="opt" data-i="'+j+'" aria-pressed="false"><svg viewBox="0 0 40 24" aria-hidden="true">'+P[o[0]]+'</svg><span>'+o[1]+'</span></button>'}).join('');
+ $('#q-band').hidden=true;$('#q-why').hidden=true;$('#q-next').textContent=i<2?'다음 문제':'다음'}
+$('#q-opts').addEventListener('click',function(e){var b=e.target.closest('.opt');if(!b||answered)return;answered=true;var q=QZ[step],j=+b.dataset.i,ok=j===q.right;
+ $$('.opt',this).forEach(function(x){x.setAttribute('aria-pressed',String(x===b));x.disabled=true;if(+x.dataset.i===q.right)x.classList.add('ok')});
+ $('#board-q').innerHTML=q.d(ok?'ok':q.v[j]);
+ var band=$('#q-band');band.className='band '+(ok?'r':'w');$('#q-band-h').textContent=ok?'맞아요':'이렇게 해 봐요';$('#q-band-p').textContent=ok?q.ok:q.no;band.hidden=false;
+ var why=$('#q-why');if(!ok){why.textContent=q.o[j][2];why.hidden=false}});
+$('#q-next').addEventListener('click',function(){if(step<2)showQ(step+1);else showDrill()});
+$$('[data-goq]').forEach(function(a){a.addEventListener('click',function(){showQ(+a.dataset.goq)})});
+// 반응 연습 '지금!'
+var dt=0,raf=null,tick=null,running=false,done=false,openT=null,lastWhen='';
+function drawR(mark){var r=S.drill(dt,mark);$('#board-r').innerHTML=r.svg;if(r.ok&&openT==null)openT=dt;return r}
+function stopDrill(){if(raf)cancelAnimationFrame(raf);if(tick)clearInterval(tick);raf=tick=null;running=false}
+function showDrill(){step=3;steps();$('#quiz').hidden=true;$('#t-end').hidden=true;$('#drill').hidden=false;stopDrill();dt=0;done=false;openT=null;$('#d-band').hidden=true;$('#d-go').textContent='시작하기';$('#d-go').hidden=false;drawR(false)}
+function startRun(){running=true;$('#d-go').textContent='지금!';if(reduced()){tick=setInterval(function(){dt=Math.min(1,dt+.1);drawR(false);if(dt>=1)finish(null)},600)}else{var t0=null;var f=function(ts){if(t0==null)t0=ts;dt=Math.min(1,(ts-t0)/5200);drawR(false);if(dt<1)raf=requestAnimationFrame(f);else finish(null)};raf=requestAnimationFrame(f)}}
+function finish(r){stopDrill();done=true;$('#d-go').hidden=true;var h,p;
+ if(!r){h='이번엔 지나갔어요';p='Q 아이콘과 내 원, 둘만 보면 돼요.';lastWhen='누르지 않았어요'}
+ else if(r.ok){h='딱 맞았어요';p='이 순간이 딜교 타이밍이에요.';drawR(true);lastWhen='타이밍이 열리고 '+(Math.max(0,(dt-(openT==null?dt:openT))*5.2)).toFixed(1)+'초 뒤'}
+ else if(!r.cd||!r.inside&&dt<.5){h='조금 빨랐어요';p='Q가 회색이 된 다음에 눌러요.';lastWhen='타이밍이 열리기 전'}
+ else{h='조금 늦었어요';p='신드라가 원 밖으로 나가기 전에 눌러요.';lastWhen='타이밍이 닫힌 뒤'}
+ $('#d-band-h').textContent=h;$('#d-band-p').textContent=p;$('#d-band').className='band '+(r&&r.ok?'r':'w');$('#d-band').hidden=false;$('#d-next').focus()}
+$('#d-go').addEventListener('click',function(){if(done)return;if(!running){startRun();return}finish(S.drill(dt,false))});
+$('#d-next').addEventListener('click',function(){step=4;steps();$('#drill').hidden=true;$('#t-end').hidden=false});
+showQ(0);
+
+/* ---------- 정석 ---------- */
+$('#canon-more').addEventListener('click',function(){var o=$('#canon-exp').hidden;$('#canon-exp').hidden=!o;$('#canon-exp2').hidden=!o;this.setAttribute('aria-expanded',String(o));this.textContent=o?'실험 중인 것 접기':'실험 중인 것도 보기'});
+$('#goal-btn').addEventListener('click',function(){$('#goal-done').hidden=false});
+
+/* ---------- 시트 ---------- */
+var opener=null,VERD='<div class="verdicts"><p><span class="tag">확인됨</span> 기록에서 직접 본 것</p><p><span class="tag maybe">아마도</span> 같은 장면 기록으로 미루어 본 것</p><p><span class="tag maybe">실험 중</span> 아직 기록이 적은 것</p></div>';
+function openSheet(id,from){var t=$('#tpl-'+id);if(!t)return;opener=from||document.activeElement;$('#sheet-h').textContent=t.dataset.title;$('#sheet-b').innerHTML=t.innerHTML+(id==='dispute'?'':VERD);
+ if(id==='detail-drill'&&lastWhen)$('#drill-when',$('#sheet-b')).textContent=lastWhen;$('#scrim').hidden=false;$('#sheet').hidden=false;$('#sheet').focus()}
+function closeSheet(){$('#scrim').hidden=true;$('#sheet').hidden=true;if(opener&&opener.focus)opener.focus()}
+document.addEventListener('click',function(e){var b=e.target.closest('[data-sheet]');if(b)openSheet(b.dataset.sheet,b)});
+$('#sheet-x').addEventListener('click',closeSheet);$('#scrim').addEventListener('click',closeSheet);
+addEventListener('keydown',function(e){if(e.key==='Escape'&&!$('#sheet').hidden)closeSheet()});
+$('#sheet-b').addEventListener('click',function(e){var b=e.target.closest('[data-reason]');if(!b)return;closeSheet();card.hidden=true;$('#review-hidden').hidden=false;
+ $('#review-hidden-t').textContent=b.dataset.reason+'를 골랐어요. 이 장면은 판정에서 빼요.';$('#review-undo').focus()});
+$('#review-undo').addEventListener('click',function(){card.hidden=false;$('#review-hidden').hidden=true});
+
+/* ---------- 상태 화면 S1~S16 (시연 막대에서만 고른다) ---------- */
+var ST={S1:['today','load','방금 판을 보고 있어요','다 보면 알림으로 알려 드릴게요.',null,['기다리며 문제 풀기','train']],
+ S2:['review','grey1','PC가 켜지면 장면을 그려요','기본 분석은 끝나서 고칠 점은 지금 볼 수 있어요.',null,['고칠 점 보기','review']],
+ S3:['today','empty','아직 본 판이 없어요','한 판 하고 오면 고칠 장면 하나를 골라 드릴게요.',['레슨 읽기','codex'],null],
+ S4:['review','empty','아직 복기할 판이 없어요','게임이 끝나면 고칠 장면이 여기에 생겨요.',['레슨 읽기','codex'],null],
+ S5:['me','dot','3판 더 하면 알려 드릴게요','연습한 장면이 다음 판에서 바뀌었는지 보고 있어요.',['연습하기','train'],null],
+ S6:['canon-card','slots','고수 기록을 모으고 있어요','다 모이면 이 자리에 고수 10명 그림이 생겨요.',null,['레슨 보기','lesson-mid']],
+ S7:['today',null,'판을 불러오지 못했어요','게임 기록이 아직 도착하지 않았을 수 있어요.',['다시 하기','today'],['다른 판 고르기','review']],
+ S8:['review','grey6','이 판은 장면을 다시 틀 수 없어요','패치가 바뀌어도 고칠 점과 연습은 그대로 남아요.',null,['고칠 점 보기','review'],'s8'],
+ S9:['review','grey2','이 판은 리플레이를 받을 수 없어요','기본 분석으로 찾은 고칠 점은 그대로 볼 수 있어요.',null,['고칠 점 보기','review']],
+ S10:['review','grey1h','장면을 그리다 멈췄어요','PC가 쉬고 있을 때 한 번 더 해 볼게요.',null,['닫기','review']],
+ S11:['review','blur','이 구간은 기록이 흐릿해요','흐릿한 구간으로는 고칠 장면을 만들지 않아요.',null,null],
+ S12:['review','pos','이 판은 기본 분석만 했어요','게임 기록에 띄엄띄엄 찍힌 위치만 있어서 움직임은 그리지 않았어요.',null,['정밀 분석 알아보기','me']],
+ S13:['today',null,'인터넷에 연결되지 않았어요','연결되면 이어서 보여 드릴게요.',['다시 하기','today'],null],
+ S14:['today','queue','다음 연습 2개가 차례를 기다려요','지금 연습이 판정되면 다음 것이 바로 시작돼요.',null,['코치는 3개를 한 번에 연습해요','me']],
+ S15:['review',null,'오늘 복기 3판을 다 봤어요','내일 다시 열리고, 연습과 다음 판 확인은 그대로 이어져요.',['닫기','review'],['코치 알아보기','me']],
+ S16:['review','sheet']};
+var state='normal';
+// 회색 판 상태는 상태마다 다른 컷: S2 대기 = 컷 1, S8 패치 = 컷 6, S9 리플레이 없음 = 컷 2, S10 그리다 멈춤 = 컷 1의 왼쪽만
+function pic(kind){var b=K.bg(480,380),s='',g=/^grey(\d)(h?)$/.exec(kind||'');
+ if(kind==='load')s=b+K.mag('Ahri',190,200,'b')+K.mag('Syndra',300,180,'r');
+ if(g&&!g[2])s='<g filter="url(#fGray)">'+S.sceneA(+g[1],'real')+'</g>';
+ if(g&&g[2])s=b+K.laneH(480,92,288)+'<defs><clipPath id="cStop"><rect width="246" height="380"/></clipPath></defs><g filter="url(#fGray)" clip-path="url(#cStop)">'+S.sceneA(+g[1],'real').replace(/<text[^>]*Nanum[^>]*>[^<]*<\/text>/g,'')+'</g>'+K.pen('M246 92V288',INK,2.4,'stroke-dasharray="2 7"');
+ if(kind==='empty')s=b+'<rect x="20" y="20" width="440" height="340" rx="12" fill="none" stroke="#CDD0C8" stroke-dasharray="2 8"/>'+K.mag('Ahri',420,330,'b',18)+K.mag('Syndra',380,330,'r',18)+K.min(346,334,'b')+K.min(326,334,'r');
+ if(kind==='dot')s=b+K.min(240,190,'b',12,INK);
+ if(kind==='slots'){s=b;for(var i=0;i<10;i++)s+='<circle cx="'+(60+i*40)+'" cy="190" r="15" fill="none" stroke="#CDD0C8" stroke-width="2" stroke-dasharray="3 4"/>'}
+ if(kind==='blur')s=b+K.laneH(480,92,288)+K.mag('Ahri',150,200,'b')+'<path d="M172 200C230 170 280 230 330 190" fill="none" stroke="'+INK+'" stroke-width="2.4" stroke-dasharray="3 7"/>'+K.mag('Syndra',350,180,'r');
+ if(kind==='pos'){s=b+K.laneH(480,92,288);[[90,220],[150,206],[214,198],[300,184],[360,176]].forEach(function(p){s+='<circle cx="'+p[0]+'" cy="'+p[1]+'" r="6" fill="'+K.BLUE+'"/>'})}
+ return s?'<div class="board"><svg viewBox="0 0 480 380" aria-hidden="true">'+s+'</svg></div>':''}
+function applyState(){var scr=document.body.dataset.screen,sec=$('#s-'+scr);
+ $$('.statebox').forEach(function(b){b.hidden=true;b.innerHTML=''});$$('.screen > .normal').forEach(function(n){n.hidden=false});
+ if(!$('#review-hidden').hidden)card.hidden=true;
+ if(state==='normal'||!sec)return;var d=ST[state],h=(location.hash||'#today').slice(1);if(d[0]!==h&&!(d[0]==='today'&&h==='')){return}
+ if(d[1]==='sheet'){openSheet('dispute');return}
+ var box=$('.statebox',sec),norm=$('.normal',sec);
+ var acts=(d[4]?'<a class="btn" href="#'+d[4][1]+'" data-reset>'+d[4][0]+'</a>':'')+(d[5]?'<a class="lk" href="#'+d[5][1]+'" data-reset>'+d[5][0]+'</a>':'')+(d[6]?'<button class="lk" data-sheet="detail-'+d[6]+'">자세히</button>':'');
+ var body='<div class="state" role="status">'+pic(d[1])+'<h2 class="t22">'+d[2]+'</h2><p class="p">'+d[3]+'</p>';
+ if(d[1]==='queue'){body='<div class="state" role="status"><h2 class="t22">'+d[2]+'</h2><p class="p">'+d[3]+'</p><ul class="queue"><li>'+K.miniMin('grey')+'<span class="metas"><span class="b8">차례 1</span><span>안 보이는 곳엔 적이 있다고 생각하기</span></span><a class="lk" href="#codex" data-reset>레슨 미리 읽기</a></li><li>'+K.miniMin('grey')+'<span class="metas"><span class="b8">차례 2</span><span>10:00 막타 챙기기</span></span><a class="lk" href="#codex" data-reset>레슨 미리 읽기</a></li></ul>';box.innerHTML=body+acts+'</div>';box.hidden=false;bindReset(box);return}
+ box.innerHTML=body+'<div class="acts">'+acts+'</div></div>';norm.hidden=true;$('#review-hidden').hidden=true;box.hidden=false;bindReset(box)}
+function bindReset(box){$$('[data-reset]',box).forEach(function(a){a.addEventListener('click',function(){setState('normal')})})}
+function setState(s){state=s;$('#state-pick').value=s;if(s!=='normal'){var d=ST[s];var target=d[0];if(location.hash.slice(1)!==target){location.hash=target;return}}applyState()}
+$('#state-pick').addEventListener('change',function(){setState(this.value)});
+
+route();
+})();
+</script>

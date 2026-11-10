@@ -1,0 +1,356 @@
+<meta name="dash-one-writer">
+<style>
+.gx{display:grid;gap:var(--cds-gap-xl);font-family:var(--font-anthropic-sans);color:var(--color-fg);max-width:72rem;margin-inline:auto;container-type:inline-size}
+.gx h1{font-family:var(--font-anthropic-serif);font-weight:400;font-size:var(--cds-font-size-title);margin:0;text-wrap:balance}
+.gx h2{font-size:var(--cds-font-size-heading);font-weight:var(--cds-font-weight-medium);margin:0;text-wrap:balance}
+.gx-head{display:grid;gap:var(--cds-gap-xs)}
+.gx-take{margin:0;color:var(--color-fg-muted);font-size:var(--cds-font-size-body);max-width:65ch}
+.gx .gx-take b{color:var(--color-fg);font-weight:600}
+.gx-pause{margin:0;padding:var(--cds-pad-sm) var(--cds-pad-md);border:1px solid var(--color-border-line);border-radius:var(--cds-radius);font-size:var(--cds-font-size-body);color:var(--color-warn)}
+.gx-card{background:var(--color-panel);border:1px solid var(--color-border-line);border-radius:var(--cds-radius);padding:var(--cds-pad-lg);display:grid;gap:var(--cds-gap-md);min-width:0}
+.gx-note{margin:0;color:var(--color-fg-muted);font-size:var(--cds-font-size-caption)}
+.gx-label{color:var(--color-fg-muted);font-size:var(--cds-font-size-caption);letter-spacing:.02em}
+.gx-overall-top{display:flex;align-items:flex-end;justify-content:space-between;gap:var(--cds-gap-md);flex-wrap:wrap}
+.gx-big{font-family:var(--font-anthropic-serif);font-weight:400;font-size:calc(var(--cds-font-size-title) * 1.7);line-height:1;font-variant-numeric:tabular-nums}
+.gx-count{font-variant-numeric:tabular-nums;font-size:var(--cds-font-size-body)}
+.gx-now{margin:0;display:flex;gap:var(--cds-gap-sm);flex-wrap:wrap;align-items:baseline;font-size:var(--cds-font-size-body)}
+.gx-barbox{position:relative;min-height:46px;display:grid;gap:var(--cds-gap-xs)}
+.gx-bar{display:flex;gap:2px;height:22px}
+.gx-seg{position:relative;height:100%;min-width:4px;background:var(--cds-chart-grid);border-radius:2px;overflow:hidden}
+.gx-seg.is-phase-start{margin-left:8px}
+.gx-seg > i{position:absolute;top:0;bottom:0;left:0;display:block}
+.gx-seg.is-active::after{content:"";position:absolute;top:0;bottom:0;left:-34px;right:0;background:repeating-linear-gradient(-45deg,currentColor 0 6px,transparent 6px 12px);opacity:.3}
+.gx-ticks{display:flex;gap:2px;font-size:var(--cds-font-size-caption);color:var(--color-fg-muted)}
+.gx-tick{min-width:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;font-variant-numeric:tabular-nums}
+.gx-tick.is-phase-start{margin-left:8px}
+.gx-tip{position:absolute;z-index:2;pointer-events:none;background:var(--cds-surface-popover);border:1px solid var(--cds-border);border-radius:var(--cds-radius);box-shadow:var(--cds-shadow-popover);padding:var(--cds-pad-xs) var(--cds-pad-sm);font-size:var(--cds-font-size-caption);white-space:nowrap}
+.gx-tip span{display:block;color:var(--cds-text-secondary)}
+.gx-phases{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,13rem),1fr));gap:var(--cds-gap-md);min-height:132px}
+.gx-phase{background:var(--color-panel);border:1px solid var(--color-border-line);border-radius:var(--cds-radius);padding:var(--cds-pad-md);display:grid;gap:var(--cds-gap-sm);align-content:start}
+.gx-phase.is-active{border-color:currentColor}
+.gx-phase-top{display:flex;justify-content:space-between;align-items:center;gap:var(--cds-gap-sm)}
+.gx-phase h3{margin:0;font-size:var(--cds-font-size-body);font-weight:var(--cds-font-weight-medium);color:var(--color-fg)}
+.gx-phase-pct{font-family:var(--font-anthropic-serif);font-size:var(--cds-font-size-title);line-height:1;font-variant-numeric:tabular-nums;color:var(--color-fg)}
+.gx-mini{position:relative;height:8px;border-radius:4px;background:var(--cds-chart-grid);overflow:hidden}
+.gx-mini > i{position:absolute;top:0;bottom:0;left:0;display:block;border-radius:4px}
+.gx-mini.is-active::after{content:"";position:absolute;top:0;bottom:0;left:-34px;right:0;background:repeating-linear-gradient(-45deg,currentColor 0 6px,transparent 6px 12px);opacity:.3}
+.gx-pill{display:inline-flex;align-items:center;gap:6px;font-size:var(--cds-font-size-caption);white-space:nowrap;color:var(--color-fg-muted)}
+.gx-pill::before{content:"";width:8px;height:8px;border-radius:50%;background:currentColor;flex:none}
+.gx-pill[data-s="완료"]{color:var(--color-ok)}
+.gx-pill[data-s="멈춤"]{color:var(--color-warn)}
+.gx-pill[data-s="대기"]::before{background:transparent;border:1.5px solid currentColor;width:5px;height:5px}
+.gx-scroll{overflow-x:auto;min-width:0}
+.gx-table{width:100%;border-collapse:collapse;font-size:var(--cds-font-size-body)}
+.gx-table th{text-align:left;font-weight:var(--cds-font-weight-medium);color:var(--color-fg-muted);font-size:var(--cds-font-size-caption);padding:0 var(--cds-pad-sm) var(--cds-pad-xs);border-bottom:1px solid var(--color-border-line);white-space:nowrap}
+.gx-table td{padding:var(--cds-pad-sm);border-bottom:1px solid var(--color-border-line);vertical-align:middle}
+.gx-table tr:last-child td{border-bottom:0}
+.gx-tasks td:nth-child(5){white-space:nowrap;font-variant-numeric:tabular-nums}
+.gx-cellbar{display:inline-block;vertical-align:middle;width:64px;height:6px;border-radius:3px;background:var(--cds-chart-grid);margin-left:var(--cds-gap-sm);position:relative;overflow:hidden}
+.gx-cellbar > i{position:absolute;top:0;bottom:0;left:0;display:block}
+.gx-tasks td:nth-child(6){color:var(--color-fg-muted);font-size:var(--cds-font-size-caption)}
+.gx-events td:first-child{white-space:nowrap;color:var(--color-fg-muted);font-variant-numeric:tabular-nums;width:1%}
+.gx-tasks tbody,.gx-events tbody{min-height:2rem}
+.gx-fail{display:flex;align-items:center;justify-content:center;gap:var(--cds-gap-sm);min-height:inherit;color:var(--color-fg-muted);font-size:var(--cds-font-size-caption)}
+.gx-fail::before{content:"";width:.375rem;height:.375rem;border-radius:50%;background:var(--color-bad)}
+[data-dash-source-state=empty]{color:transparent}
+[data-dash-source-state=refreshing]{opacity:.5;transition:opacity var(--cds-dur-slow)}
+@container (max-width: 40rem){.gx-tasks tr > :nth-child(1),.gx-tasks tr > :nth-child(6){display:none}}
+@media (prefers-reduced-motion: no-preference){
+  .gx-seg.is-active::after,.gx-mini.is-active::after{animation:gx-move 1.1s linear infinite}
+  .gx-seg > i,.gx-mini > i{transition:width var(--cds-dur-slow) var(--cds-ease-out)}
+}
+@keyframes gx-move{to{transform:translateX(16.97px)}}
+</style>
+
+<div class="gx">
+  <header class="gx-head">
+    <h1 id="title">GRIMOIRE 진행 현황</h1>
+    <p class="gx-take gx-take-run">지금 <b data-draw="activePhase" data-source="overall" data-field="active">—</b> 단계를 진행하고 있어요. 전체 작업의 <b data-draw="overallPct" data-source="overall" data-field="pct">—</b>%를 마쳤어요.</p>
+    <p class="gx-take gx-take-pause" hidden><b data-draw="activePhase" data-source="overall" data-field="active">—</b> 단계가 시작을 기다리고 있어요. 전체 작업의 <b data-draw="overallPct" data-source="overall" data-field="pct">—</b>%를 마쳤어요.</p>
+  </header>
+
+  <p class="gx-pause" hidden>지금은 멈춘 상태예요. 채팅에 "시작"을 보내면 다음 단계가 이어서 진행돼요.</p>
+
+  <section class="gx-card" id="overall" aria-labelledby="overall-h">
+    <div class="gx-overall-top">
+      <div>
+        <h2 id="overall-h">전체 진행률</h2>
+        <p class="gx-note">작업마다 작업량 비중을 매겨 가중 평균한 값이에요.</p>
+      </div>
+      <div class="gx-big"><span data-draw="overallPct" data-source="overall" data-field="pct">—</span>%</div>
+    </div>
+    <div class="gx-barbox" data-draw="overallBar" data-source="tasks"></div>
+    <p class="gx-note">막대 한 칸이 작업 하나예요. 칸 너비는 작업량 비중, 채워진 만큼이 그 작업의 진행률이고, 줄무늬가 움직이는 칸이 지금 하는 작업이에요.</p>
+    <p class="gx-now"><span class="gx-label">지금 하는 일</span> <span data-draw="activeTask" data-source="overall" data-field="active_task">—</span></p>
+    <p class="gx-now"><span class="gx-label">끝낸 작업</span> <span class="gx-count"><span data-draw="doneCount" data-source="overall" data-field="done">—</span> / <span data-draw="totalCount" data-source="overall" data-field="total">—</span></span></p>
+  </section>
+
+  <section id="phases" aria-labelledby="phases-h" style="display:grid;gap:var(--cds-gap-md)">
+    <h2 id="phases-h">단계별 진행</h2>
+    <div class="gx-phases" data-draw="phases" data-source="phases"></div>
+  </section>
+
+  <section class="gx-card" id="tasks" aria-labelledby="tasks-h">
+    <div>
+      <h2 id="tasks-h">팀원별 작업</h2>
+      <p class="gx-note">팀원이 큰 마디를 끝낼 때마다 리더가 갱신해요.</p>
+    </div>
+    <div class="gx-scroll">
+      <table class="gx-table gx-tasks" data-source="tasks" data-row-key="id">
+        <thead><tr><th data-field="phase_name">단계</th><th data-field="role">담당</th><th data-field="task">할 일</th><th data-field="status">상태</th><th data-field="pct">진행률</th><th data-field="output">산출물</th></tr></thead>
+        <tbody data-draw="taskRows"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="gx-card" id="events" aria-labelledby="events-h">
+    <div>
+      <h2 id="events-h">최근 소식</h2>
+      <p class="gx-note">새 소식이 위에 와요. 시각은 한국 시간이에요.</p>
+    </div>
+    <div class="gx-scroll">
+      <table class="gx-table gx-events" data-source="events" data-row-key="id">
+        <thead><tr><th data-field="at">시각</th><th data-field="text">내용</th></tr></thead>
+        <tbody data-draw="eventRows"></tbody>
+      </table>
+    </div>
+  </section>
+</div>
+
+<script>
+dash.calc('phases', {
+  title: '단계별 진행률',
+  description: '단계마다 작업 진행률을 작업량 비중으로 가중 평균하고, 단계 상태를 작업 상태에서 정한 값',
+  inputs: ['tasks'],
+  fn: (tasks) => {
+    const by = new Map();
+    for (const t of tasks) {
+      const p = Number(t.phase);
+      if (!by.has(p)) by.set(p, { phase: p, phase_name: t.phase_name, w: 0, wp: 0, done: 0, total: 0, st: [] });
+      const g = by.get(p);
+      const w = Number(t.weight);
+      g.w += w; g.wp += w * Number(t.pct); g.total += 1; g.st.push(t.status);
+      if (t.status === '완료') g.done += 1;
+    }
+    return [...by.values()].sort((a, b) => a.phase - b.phase).map((g) => ({
+      phase: g.phase,
+      phase_name: g.phase_name,
+      weight: g.w,
+      pct: Math.round(g.wp / g.w),
+      status: g.st.every((s) => s === '완료') ? '완료' : g.st.includes('진행 중') ? '진행 중' : g.st.includes('멈춤') ? '멈춤' : '대기',
+      done: g.done,
+      total: g.total
+    }));
+  }
+});
+
+dash.calc('overall', {
+  title: '전체 진행률',
+  description: '모든 작업 진행률을 작업량 비중으로 가중 평균한 값과 지금 하는 일',
+  inputs: ['tasks'],
+  fn: (tasks) => {
+    const rows = tasks.map((t) => ({ ...t, phase: Number(t.phase), pct: Number(t.pct), weight: Number(t.weight) })).sort((a, b) => a.phase - b.phase);
+    const w = rows.reduce((s, t) => s + t.weight, 0);
+    const wp = rows.reduce((s, t) => s + t.weight * t.pct, 0);
+    const cur = rows.find((t) => t.status === '진행 중') || rows.find((t) => t.status === '멈춤') || rows.find((t) => t.status !== '완료');
+    return [{
+      pct: Math.round(wp / w),
+      active: cur ? `${cur.phase}단계 · ${cur.phase_name}` : '전 단계 완료',
+      active_task: cur ? `${cur.role} — ${cur.task}` : '모든 작업을 마쳤어요',
+      paused: !rows.some((t) => t.status === '진행 중') && rows.some((t) => t.status === '멈춤'),
+      done: rows.filter((t) => t.status === '완료').length,
+      total: rows.length
+    }];
+  }
+});
+
+(() => {
+  const accent = () => dash.colors[0];
+  const first = (id) => { const r = dash.data(id); return r.status === 'ok' && r.data.length ? r.data[0] : null; };
+  const failLine = () => { const d = document.createElement('div'); d.className = 'gx-fail'; d.textContent = '불러오지 못했어요'; return d; };
+  const num = (v) => Number(v);
+  const byPhase = (rows) => rows.map((t, i) => ({ ...t, phase: num(t.phase), pct: num(t.pct), weight: num(t.weight), _i: i })).sort((a, b) => a.phase - b.phase || a._i - b._i);
+
+  const fillOverall = (name, key) => dash.draw(name, (el) => {
+    const r = dash.data('overall');
+    const o = first('overall');
+    el.classList.toggle('dash-skeleton', r.status === 'loading');
+    el.textContent = o ? String(o[key]) : '—';
+  });
+  fillOverall('overallPct', 'pct');
+  fillOverall('activePhase', 'active');
+  fillOverall('activeTask', 'active_task');
+  fillOverall('doneCount', 'done');
+  fillOverall('totalCount', 'total');
+
+  dash.onData(() => {
+    const o = first('overall');
+    const paused = !!(o && o.paused);
+    document.querySelectorAll('.gx-take-run').forEach((n) => { n.hidden = paused; });
+    document.querySelectorAll('.gx-take-pause, .gx-pause').forEach((n) => { n.hidden = !paused; });
+  });
+
+  dash.draw('overallBar', (el) => {
+    const r = dash.data('tasks');
+    el.replaceChildren();
+    el.classList.toggle('dash-skeleton', r.status === 'loading');
+    if (r.status !== 'ok') { if (r.status === 'error') el.append(failLine()); return; }
+    const rows = byPhase(r.data);
+    const bar = document.createElement('div');
+    bar.className = 'gx-bar';
+    bar.setAttribute('role', 'img');
+    const ticks = document.createElement('div');
+    ticks.className = 'gx-ticks';
+    const tip = document.createElement('div');
+    tip.className = 'gx-tip';
+    tip.hidden = true;
+    const phases = new Map();
+    let prev = null;
+    const labels = [];
+    for (const t of rows) {
+      const seg = document.createElement('div');
+      seg.className = 'gx-seg';
+      if (prev !== null && t.phase !== prev) seg.classList.add('is-phase-start');
+      seg.style.flex = `${t.weight} 1 0`;
+      seg.style.color = accent();
+      if (t.status === '진행 중') seg.classList.add('is-active');
+      const f = document.createElement('i');
+      f.style.width = `${Math.max(0, Math.min(100, t.pct))}%`;
+      f.style.background = accent();
+      seg.append(f);
+      const show = (ev) => {
+        tip.replaceChildren();
+        const a = document.createElement('span');
+        a.textContent = `${t.phase}단계 · ${t.phase_name}`;
+        const b = document.createElement('div');
+        b.textContent = `${t.role} — ${t.task}`;
+        const c = document.createElement('div');
+        c.textContent = `${t.status} · ${t.pct}%`;
+        tip.append(a, b, c);
+        tip.hidden = false;
+        const box = el.getBoundingClientRect();
+        const w = tip.offsetWidth;
+        const x = Math.max(0, Math.min(box.width - w, ev.clientX - box.left - w / 2));
+        tip.style.left = `${x}px`;
+        tip.style.top = `${30}px`;
+      };
+      seg.addEventListener('pointerenter', show);
+      seg.addEventListener('pointermove', show);
+      seg.addEventListener('pointerleave', () => { tip.hidden = true; });
+      bar.append(seg);
+      labels.push(`${t.role} ${t.task} ${t.pct}%`);
+      if (!phases.has(t.phase)) phases.set(t.phase, { phase: t.phase, w: 0, wp: 0, start: prev !== null });
+      const g = phases.get(t.phase);
+      g.w += t.weight; g.wp += t.weight * t.pct;
+      prev = t.phase;
+    }
+    bar.setAttribute('aria-label', labels.join(', '));
+    for (const g of phases.values()) {
+      const tk = document.createElement('div');
+      tk.className = 'gx-tick';
+      if (g.start) tk.classList.add('is-phase-start');
+      tk.style.flex = `${g.w} 1 0`;
+      tk.textContent = `${g.phase}단계 ${Math.round(g.wp / g.w)}%`;
+      ticks.append(tk);
+    }
+    el.append(bar, ticks, tip);
+  });
+
+  dash.draw('phases', (el) => {
+    const r = dash.data('phases');
+    el.replaceChildren();
+    el.classList.toggle('dash-skeleton', r.status === 'loading');
+    if (r.status !== 'ok') { if (r.status === 'error') el.append(failLine()); return; }
+    for (const p of r.data) {
+      const card = document.createElement('div');
+      card.className = 'gx-phase';
+      card.style.color = accent();
+      if (p.status === '진행 중') card.classList.add('is-active');
+      const top = document.createElement('div');
+      top.className = 'gx-phase-top';
+      const eb = document.createElement('span');
+      eb.className = 'gx-label';
+      eb.textContent = `${p.phase}단계`;
+      const pill = document.createElement('span');
+      pill.className = 'gx-pill';
+      pill.dataset.s = p.status;
+      if (p.status === '진행 중') pill.style.color = accent();
+      pill.textContent = p.status;
+      top.append(eb, pill);
+      const h = document.createElement('h3');
+      h.textContent = p.phase_name;
+      const pct = document.createElement('div');
+      pct.className = 'gx-phase-pct';
+      pct.textContent = `${p.pct}%`;
+      const mini = document.createElement('div');
+      mini.className = 'gx-mini';
+      if (p.status === '진행 중') mini.classList.add('is-active');
+      const f = document.createElement('i');
+      f.style.width = `${Math.max(0, Math.min(100, p.pct))}%`;
+      f.style.background = accent();
+      mini.append(f);
+      const note = document.createElement('div');
+      note.className = 'gx-note';
+      note.textContent = `작업 ${p.done} / ${p.total} 완료`;
+      card.append(top, h, pct, mini, note);
+      el.append(card);
+    }
+  });
+
+  dash.draw('taskRows', (tb) => {
+    const r = dash.data('tasks');
+    tb.replaceChildren();
+    if (r.status !== 'ok') return;
+    for (const t of byPhase(r.data)) {
+      const tr = document.createElement('tr');
+      tr.dataset.key = t.id;
+      const td = (text) => { const c = document.createElement('td'); c.textContent = text; tr.append(c); return c; };
+      td(t.phase_name);
+      td(t.role);
+      td(t.task);
+      const st = document.createElement('td');
+      const pill = document.createElement('span');
+      pill.className = 'gx-pill';
+      pill.dataset.s = t.status;
+      if (t.status === '진행 중') pill.style.color = accent();
+      pill.textContent = t.status;
+      st.append(pill);
+      tr.append(st);
+      const pc = td(`${t.pct}%`);
+      const cb = document.createElement('span');
+      cb.className = 'gx-cellbar';
+      cb.setAttribute('aria-hidden', 'true');
+      const f = document.createElement('i');
+      f.style.width = `${Math.max(0, Math.min(100, t.pct))}%`;
+      f.style.background = accent();
+      cb.append(f);
+      pc.append(cb);
+      td(t.output);
+      tb.append(tr);
+    }
+  });
+
+  const fmtAt = (s) => {
+    const d = new Date(s);
+    if (Number.isNaN(d.getTime())) return s;
+    return new Intl.DateTimeFormat('ko-KR', { timeZone: 'Asia/Seoul', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false }).format(d);
+  };
+
+  dash.draw('eventRows', (tb) => {
+    const r = dash.data('events');
+    tb.replaceChildren();
+    if (r.status !== 'ok') return;
+    const rows = [...r.data].sort((a, b) => String(b.at).localeCompare(String(a.at)));
+    for (const e of rows) {
+      const tr = document.createElement('tr');
+      tr.dataset.key = e.id;
+      const a = document.createElement('td');
+      a.textContent = fmtAt(e.at);
+      const b = document.createElement('td');
+      b.textContent = e.text;
+      tr.append(a, b);
+      tb.append(tr);
+    }
+  });
+})();
+</script>
